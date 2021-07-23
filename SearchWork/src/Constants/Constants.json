@@ -1,0 +1,27 @@
+{
+    "screen": {
+        "SplashScreen": "SplashScreen",
+        "LoginScreen": "LoginScreen",
+        "ForgotPassScreen": "ForgotPassScreen",
+        "RegisterScreen": "RegisterScreen",
+        "EmployeeDashboard": "EmployeeDashboard",
+        "JobListing": "JobListing",
+        "JobCategoryList": "JobCategoryList",
+        "SavedJobs": "SavedJobs",
+        "EmployeeProfile": "EmployeeProfile",
+        "Resume": "Resume",
+        "IndividualJob": "IndividualJob",
+        "JobPosted": "JobPosted",
+        "JobPostedList": "JobPostedList",
+        "EmployerDashboard": "EmployerDashboard",
+        "EmployerJobView": "EmployerJobView",
+        "ApplicantsList": "ApplicantsList",
+        "AppliedJobsList": "AppliedJobsList",
+        "Applicants": "Applicants",
+        "EmployerProfile": "EmployerProfile",
+        "BottomTabNavigation": "BottomTabNavigation",
+        "DrawerNavigation": "DrawerNavigation",
+        "EmployerDrawerStack": "EmployerDrawerStack",
+        "DrawerContent": "DrawerContent"
+    }
+}
