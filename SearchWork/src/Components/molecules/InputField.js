@@ -3,11 +3,11 @@ import { Dimensions, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import colors from '../../Constants/colors';
 
-const InputField = ({style, inputFieldStyle, editable, title, iconName, placeholder, keyboardType, value, onChaneText, secureTextEntry}) => {
+const InputField = ({style, textStyle, inputFieldStyle, editable, autoCapitalize, maxLength, multiline, title, iconName, placeholder, keyboardType, value, onChangeText, secureTextEntry}) => {
   return(
     <View style={[styles.container, style]}>
 
-      <Text style={styles.text}>{title}</Text>
+      <Text style={[styles.text, textStyle]}>{title}</Text>
 
       <View style={[styles.fieldContainer, inputFieldStyle]}>
 
@@ -24,8 +24,11 @@ const InputField = ({style, inputFieldStyle, editable, title, iconName, placehol
           secureTextEntry={secureTextEntry}
           editable={editable}
           keyboardType={keyboardType}
+          maxLength={maxLength}
+          multiline={multiline}
+          autoCapitalize={autoCapitalize}
           value={value}
-          onChangeText={onChaneText}
+          onChangeText={onChangeText}
         />
       </View>
 

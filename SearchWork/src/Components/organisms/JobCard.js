@@ -5,9 +5,9 @@ import Chips from '../atoms/Chips';
 import Feather from 'react-native-vector-icons/Feather';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
-const JobCard = () => {
+const JobCard = ({onPress}) => {
   return(
-    <View style={styles.Container}>
+    <TouchableOpacity style={styles.Container} onPress={onPress}>
       
       <View style={{borderTopLeftRadius: 12, backgroundColor: colors.primaryColorLight, borderBottomRightRadius: 55, height: 65, width: 190, alignItems: 'center', justifyContent: 'center'}}>
         <Image source={require('../../../assets/logo.png')} resizeMode='contain' style={{height: 55, width: 120}}/>
@@ -38,7 +38,7 @@ const JobCard = () => {
       </View>
 
       </View>
-    </View>
+    </TouchableOpacity>
   )
 }
 
@@ -48,8 +48,6 @@ const styles = StyleSheet.create({
     borderRadius: 12, 
     width: 300, 
     height: 207
-    //flex: 2,
-    //height: Dimensions.get('window').height * 0.31
   }
 })
 

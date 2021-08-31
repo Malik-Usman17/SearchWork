@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { View, Text, TextInput, Image, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
 import DropDownPicker from 'react-native-dropdown-picker';
-import DatePicker from 'react-native-date-picker';
+//import DatePicker from 'react-native-date-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import colors from '../Constants/colors';
 import MapView, {PROVIDER_GOOGLE, Marker, Polygon} from 'react-native-maps';
@@ -64,7 +64,6 @@ const TestScreen = () => {
   return(
 
     <View>
-
       
       <TextInput 
         style={{height: 50, width: 350, borderRadius: 10, borderColor: 'gray', borderWidth: 2, marginTop: 10}}
@@ -74,7 +73,7 @@ const TestScreen = () => {
       />
 
 
-    <View style={{ marginTop: 40, height: 600, width: 340, alignSelf: 'center', borderRadius: 20, borderWidth: 2, borderColor: 'gray', backgroundColor: 'red'}}>
+    <View style={{ marginTop: 40, overflow: 'hidden', height: 600, width: 340, alignSelf: 'center', borderRadius: 20, borderWidth: 2, borderColor: 'gray', backgroundColor: 'red'}}>
       
       
       <MapView 

@@ -2,16 +2,14 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
-import IconContainer from '../Components/IconContainer';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import colors from '../Constants/colors';
 import Constants from '../Constants/Constants.json';
-import EmployeeDashboard from '../screens/EmployeeDashboard';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import SavedJobs from '../screens/SavedJobs';
+import EmployeeDashboard from '../screens/Employee/EmployeeDashboard';
+import EmployeeProfile from '../screens/Employee/EmployeeProfile';
 import Resume from '../screens/Resume';
-import EmployeeProfile from '../screens/EmployeeProfile';
-import DrawerNavigation from './DrawerNavigation';
-import EmployerDashboard from '../screens/EmployerDashboard';
+import SavedJobs from '../screens/Employee/SavedJobs';
+import IconContainer from '../Components/molecules/IconContainer';
 
 
 const BottomTabNavigation = () => {

@@ -1,4 +1,3 @@
-// import DatePicker from 'react-native-date-picker';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
@@ -16,9 +15,16 @@ import PasswordField from '../Components/molecules/PasswordField';
 import colors from '../Constants/colors';
 import StatePicker from '../Components/organisms/StatePicker';
 import {cityStates} from '../Components/organisms/CityStates';
-import CityPicker from '../Components/organisms/CityPicker';
+import CustomPicker from '../Components/organisms/CustomPicker';
 import {DateFormat} from '../Components/atoms/DateFormat';
 import Constants from '../Constants/Constants.json';
+import ProfilePicture from '../Components/atoms/ProfilePicture';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { CommonActions } from '@react-navigation/native';
+import { useDispatch, useSelector } from 'react-redux';
+import Loader from '../Components/atoms/Loader';
+import {apiCall} from '../service/ApiCall';
+import ApiConstants from '../service/ApiConstants.json';
 
 const RegisterScreen = ({navigation}) => {
 
@@ -32,17 +38,23 @@ const RegisterScreen = ({navigation}) => {
   const [statePicker, setStatePicker] = useState(0);
   const [city, setCity] = useState(0);
   const [register, setRegister] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [gender, setGender] = useState(0);
+  const [loader, setLoader] = useState(false);
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [address, setAddress] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [imageType, setImageType] = useState('');
 
-  console.log('State:',statePicker)
-  //console.log('States:',cityStates)
-
-  const cities = cityStates.filter((value) => value.stateId == statePicker)
-  //console.log('Cities:',cities)
-
+  const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
 
-  console.log('City:',city)
- 
+  console.log(register)
+
+  const dispatch = useDispatch();
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -63,12 +75,64 @@ const RegisterScreen = ({navigation}) => {
     showMode('time');
   };
 
-  //console.log(country)
+  var bodyFormData = new FormData();
+
+  bodyFormData.append('name', fullName)
+  bodyFormData.append('email', email)
+  bodyFormData.append('password', password)
+  bodyFormData.append('phone', phone)
+  bodyFormData.append('type', register == false ? 'employee' : 'employer')
+  bodyFormData.append('address', address)
+  bodyFormData.append('city', city)
+  bodyFormData.append('state', statePicker)
+  bodyFormData.append('confirm_password', confirmPassword)
+  register == false && bodyFormData.append('gender', gender)
+  register == false && bodyFormData.append('dob', DateFormat(date))
+  imageUrl != '' && bodyFormData.append('image', {uri: imageUrl.uri, name: 'profile_picture', type: imageType})
+
+
+  async function registerUser(){
+    try{
+      setLoader(true)
+      var apiResponse = await apiCall(ApiConstants.methods.POST, ApiConstants.endPoints.Register, bodyFormData);
+
+      //console.log('API RESPONSE:',apiResponse)
+
+      if(apiResponse.isAxiosError == true){
+        alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        setLoader(false);
+      }
+      else{
+        alert('Account Created.')
+        setLoader(false)
+        navigation.navigate(Constants.screen.LoginScreen)
+        setFullName('');
+        setEmail('');
+        setPhone('');
+        setGender('');
+        setAddress('');
+        setStatePicker(0);
+        setCity(0);
+        setPassword('');
+        setConfirmPassword('');   
+      }
+    }
+    catch(error){
+      console.log('Catch Body:',error)
+      setLoader(false)
+    }
+  }
+
+    if(loader == true){
+    return(
+      <Loader />
+    )
+  }
+
 
   return (
     <ScrollView 
       style={{ flex: 1 }} 
-      //nestedScrollEnabled={true}
       showsVerticalScrollIndicator={false}
     >
       <StatusBar backgroundColor={colors.primaryColor} />
@@ -102,17 +166,20 @@ const RegisterScreen = ({navigation}) => {
                       <View style={styles.credentialHeadings}>
 
                         <TouchableOpacity 
-                          style={{flex: 0.5, height: '100%', justifyContent: 'center', alignItems: 'center' }}
-                          onPress={() => navigation.push(Constants.screen.LoginScreen)}
-                        >
+                          style={{...styles.activeContainer, backgroundColor: colors.primaryColorLight, borderBottomRightRadius: 15}}
+                          onPress={() => navigation.navigate(Constants.screen.LoginScreen)}>
                           <Text style={styles.loginText}>Login</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity 
-                          style={styles.activeContainer}
+                        <TouchableOpacity
+                          style={styles.activeContainer} 
+                          //style={{...styles.activeContainer, backgroundColor: colors.primaryColorLight, borderBottomLeftRadius: 15, borderTopRightRadius: 10}}
                           onPress={() => navigation.navigate(Constants.screen.RegisterScreen)}
                         >
+                          <View>
                           <Text style={styles.loginText}>Create Account</Text>
+                          <View style={{height:2, backgroundColor: colors.buttonColor, borderRadius: 5}}/>
+                          </View>
                         </TouchableOpacity>
 
                       </View>
@@ -140,16 +207,52 @@ const RegisterScreen = ({navigation}) => {
 
                         <Text style={styles.welcomeText}>Welcome To Search Work</Text>
                         <Text style={{ fontSize: 12, color: colors.gray, fontWeight: '700' }}>Part Time - Full Time</Text>
+
+                        <Text style={{marginTop: 10, color: colors.primaryColor, fontWeight: 'bold'}}>Choose Picture</Text>
+                        <View style={{alignItems: 'center', justifyContent: 'space-between', marginTop: 4}}>
+
+                          <ProfilePicture
+                            style={{overflow: 'hidden', borderColor: colors.gray}} 
+                            iconSize={30}
+                            onPress={() => {
+                              let options;
+                              launchImageLibrary(options={
+                                mediaType: 'photo',
+                                includeBase64: true
+                              }, (response) => {
+                                //console.log('RESPONSE:',response)             
+                                if(response?.didCancel){
+                                  console.log('User cancelled image picker');
+                                  setImageUrl('');
+                                } else if (response?.errorMessage){
+                                  console.log('Error:',response?.errorMessage)
+                                }else{
+                                  const source = {uri: response?.assets[0].uri}
+                                  setImageUrl(source)
+                                  setImageType(response?.assets[0].type)
+                                }
+                              })
+                            }}
+                            imageSource={imageUrl != '' ? imageUrl.uri : undefined}
+                          />
+
+                        </View>
+
                         <InputField
-                          title='Full Name'
-                          placeholder='Enter Your Full Name'
+                          title={register == false ? 'Full Name': 'Full Name / Business Name'}
+                          placeholder={register == false ? 'Enter Your Name': 'Enter your Name / Business Name'}
                           iconName='person'
+                          value={fullName}
+                          onChangeText={setFullName}
                         />
 
                         <InputField
                           title='Email'
                           placeholder='Email Address'
                           iconName='mail'
+                          autoCapitalize='none'
+                          value={email}
+                          onChangeText={setEmail}
                         />
 
                         <InputField
@@ -157,18 +260,46 @@ const RegisterScreen = ({navigation}) => {
                           placeholder='Phone Number'
                           keyboardType='phone-pad'
                           iconName='phone-portrait'
+                          value={phone}
+                          onChangeText={setPhone}
                         />
+
+                        {/* <View style={{flexDirection: 'row', marginTop: 10, backgroundColor: 'pink', alignItems: 'center', justifyContent: 'space-between'}}>
+                          
+                          <Text style={{color: colors.primaryColor, fontWeight: 'bold'}}>SignUp as</Text>
+
+                          <View style={styles.registerSwitchContainer}>
+                          
+                          <TouchableOpacity 
+                            style={{...styles.registerType, backgroundColor: register == false ? colors.yellow : '#E5DDDD'}}
+                            onPress={() => setRegister(false)}
+                          >
+                            <Text style={{fontWeight: 'bold'}}>Employee</Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity 
+                            style={{...styles.registerType, backgroundColor: register == true ? colors.yellow : '#E5DDDD'}}
+                            onPress={() => setRegister(true)}
+                          >
+                            <Text style={{fontWeight: 'bold'}}>Employer</Text>
+                          </TouchableOpacity>
+
+                        </View>
+
+                        </View> */}
+
+                        
 
                         {
                           register == false ?
                         
-
                         <View style={{ marginTop: 10 }}>
                           {show && (
                             <DateTimePicker
                               testID="dateTimePicker"
                               value={date}
                               mode={mode}
+                              maximumDate={date}
                               is24Hour={true}
                               display="default"
                               onChange={onChange}
@@ -197,13 +328,30 @@ const RegisterScreen = ({navigation}) => {
                         </View>
                       : null}
 
+                      {
+                        register == false && (
+                          <CustomPicker
+                            pickerTitle='Gender'
+                            label='Select Gender' 
+                            pickerContainerStyle={{marginTop: 10, flex: 0.49}}
+                            selectedValue={gender}
+                            onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
+                          >
+                            <Picker.Item label={'Male'} value={'male'}/>
+                            <Picker.Item label={'Female'} value={'female'}/>
+                          </CustomPicker>
+                        )
+                      }
+
+                      
+
                         <InputField
                           title='Address'
                           placeholder='Your Full Address'
                           iconName='location-sharp'
+                          value={address}
+                          onChangeText={setAddress}
                         />
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
                           <StatePicker 
                             pickerContainerStyle={{marginTop: 10, flex: 0.49}}
@@ -214,7 +362,9 @@ const RegisterScreen = ({navigation}) => {
                             }}
                           />
 
-                          <CityPicker 
+                          <CustomPicker
+                            pickerTitle='City'
+                            label='Select City' 
                             pickerContainerStyle={{marginTop: 10, flex: 0.49}}
                             selectedValue={city}
                             onValueChange={(itemValue, itemIndex) => {
@@ -232,9 +382,7 @@ const RegisterScreen = ({navigation}) => {
                                 )) 
                               : null
                             }
-                          </CityPicker>
-
-                        </View>
+                          </CustomPicker>
 
                         <PasswordField
                           title='Password'
@@ -242,6 +390,8 @@ const RegisterScreen = ({navigation}) => {
                           secureTextEntry={eye ? true : false}
                           iconName={eye ? 'eye-off' : 'eye'}
                           onPress={() => setEye(!eye)}
+                          value={password}
+                          onChangeText={setPassword}
                         />
 
 
@@ -251,24 +401,51 @@ const RegisterScreen = ({navigation}) => {
                           secureTextEntry={confirmEye ? true : false}
                           iconName={confirmEye ? 'eye-off' : 'eye'}
                           onPress={() => setConfirmEye(!confirmEye)}
+                          value={confirmPassword}
+                          onChangeText={setConfirmPassword}
                         />
 
-                        <Button title='Create Account' style={{marginTop: 15}}/>
+                        <Button 
+                          title='Create Account' 
+                          style={{marginTop: 15}}
+                          onPress={() => {
+                            if(register == true){
+                              if(fullName != '' && email != '' && phone != '' && address != '' && statePicker != 0 && city != 0 && password != '' && confirmPassword != ''){
+                                registerUser()
+                              }
+                              else{
+                                alert('Some Information Are Missing')
+                              }
+                            }
+                            else if(register == false){
+                              if(fullName != '' && email != '' && phone != '' && gender != 0 && address != '' && statePicker != 0 && city != 0 && password != '' && confirmPassword != ''){
+                                registerUser()
+                              }
+                              else{
+                                alert('Some Information Are Missing')
+                              }
+                            }   
+                          }}
+                        />
 
                         <View style={{ marginTop: 8, flexDirection: 'row', justifyContent: 'center' }}>
 
                           <Text style={{ color: 'gray', fontWeight: 'bold', fontSize: 12 }}>Already have an account?</Text>
 
-                          <TouchableOpacity>
+                          <TouchableOpacity onPress={() => navigation.navigate(Constants.screen.LoginScreen)}>
                             <Text style={{ marginLeft: 10, textDecorationLine: 'underline', color: colors.buttonColor, fontWeight: 'bold', fontSize: 12 }}>Log In</Text>
                           </TouchableOpacity>
 
                         </View>
 
+                        {/* <Image 
+                          source={{uri: "https://cdn.britannica.com/80/157180-050-7B906E02/Heads-wheat-grains.jpg"}}
+                          style={{height: 70, width: 100, backgroundColor: 'pink'}}
+                        /> */}
+
                         <Divider style={{ marginTop: 10 }} />
 
                         <CompanyLabel style={{ marginTop: 10 }} />
-
 
                       </View>
 
@@ -286,8 +463,10 @@ const RegisterScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
   bg: {
-    height: Dimensions.get('screen').height + 310,
+    //flex: 1
+    //height: Dimensions.get('screen').height + 310,
     width: Dimensions.get('window').width,
+    height: Dimensions.get('screen').height + 600,
   },
   image: {
     resizeMode: 'cover',
@@ -304,7 +483,7 @@ const styles = StyleSheet.create({
   credentialHeadings: {
     alignItems: 'center',
     flexDirection: 'row',
-    height: Dimensions.get('window').height * 0.075
+    height: Dimensions.get('window').height * 0.085
   },
   loginText: {
     color: colors.buttonColor,
@@ -316,9 +495,6 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.primaryColorLight,
-    borderBottomLeftRadius: 15,
-    borderTopRightRadius: 10
   },
   fieldContainer: {
     padding: 15

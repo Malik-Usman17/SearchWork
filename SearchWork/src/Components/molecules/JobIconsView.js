@@ -7,7 +7,7 @@ const JobIconsView = ({onPress, title, style}) => {
   return (
     <View style={[styles.mainContainer, style]}>
 
-    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.5}>
+    <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.6}>
       <Entypo name='briefcase' size={20} color={colors.white}/>
     </TouchableOpacity>
     <Text style={{marginTop: 4, fontWeight: 'bold', fontSize: 11}}>{title}</Text>

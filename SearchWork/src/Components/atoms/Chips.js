@@ -8,8 +8,6 @@ const Chips = (props) => {
 
       {props.children}
       
-      {/* <AntDesign name='clockcircle' size={17} color={colors.gray}/> */}
-      
       <Text style={styles.Text}>{props.title}</Text>
 
     </View>

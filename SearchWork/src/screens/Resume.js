@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, ImageBackground, Image, Dimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, ImageBackground, Linking, Image, Dimensions, Platform } from 'react-native';
 import colors from '../Constants/colors';
 import SmallDetails from '../Components/atoms/SmallDetails';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -11,6 +11,7 @@ import Heading from '../Components/atoms/Haeding';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import IconText from '../Components/atoms/IconText';
 import Logo from '../Components/atoms/Logo';
+import Button from '../Components/molecules/Button';
 
 
 const Resume = () => {
@@ -30,7 +31,7 @@ const Resume = () => {
 
             <View style={{ alignItems: 'center' }}>
               <View style={{ position: 'absolute', top: -50 }}>
-                <ProfilePicture />
+                <ProfilePicture iconSize={30}/>
               </View>
             </View>
 
@@ -79,7 +80,7 @@ const Resume = () => {
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <Text style={styles.name}>John Doe</Text>
-              <Image source={require('../../assets/resumeClip.png')} style={{ width: 40 }} />
+              <Image source={require('../../assets/resumeChip.png')} resizeMode='contain'  style={{ width: 40, height: 80 }} />
             </View>
 
             <View style={styles.headingContainer}>
@@ -108,7 +109,7 @@ const Resume = () => {
               <Text style={styles.descriptionText}>Worked as a petrol Filler in Shell Pump, Chicago.</Text>
             </View>
 
-            <View style={styles.headingContainer}>
+            {/* <View style={styles.headingContainer}>
               <FontAwesome name='laptop' size={25} color={colors.primaryColor} />
               <Text style={styles.heading}>Skills</Text>
             </View>
@@ -117,7 +118,7 @@ const Resume = () => {
             <View style={styles.descriptionContainer}>
               <View style={styles.dot} />
               <Text style={styles.descriptionText}>MS Excel, MS Word, MS Power Point.</Text>
-            </View>
+            </View> */}
 
           </View>
 
@@ -130,6 +131,33 @@ const Resume = () => {
         </View>
 
       </View>
+
+        <View style={{flexDirection: 'row', marginTop: 10}}>
+          <Button 
+            title='Call' 
+            style={styles.button} 
+            iconName='add-call' 
+            titleStyle={{marginLeft: 10}}
+            onPress={() => {
+              let phoneNumber = '';
+              if(Platform.OS === 'android'){
+                phoneNumber = 'tel:${+923102769940}'
+              }
+              else{
+                phoneNumber = 'telprompt:${+923102769940}'
+              }
+              Linking.openURL(phoneNumber)
+            }}
+          />
+
+          <Button 
+            title='Email'
+            iconName='email' 
+            style={{...styles.button, borderTopRightRadius: 30, borderTopLeftRadius: 0, backgroundColor: 'red'}}
+            titleStyle={{marginLeft: 10}}
+            onPress={() => Linking.openURL('mailto: example@gmail.com')}
+          />
+        </View>
       
       {/* </ImageBackground> */}
     
@@ -150,18 +178,15 @@ const styles = StyleSheet.create({
   },
   rowContainer: {
     flexDirection: 'row',
-    //backgroundColor: 'pink',
     height: 850
   },
   leftColumn: {
     width: Dimensions.get('window').width * 0.35,
     backgroundColor: colors.darkGray,
     borderTopLeftRadius: 20,
-    // borderBottomLeftRadius: 20
   },
   rightColumn: {
     marginHorizontal: 10,
-    //backgroundColor: 'green',
     flex: 1
   },
   name: {
@@ -221,7 +246,14 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     fontSize: 13,
     marginRight: 4
-  }
+  },
+  button:{
+    flex: 0.5, 
+    height: Dimensions.get('screen').height * 0.08, 
+    borderTopLeftRadius: 30, 
+    borderRadius: 0,
+    backgroundColor: colors.primaryColor
+  },
 });
 
 export default Resume;

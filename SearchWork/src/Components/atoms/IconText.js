@@ -19,7 +19,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     marginTop: 8,
     flexDirection: 'row',
-    //backgroundColor: 'green',
   },
   text:{
     fontSize: 12, 

@@ -4,13 +4,13 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import colors from '../../Constants/colors';
 
 
-const StatePicker = ({selectedValue, onValueChange, items, pickerContainerStyle}) => {
+const StatePicker = ({selectedValue, onValueChange, items, pickerContainerStyle, pickerTitleStyle}) => {
 
   const data = items;
 
   return(
     <View style={pickerContainerStyle}>
-      <Text style={styles.pickerTitle}>
+      <Text style={[styles.pickerTitle, pickerTitleStyle]}>
         State
       </Text>
 
@@ -24,10 +24,11 @@ const StatePicker = ({selectedValue, onValueChange, items, pickerContainerStyle}
           <Picker.Item label='Select State' value={0} />
           {
             data.map((val, index) => (
-              <Picker.Item 
+              <Picker.Item
+                //style={{fontSize: 14}} 
                 key={index}
                 label={val.state}
-                value={val.stateId}
+                value={val.state}
               />
             ))
           }

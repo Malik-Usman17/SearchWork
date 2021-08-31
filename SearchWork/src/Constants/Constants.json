@@ -19,6 +19,7 @@
         "AppliedJobsList": "AppliedJobsList",
         "Applicants": "Applicants",
         "EmployerProfile": "EmployerProfile",
+        "UpdateJob": "UpdateJob",
         "BottomTabNavigation": "BottomTabNavigation",
         "DrawerNavigation": "DrawerNavigation",
         "EmployerDrawerStack": "EmployerDrawerStack",

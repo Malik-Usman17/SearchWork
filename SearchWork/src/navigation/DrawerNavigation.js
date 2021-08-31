@@ -1,30 +1,39 @@
-import React from 'react';
 import { createDrawerNavigator } from '@react-navigation/drawer';
-import { NavigationContainer } from '@react-navigation/native';
-import Constants from '../Constants/Constants.json';
-import EmployeeDashboard from '../screens/EmployeeDashboard';
-import SavedJobs from '../screens/SavedJobs';
-import DrawerContent from '../screens/DrawerContent';
+import React from 'react';
+import { StyleSheet } from 'react-native';
 import colors from '../Constants/colors';
-import Divider from '../Components/atoms/Divider';
+import Constants from '../Constants/Constants.json';
+import DrawerContent from '../screens/Employee/DrawerContent';
+import JobCategoryList from '../screens/Employee/JobCategoryList';
+import JobListing from '../screens/Employee/JobListing';
 import BottomTabNavigation from './BottomTabNavigation';
+import IndividualJob from '../screens/IndividualJob';
+
 
 const Drawer = createDrawerNavigator();
 
 const DrawerNavigation = () => {
   return(
     <Drawer.Navigator 
-      drawerStyle={{borderBottomRightRadius: 40, width: 320, backgroundColor: colors.white}} 
+      drawerStyle={styles.drawerStyle} 
       drawerContent={props => <DrawerContent {...props} />} 
       initialRouteName={Constants.screen.BottomTabNavigation}
     >
-      <Drawer.Screen name={Constants.screen.EmployeeDashboard} component={EmployeeDashboard}/>
-      <Drawer.Screen name={Constants.screen.SavedJobs} component={SavedJobs}/>
       <Drawer.Screen name={Constants.screen.BottomTabNavigation} component={BottomTabNavigation}/>
-      {/* <Drawer.Screen name={Constants.screen.DrawerContent} component={DrawerContent} /> */}
-
+      <Drawer.Screen name={Constants.screen.IndividualJob} component={IndividualJob}/>
+      <Drawer.Screen name={Constants.screen.JobListing} component={JobListing}/>
+      <Drawer.Screen name={Constants.screen.JobCategoryList} component={JobCategoryList}/> 
+    
     </Drawer.Navigator>
   )
 }
+
+const styles = StyleSheet.create({
+  drawerStyle:{
+    borderBottomRightRadius: 40, 
+    width: 320, 
+    backgroundColor: colors.white
+  }
+})
 
 export default DrawerNavigation;

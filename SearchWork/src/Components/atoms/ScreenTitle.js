@@ -2,9 +2,9 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import colors from '../../Constants/colors';
 
-const ScreenTitle = ({title}) => {
+const ScreenTitle = ({title, style}) => {
   return(
-    <Text style={styles.text}>{title}</Text>
+    <Text style={[styles.text, style]}>{title}</Text>
   )
 }
 
@@ -13,7 +13,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',  
     color: colors.white, 
     fontSize: 22, 
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
 });
 

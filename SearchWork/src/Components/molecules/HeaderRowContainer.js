@@ -3,7 +3,7 @@ import { StyleSheet, View } from 'react-native';
 
 const HeaderRowContainer = (props) => {
   return(
-    <View style={styles.container}>
+    <View style={[styles.container, props.style]}>
       
       <View style={styles.innerContainer}>
         {props.children}
@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
   container:{
     position: 'absolute', 
     width: '100%', 
-    padding: 15
+    padding: 15,
   },
   innerContainer:{
     flexDirection: 'row', 

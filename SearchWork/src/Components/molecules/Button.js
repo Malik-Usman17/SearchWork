@@ -6,17 +6,18 @@ import colors from '../../Constants/colors';
 const Button = ({title, iconName, style, titleStyle, onPress, iconColor}) => {
   return(
       <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
-        <Text style={[styles.text, titleStyle]}>{title}</Text>
         {
           iconName ?
             <MaterialIcons 
               name={iconName} 
               size={25} 
-              style={{marginLeft: 3}} 
+              //style={{marginLeft: 3}} 
               color={iconColor ? iconColor :  colors.white}
             />
           : null
         }
+
+        <Text style={[styles.text, titleStyle]}>{title}</Text>
                 
       </TouchableOpacity>
   )

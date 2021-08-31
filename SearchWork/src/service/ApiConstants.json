@@ -1,0 +1,25 @@
+{
+  "baseUrl": "http://searchwork.livereps.co/api",
+  
+  "endPoints": {
+      "Login": "/login",
+      "Register": "/register"
+  },
+
+  "methods": {
+      "GET": "GET",
+      "POST": "POST",
+      "PUT": "PUT"
+  },
+
+  "responseCode":{
+      "success": 200,
+      "validationError": 401
+  },
+
+  "responseStatus":{
+      "success": "Success",
+      "reject": "Reject",
+      "failure": "Failure"
+  }
+}
