@@ -14,7 +14,12 @@ const initialState = {
     zipCode: '',
     address: '',
   },
-  userDetails: null
+  userDetails: null,
+  rememberMeCheck : false,
+  userCredentials: {
+    email: '',
+    password: ''
+  },
 }
 
 export const slices = createSlice({
@@ -27,15 +32,25 @@ export const slices = createSlice({
 
     login: (state, action) => {
       state.userDetails = action.payload
+    },
+
+    saveUserCredential: (state, action) => {
+      state.userCredentials = action.payload
+    },
+
+    isRememberMe: (state, action) => {
+      state.rememberMeCheck = action.payload
     }
   }
 });
 
-export const {setJobPost, login} = slices.actions;
+export const {setJobPost, login, isRememberMe, saveUserCredential} = slices.actions;
 
 //Selectors
 export const jobPostedSelector = (state) => state.nav.jobPosted;
 export const userLogin = (state) => state.nav.userDetails;
+export const rememberMeOperation = (state) => state.nav.rememberMeCheck;
+export const userCredential = (state) => state.nav.userCredentials;
 
 
 export default slices.reducer;

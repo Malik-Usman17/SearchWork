@@ -71,7 +71,7 @@ const EmployerDrawerContent = ({navigation}) => {
           <MaterialCommunityIcons name='file-document-edit' size={25} color={colors.primaryColor}/>
         </IconButton>
 
-        <IconButton title='Draft' style={styles.iconButton}>
+        <IconButton title='Draft' style={styles.iconButton} onPress={() => navigation.navigate(Constants.screen.Draft)}>
           <MaterialIcons name='drafts' size={25} color={colors.primaryColor}/>
         </IconButton>
 

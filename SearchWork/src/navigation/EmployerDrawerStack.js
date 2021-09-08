@@ -12,6 +12,7 @@ import AppliedJobsList from '../screens/Employer/AppliedJobsList';
 import Applicants from '../screens/Employer/Applicants';
 import Resume from '../screens/Resume';
 import UpdateJob from '../screens/Employer/UpdateJob';
+import Draft from '../screens/Employer/Draft';
 
 
 const Drawer = createDrawerNavigator();
@@ -32,6 +33,7 @@ const EmployerDrawerStack = () => {
       <Drawer.Screen name={Constants.screen.Applicants} component={Applicants}/>
       <Drawer.Screen name={Constants.screen.Resume} component={Resume}/>
       <Drawer.Screen name={Constants.screen.UpdateJob} component={UpdateJob}/>
+      <Drawer.Screen name={Constants.screen.Draft} component={Draft} />
 
     </Drawer.Navigator>
   )

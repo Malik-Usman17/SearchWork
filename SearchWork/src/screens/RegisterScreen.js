@@ -25,6 +25,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Loader from '../Components/atoms/Loader';
 import {apiCall} from '../service/ApiCall';
 import ApiConstants from '../service/ApiConstants.json';
+import CustomModal from '../Components/organisms/CustomModal';
 
 const RegisterScreen = ({navigation}) => {
 
@@ -48,11 +49,14 @@ const RegisterScreen = ({navigation}) => {
   const [address, setAddress] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [imageType, setImageType] = useState('');
+  const [validEmail, setValidEmail] = useState(true);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorModal, setErrorModal] = useState(false);
 
   const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
 
-  console.log(register)
 
   const dispatch = useDispatch();
 
@@ -88,7 +92,7 @@ const RegisterScreen = ({navigation}) => {
   bodyFormData.append('confirm_password', confirmPassword)
   register == false && bodyFormData.append('gender', gender)
   register == false && bodyFormData.append('dob', DateFormat(date))
-  imageUrl != '' && bodyFormData.append('image', {uri: imageUrl.uri, name: 'profile_picture', type: imageType})
+  imageUrl != '' && bodyFormData.append('image', {uri: imageUrl, name: 'profile_picture', type: 'image/*'})
 
 
   async function registerUser(){
@@ -96,25 +100,26 @@ const RegisterScreen = ({navigation}) => {
       setLoader(true)
       var apiResponse = await apiCall(ApiConstants.methods.POST, ApiConstants.endPoints.Register, bodyFormData);
 
-      //console.log('API RESPONSE:',apiResponse)
-
       if(apiResponse.isAxiosError == true){
-        alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        setErrorModal(true)
+        setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        //alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
         setLoader(false);
       }
       else{
-        alert('Account Created.')
+        setModalVisible(!modalVisible)
+        //alert('Account Created.')
         setLoader(false)
-        navigation.navigate(Constants.screen.LoginScreen)
-        setFullName('');
-        setEmail('');
-        setPhone('');
-        setGender('');
-        setAddress('');
-        setStatePicker(0);
-        setCity(0);
-        setPassword('');
-        setConfirmPassword('');   
+        // navigation.navigate(Constants.screen.LoginScreen)
+        // setFullName('');
+        // setEmail('');
+        // setPhone('');
+        // setGender('');
+        // setAddress('');
+        // setStatePicker(0);
+        // setCity(0);
+        // setPassword('');
+        // setConfirmPassword('');   
       }
     }
     catch(error){
@@ -129,12 +134,76 @@ const RegisterScreen = ({navigation}) => {
     )
   }
 
+  function ValidateEmail(mail) 
+  {
+   if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))
+    {
+      return (true)
+    }
+      return (false)
+  }
+
+  function fieldsMissingCheck(){
+    if(register == true){
+      if(fullName == '' || email == '' || phone == '' || address == '' || statePicker == 0 || city == 0 || password == '' || confirmPassword == ''){
+        return 'Some fields are missing.'
+      }
+      else{
+        return 'Account Created.'
+      }
+    }
+    else{
+      if(fullName == '' || email == '' || phone == '' || gender == '' || address == '' || statePicker == 0 || city == 0 || password == '' || confirmPassword == ''){
+        return 'Some fields are missing.'
+      }
+      else{
+        return 'Account Created.'
+      }
+    }
+  }
+
 
   return (
     <ScrollView 
       style={{ flex: 1 }} 
       showsVerticalScrollIndicator={false}
     >
+
+      <CustomModal 
+        isVisible={modalVisible}
+        type = 'confirmation'
+        onPressOk={() => {
+          if(fieldsMissingCheck() == 'Account Created.'){
+          setModalVisible(false)
+          navigation.navigate(Constants.screen.LoginScreen)
+          setFullName('');
+          setEmail('');
+          setPhone('');
+          setGender('');
+          setAddress('');
+          setStatePicker(0);
+          setCity(0);
+          setPassword('');
+          setConfirmPassword('');
+          }
+          else{
+            setModalVisible(false)
+          } 
+        }}
+        message={fieldsMissingCheck()}
+        imageSource={fieldsMissingCheck() == 'Some fields are missing.' ? require('../../assets/warning.png') : require('../../assets/checked.png')}
+        buttonText='Ok'
+      />
+
+      <CustomModal 
+        isVisible={errorModal}
+        type = 'confirmation'
+        onPressOk={() => setErrorModal(false)}
+        message={errorMessage}
+        imageSource={require('../../assets/warning.png')}
+        buttonText='Ok'
+      />
+
       <StatusBar backgroundColor={colors.primaryColor} />
 
         <ImageBackground source={require('../../assets/blurBg.png')} resizeMode='cover' style={styles.bg}>
@@ -166,14 +235,13 @@ const RegisterScreen = ({navigation}) => {
                       <View style={styles.credentialHeadings}>
 
                         <TouchableOpacity 
-                          style={{...styles.activeContainer, backgroundColor: colors.primaryColorLight, borderBottomRightRadius: 15}}
+                          style={{...styles.activeContainer, backgroundColor: colors.primaryColorLight, borderBottomRightRadius: 15, borderTopLeftRadius: 10}}
                           onPress={() => navigation.navigate(Constants.screen.LoginScreen)}>
                           <Text style={styles.loginText}>Login</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
                           style={styles.activeContainer} 
-                          //style={{...styles.activeContainer, backgroundColor: colors.primaryColorLight, borderBottomLeftRadius: 15, borderTopRightRadius: 10}}
                           onPress={() => navigation.navigate(Constants.screen.RegisterScreen)}
                         >
                           <View>
@@ -222,18 +290,19 @@ const RegisterScreen = ({navigation}) => {
                               }, (response) => {
                                 //console.log('RESPONSE:',response)             
                                 if(response?.didCancel){
-                                  console.log('User cancelled image picker');
+                                  //console.log('User cancelled image picker');
                                   setImageUrl('');
                                 } else if (response?.errorMessage){
                                   console.log('Error:',response?.errorMessage)
                                 }else{
-                                  const source = {uri: response?.assets[0].uri}
+                                  const source = response?.assets[0].uri
                                   setImageUrl(source)
-                                  setImageType(response?.assets[0].type)
+                                  //setImageType(response?.assets[0].type)
                                 }
                               })
                             }}
-                            imageSource={imageUrl != '' ? imageUrl.uri : undefined}
+                            imageSource={imageUrl != '' ? imageUrl : undefined}
+                            // imageSource={imageUrl != '' ? imageUrl.uri : undefined}
                           />
 
                         </View>
@@ -253,12 +322,33 @@ const RegisterScreen = ({navigation}) => {
                           autoCapitalize='none'
                           value={email}
                           onChangeText={setEmail}
+                          onSubmitEditing={() => {
+                            if(email != ''){
+                              if(ValidateEmail(email) == false){
+                                setValidEmail(false)
+                              }
+                              else{
+                                setValidEmail(true)
+                              }
+                            }
+                          }}
+                          // onSubmitEditing={() => {
+                          //   if(ValidateEmail(email) == false){
+                          //     setValidEmail(false)
+                          //   }
+                          //   else{
+                          //     setValidEmail(true)
+                          //   }
+                          // }}
                         />
+ 
+                       {validEmail == false  && <Text style={{marginLeft: 7, fontWeight: 'bold', color: 'red'}}>Invalid Email Address</Text>}
 
                         <InputField
                           title='Phone'
                           placeholder='Phone Number'
                           keyboardType='phone-pad'
+                          maxLength={11}
                           iconName='phone-portrait'
                           value={phone}
                           onChangeText={setPhone}
@@ -414,7 +504,8 @@ const RegisterScreen = ({navigation}) => {
                                 registerUser()
                               }
                               else{
-                                alert('Some Information Are Missing')
+                                setModalVisible(!modalVisible)
+                                //alert('Some Information Are Missing')
                               }
                             }
                             else if(register == false){
@@ -422,7 +513,8 @@ const RegisterScreen = ({navigation}) => {
                                 registerUser()
                               }
                               else{
-                                alert('Some Information Are Missing')
+                                setModalVisible(!modalVisible)
+                                //alert('Some Information Are Missing')
                               }
                             }   
                           }}

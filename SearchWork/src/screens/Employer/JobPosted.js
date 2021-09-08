@@ -1,5 +1,5 @@
 import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dimensions, ImageBackground, ScrollView, TouchableOpacity, Linking, StatusBar, StyleSheet, Text, View, Image } from 'react-native';
 import HeaderImage from '../../Components/atoms/HeaderImage';
 import MenuIcon from '../../Components/atoms/MenuIcon';
@@ -20,6 +20,7 @@ import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import ScreenTitle from '../../Components/atoms/ScreenTitle';
 import CustomPicker from '../../Components/organisms/CustomPicker';
 import Constants from '../../Constants/Constants.json';
+import CustomModal from '../../Components/organisms/CustomModal';
 //import translate from 'google-translate-api';
 //import {GoogleTranslator} from '@translate-tools/core/translators/GoogleTranslator';
 
@@ -34,6 +35,8 @@ const JobPosted = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
+  console.log('Length:',job.length)
+
 
   // const translator = new GoogleTranslator();
 
@@ -43,6 +46,7 @@ const JobPosted = ({ navigation }) => {
 
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
+  const [jobTitle, setJobTitle] = useState('');
   const [description, setDescription] = useState('');
   const [statePicker, setStatePicker] = useState(0);
   const [city, setCity] = useState(0);
@@ -53,6 +57,9 @@ const JobPosted = ({ navigation }) => {
   const [imageFileName, setImageFileName] = useState('');
   const [employeesNo, setEmployeesNo] = useState(0);
   const [zipCode, setZipCode] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [draftModal, setDraftModal] = useState(true);
+
   
 
   //console.log('ImageUrl:',imageUrl)
@@ -69,6 +76,14 @@ const JobPosted = ({ navigation }) => {
   ]
 
   var test;
+
+
+  // // useEffect(() => {
+  //   if(jobObj.jobTitle != '' || jobObj.hourlyPay != ''  || jobObj.duration != 0  || jobObj.jobCategory != 0  || jobObj.jobSubCategory != 0  || jobObj.jobDescription != '' || jobObj.noOfEmployees != 0  || jobObj.state != 0  || jobObj.city != 0 || jobObj.zipCode != '' || jobObj.address != ''){
+  //   setDraftModal(!draftModal)
+  //   }
+  // // }, [])
+
 
   // const openGallery = () => {
   //   const options = {
@@ -191,9 +206,59 @@ const JobPosted = ({ navigation }) => {
   // });
 
 
-  
+   console.log('Title:',jobTitle)
   return (
     <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+
+      {
+        (jobObj.jobTitle == '' || jobObj.hourlyPay == ''  || jobObj.duration == 0  || jobObj.jobCategory == 0  || jobObj.jobSubCategory == 0  || jobObj.jobDescription == '' || jobObj.noOfEmployees == 0  || jobObj.state == 0  || jobObj.city == 0 || jobObj.zipCode == '' || jobObj.address == '') ?
+        <CustomModal 
+          type='confirmation'
+          isVisible={modalVisible}
+          message='Some fields are missing.'
+          imageSource={require('../../../assets/warning.png')}
+          onPressOk={() => setModalVisible(false)}
+          buttonText='Ok'
+        />
+        :
+        <CustomModal 
+          type='confirmation'
+          isVisible={modalVisible}
+          message='Job has successfully created.'
+          imageSource={require('../../../assets/checked.png')}
+          onPressOk={() => {
+            setModalVisible(false)
+            navigation.navigate(Constants.screen.JobPostedList)
+            setJobTitle('')
+                jobObj.jobTitle = '' 
+                jobObj.hourlyPay = '' 
+                jobObj.duration = 0 
+                jobObj.jobCategory = 0 
+                jobObj.jobSubCategory = 0 
+                jobObj.jobDescription = '' 
+                jobObj.noOfEmployees = 0 
+                jobObj.state = 0 
+                jobObj.city = 0
+                jobObj.zipCode = '' 
+                jobObj.address = ''
+                dispatch(setJobPost(jobObj))
+          }}
+          buttonText='Ok'
+        />
+      }
+
+{(jobObj.jobTitle != '' || jobObj.hourlyPay != ''  || jobObj.duration != 0  || jobObj.jobCategory != 0  || jobObj.jobSubCategory != 0  || jobObj.jobDescription != '' || jobObj.noOfEmployees != 0  || jobObj.state != 0  || jobObj.city != 0 || jobObj.zipCode != '' || jobObj.address != '')&&
+        <CustomModal 
+          isVisible={draftModal}
+          message='You have unposted job.'
+          imageSource={require('../../../assets/diagnostic.png')}
+          onPressYes={() => {
+            //setDraftModal(false)
+            navigation.navigate(Constants.screen.Draft)
+          }}
+          onPressNo={() => setDraftModal(false)}
+        />
+        }
 
       <StatusBar backgroundColor={colors.primaryColor} />
 
@@ -205,7 +270,7 @@ const JobPosted = ({ navigation }) => {
 
           <MenuIcon onPress={() => navigation.openDrawer()} />
 
-          <ScreenTitle title={(job.jobTitle == '' && job.hourlyPay == '' && job.duration == 0 && job.jobCategory == 0 && job.jobSubCategory == 0 && job.jobDescription == '' && job.noOfEmployees == 0 && job.state == 0 && job.city == 0 && job.zipCode == '' && job.address == '') ? 'Post A Job' : 'Draft'}/>
+          <ScreenTitle title='Post A Job'/>
 
           <LanguagePicker
             viewStyle={{ width: 80 }}
@@ -220,21 +285,27 @@ const JobPosted = ({ navigation }) => {
 
         <View style={styles.infoContainer}>
           <InputField
-            textStyle={{color: job.jobTitle == '' ? 'red' : colors.primaryColor}}
+            //textStyle={{color: job.jobTitle == '' ? 'red' : colors.primaryColor}}
             title='Job Title'
             iconName='person'
             placeholder='Job Title'
-            value={job.jobTitle}
+            value={jobTitle}
             onChangeText={(val) => {
+              setJobTitle(val)
               jobObj.jobTitle = val
-              dispatch(setJobPost(jobObj))
-            }} 
+              dispatch(setJobPost(jobObj))     
+            }}
+            // value={job.jobTitle}
+            // onChangeText={(val) => {
+            //   jobObj.jobTitle = val
+            //   dispatch(setJobPost(jobObj))
+            // }} 
           />
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
             <InputField
-              textStyle={{color: job.hourlyPay == '' ? 'red' : colors.primaryColor}}
+              //textStyle={{color: job.hourlyPay == '' ? 'red' : colors.primaryColor}}
               style={{ flex: 0.45 }}
               keyboardType={'number-pad'}
               title='Hourly Pay'
@@ -248,7 +319,7 @@ const JobPosted = ({ navigation }) => {
             />
 
             <CustomPicker
-              pickerTitleStyle={{color: job.duration == 0 ? 'red' : colors.primaryColor}}
+              //pickerTitleStyle={{color: job.duration == 0 ? 'red' : colors.primaryColor}}
               pickerContainerStyle={{ marginTop: 10, flex: 0.52  }}
               label='Job Type'
               pickerTitle='Duration'
@@ -266,7 +337,7 @@ const JobPosted = ({ navigation }) => {
           </View>
 
           <CustomPicker
-            pickerTitleStyle={{color: job.jobCategory == 0 ? 'red' : colors.primaryColor}}
+            //pickerTitleStyle={{color: job.jobCategory == 0 ? 'red' : colors.primaryColor}}
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select Job Category'
             pickerTitle='Job Category'
@@ -288,7 +359,7 @@ const JobPosted = ({ navigation }) => {
           </CustomPicker>
 
           <CustomPicker
-            pickerTitleStyle={{color: job.jobSubCategory == 0 ? 'red' : colors.primaryColor}}
+            //pickerTitleStyle={{color: job.jobSubCategory == 0 ? 'red' : colors.primaryColor}}
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select Job Sub Category'
             pickerTitle='Job Sub Category'
@@ -349,7 +420,7 @@ const JobPosted = ({ navigation }) => {
            </View>
 
           <InputField
-            textStyle={{color: job.jobDescription == '' ? 'red' : colors.primaryColor}}
+            //textStyle={{color: job.jobDescription == '' ? 'red' : colors.primaryColor}}
             title='Description'
             placeholder='Job Description'
             maxLength={250}
@@ -367,7 +438,7 @@ const JobPosted = ({ navigation }) => {
           </Text>
 
           <CustomPicker
-            pickerTitleStyle={{color: job.noOfEmployees == 0 ? 'red' : colors.primaryColor}}
+            //pickerTitleStyle={{color: job.noOfEmployees == 0 ? 'red' : colors.primaryColor}}
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select No. Of Employees'
             pickerTitle='No. Of Employees'
@@ -384,10 +455,8 @@ const JobPosted = ({ navigation }) => {
             <Picker.Item label={'5'} value={'5'} />
           </CustomPicker>
 
-          {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}> */}
-
             <StatePicker
-              pickerTitleStyle={{color: job.state == 0 ? 'red' : colors.primaryColor}}
+              //pickerTitleStyle={{color: job.state == 0 ? 'red' : colors.primaryColor}}
               pickerContainerStyle={{ marginTop: 10, flex: 0.49 }}
               items={cityStates}
               selectedValue={job.state}
@@ -398,7 +467,7 @@ const JobPosted = ({ navigation }) => {
             />
 
             <CustomPicker
-              pickerTitleStyle={{color: job.city == 0 ? 'red' : colors.primaryColor}}
+              //pickerTitleStyle={{color: job.city == 0 ? 'red' : colors.primaryColor}}
               pickerContainerStyle={{ marginTop: 10, flex: 0.49 }}
               label='Select City'
               pickerTitle='City'
@@ -412,7 +481,6 @@ const JobPosted = ({ navigation }) => {
                 cities.length > 0 ?
                   cityItems.map((val, index) => (
                     <Picker.Item
-                      style={{ fontSize: 14 }}
                       key={index}
                       label={val.city}
                       value={val.city}
@@ -422,11 +490,10 @@ const JobPosted = ({ navigation }) => {
               }
             </CustomPicker>
 
-          {/* </View> */}
-
           <InputField
-            textStyle={{color: job.zipCode == '' ? 'red' : colors.primaryColor}}
+            //textStyle={{color: job.zipCode == '' ? 'red' : colors.primaryColor}}
             keyboardType={'number-pad'}
+            maxLength={4}
             title='Zip Code'
             placeholder='Zip Code'
             value={job.zipCode}
@@ -437,7 +504,7 @@ const JobPosted = ({ navigation }) => {
           />
 
           <InputField
-            textStyle={{color: job.address == '' ? 'red' : colors.primaryColor}}
+            //textStyle={{color: job.address == '' ? 'red' : colors.primaryColor}}
             title='Address'
             placeholder='Address'
             iconName='location-sharp'
@@ -467,20 +534,12 @@ const JobPosted = ({ navigation }) => {
             style={{ ...styles.button, backgroundColor: colors.primaryColor }}
             title='Post'
             onPress={() => {
-              jobObj.jobTitle = '' 
-              jobObj.hourlyPay = '' 
-              jobObj.duration = 0 
-              jobObj.jobCategory = 0 
-              jobObj.jobSubCategory = 0 
-              jobObj.jobDescription = '' 
-              jobObj.noOfEmployees = 0 
-              jobObj.state = 0 
-              jobObj.city = 0
-              jobObj.zipCode = '' 
-              jobObj.address = ''
-              dispatch(setJobPost(jobObj))
-              alert('Job Has Been Successfully Posted')
-              navigation.navigate(Constants.screen.JobPostedList)
+              if(jobTitle == '' || jobObj.hourlyPay == ''  || jobObj.duration == 0  || jobObj.jobCategory == 0  || jobObj.jobSubCategory == 0  || jobObj.jobDescription == '' || jobObj.noOfEmployees == 0  || jobObj.state == 0  || jobObj.city == 0 || jobObj.zipCode == '' || jobObj.address == ''){
+                setModalVisible(!modalVisible)
+              }
+              else{
+                setModalVisible(!modalVisible)
+              }
             }}
           />
 

@@ -12,6 +12,7 @@
         "Resume": "Resume",
         "IndividualJob": "IndividualJob",
         "JobPosted": "JobPosted",
+        "Draft": "Draft",
         "JobPostedList": "JobPostedList",
         "EmployerDashboard": "EmployerDashboard",
         "EmployerJobView": "EmployerJobView",

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { Dimensions, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Dimensions, ImageBackground, ScrollView, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import AsyncStorage from '@react-native-community/async-storage'
 import Feather from 'react-native-vector-icons/Feather';
 import HeaderImage from '../Components/atoms/HeaderImage';
 import Logo from '../Components/atoms/Logo';
@@ -13,17 +14,20 @@ import colors from '../Constants/colors';
 import InputField from '../Components/molecules/InputField';
 import Constants from '../Constants/Constants.json';
 import { useDispatch, useSelector } from 'react-redux';
-import { userLogin, login } from '../redux/slices';
+import { userLogin, login, isRememberMe, rememberMeOperation, saveUserCredential, userCredential } from '../redux/slices';
 import Loader from '../Components/atoms/Loader';
 import {apiCall} from '../service/ApiCall';
 import ApiConstants from '../service/ApiConstants.json';
 import Axios from 'axios';
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions, useIsFocused } from '@react-navigation/native';
+import CustomModal from '../Components/organisms/CustomModal';
+import Modal from "react-native-modal";
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+
 
 const LoginScreen = ({navigation}) => {
-
-  // const user = useSelector(userLogin)
-  // console.log('User:',user)
 
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -31,18 +35,25 @@ const LoginScreen = ({navigation}) => {
   const [dropDown, setDropDown] = useState(false);
   const [lang, setLang] = useState('eng');
   const [loader, setLoader] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [validEmail, setValidEmail] = useState(true);
+
+  const credentials = useSelector(userCredential);
+  const rememberMeCheck = useSelector(rememberMeOperation);
+ 
+  var credentialFields = { ...credentials }
 
   const dispatch = useDispatch();
-  
 
+  
   async function loginUser() {
 
     try{
      setLoader(true);
       
       let user = {
-        email: email,
-        password: password
+        email: credentials.email,
+        password: credentials.password
       }
 
       var apiResponse = await apiCall(
@@ -51,15 +62,13 @@ const LoginScreen = ({navigation}) => {
         user
       );
 
-      console.log('Api Response:',apiResponse.data)
+      //console.log('Api Response:',apiResponse.data)
 
       if(apiResponse.isAxiosError == true){
-        console.log(apiResponse.response.data)
-        alert(apiResponse.response.data.error.messages[0])
+        setModalVisible(!modalVisible) 
         setLoader(false)
       }
       else{
-        console.log('Api Response Success:',apiResponse.data.response.data)
         dispatch(login(apiResponse.data.response.data))
         setLoader(false)
         
@@ -83,20 +92,27 @@ const LoginScreen = ({navigation}) => {
     )
   }
 
-//   function ValidateEmail(mail) 
-// {
-//  if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))
-//   {
-//     return (true)
-//   }
-//     //alert("You have entered an invalid email address!")
-//     return (false)
-// }
- 
-// console.log(ValidateEmail(email))
+  function ValidateEmail(mail) 
+{
+ if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))
+  {
+    return (true)
+  }
+    return (false)
+}
+
 
   return (
     <ScrollView style={{ flex: 1}} showsVerticalScrollIndicator={false}>
+
+      <CustomModal 
+        isVisible={modalVisible}
+        type = 'confirmation'
+        onPressOk={() => setModalVisible(false)}
+        message={(email != '' || credentials.email != '') || (password != ''  || credentials.password != '') ? 'Invalid Email or Password.' : 'Some fields are missing.'}
+        imageSource={require('../../assets/warning.png')}
+        buttonText='Ok'
+      />
       
       <StatusBar backgroundColor={colors.primaryColor} />
       
@@ -153,32 +169,55 @@ const LoginScreen = ({navigation}) => {
                   <Text style={styles.welcomeText}>Welcome To Search Work</Text>
                   
                   <Text style={{ fontSize: 12, color: colors.gray, fontWeight: '700' }}>Part Time - Full Time</Text>
-                  
+
                   <InputField
                     title='Email'
                     placeholder='Email Address'
                     iconName='mail'
                     autoCapitalize='none'
-                    value={email}
-                    onChangeText={setEmail}
+                    value={credentials.email != '' ? credentials.email : email}
+                    onChangeText={(val) => {
+                      setEmail(val)
+                      credentialFields.email = val
+                      dispatch(saveUserCredential(credentialFields))
+                    }}
+                    onSubmitEditing={() => {
+                      if(ValidateEmail(email) == false){
+                        setValidEmail(false)
+                      }
+                      else{
+                        setValidEmail(true)
+                      }
+                    }}
                   />
 
+                  {validEmail == false && <Text style={{marginLeft: 7, fontWeight: 'bold', color: 'red'}}>Invalid Email Address</Text>}
+                  
                   <PasswordField 
                     title='Password'
                     placeholder='Password'
                     secureTextEntry={eye ? true : false}
                     iconName={eye ? 'eye-off' : 'eye'}
                     onPress={() => setEye(!eye)}
-                    value={password}
-                    onChangeText={setPassword}
+                    value={credentials.password != '' ? credentials.password : password}
+                    onChangeText={(val) => {
+                      setPassword(val)
+                      credentialFields.password = val
+                      dispatch(saveUserCredential(credentialFields))
+                    }}
                   />
 
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 7, alignItems: 'center'}}>
                     
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Feather name='check-circle' size={18} color={colors.primaryColor} />
-                      <Text style={{ marginLeft: 5, color: 'gray', fontWeight: '700', fontSize: 12 }}>Remember Me</Text>
-                    </View>
+                    <TouchableOpacity 
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                      onPress={() => {
+                        dispatch(isRememberMe(!rememberMeCheck))
+                      }}
+                    >
+                      <MaterialIcons name={rememberMeCheck == false ? 'crop-square' : 'check-box'} size={18} color={colors.primaryColor}/>
+                      <Text style={{ marginLeft: 3, color: rememberMeCheck == true ? colors.primaryColor : 'gray', fontWeight: '700', fontSize: 12 }}>Remember Me</Text>
+                    </TouchableOpacity>
 
                     <TouchableOpacity onPress={() => navigation.push(Constants.screen.ForgotPassScreen)}>
                       <Text style={{ color: 'gray', fontWeight: 'bold', fontSize: 12, textDecorationLine: 'underline'}}>Forgot Password?</Text>
@@ -191,7 +230,20 @@ const LoginScreen = ({navigation}) => {
                     title='Login' 
                     titleStyle={{marginLeft: 7}}
                     iconName='login'
-                    onPress={() => loginUser()} 
+                    onPress={() => {
+                      if((email == '' && credentials.email == '') || (password == '' && credentials.password == '')){
+                        console.log('if running')
+                        setModalVisible(!modalVisible)
+                      }
+                      else{
+                        loginUser()
+                        if(rememberMeCheck == false){
+                          credentialFields.email = ''
+                          credentialFields.password = ''
+                          dispatch(saveUserCredential(credentialFields))
+                        }
+                      }
+                    }}
                   />
 
                   <View style={{marginTop: 8, flexDirection: 'row', justifyContent: 'space-between'}}>
@@ -258,6 +310,47 @@ const styles = StyleSheet.create({
   bgImage: {
     height: Dimensions.get('screen').height,
     width: Dimensions.get('window').width
+  },
+
+
+  modalContainer: {
+    width: 300,
+    alignSelf: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.white,
+    borderRadius: 15,
+    padding: 9
+  },
+  modalText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    bottom: 12
+  },
+  icon: {
+    height: 60,
+    width: 60,
+    bottom: 30
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginTop: 15,
+    paddingHorizontal: 10,
+    paddingBottom: 5
+  },
+  button: {
+    backgroundColor: colors.primaryColor,
+    width: 100,
+    paddingVertical: 8,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center'
+  },
+  buttonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.white
   }
 });
 

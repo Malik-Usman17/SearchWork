@@ -7,6 +7,7 @@ import RegisterScreen from '../screens/RegisterScreen';
 import SplashScreen from '../screens/SplashScreen';
 import DrawerNavigation from './DrawerNavigation';
 import EmployerDrawerStack from './EmployerDrawerStack';
+import ModalScreen from '../screens/ModalScreen';
 
 
 const {Screen, Navigator} = createStackNavigator();
@@ -20,6 +21,7 @@ const UnAuthorizedStack = () => {
           <Screen name={Constants.screen.RegisterScreen} component={RegisterScreen}/>
           <Screen name={Constants.screen.EmployerDrawerStack} component={EmployerDrawerStack} />
           <Screen name={Constants.screen.DrawerNavigation} component={DrawerNavigation}/>
+          <Screen name='ModalScreen' component={ModalScreen}/>
         </Navigator> 
     )
 }
