@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Dimensions, TextInput } from 'react-native';
 import Divider from '../atoms/Divider';
 
-const ProfileTextField = ({title, value, onChangeText, editable }) => {
+const ProfileTextField = ({title, multiline, keyboardType, value, onChangeText, editable }) => {
   return (
     <View style={{paddingHorizontal: 10}}>
     
@@ -15,6 +15,8 @@ const ProfileTextField = ({title, value, onChangeText, editable }) => {
         value={value}
         onChangeText={onChangeText}
         editable={editable}
+        multiline={multiline}
+        keyboardType={keyboardType}
       />
 
     </View>
@@ -32,11 +34,12 @@ const styles = StyleSheet.create({
   },
   title:{
     width: Dimensions.get('window').width * 0.35, 
-    fontSize: 16, 
+    fontSize: 16,
   },
   textField:{
     marginLeft: 7, 
-    flex: 1 
+    flex: 1,
+    fontSize: 15
   }
 })
 export default ProfileTextField;

@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
   container:{
     position: 'absolute', 
     width: '100%', 
-    padding: 15,
+    padding: 9,
   },
   innerContainer:{
     flexDirection: 'row', 

@@ -20,18 +20,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10, 
     flexDirection: 'row', 
     height: Dimensions.get('window').height * 0.07, 
-    alignItems: 'center' 
+    alignItems: 'center', 
   },
   labelText:{
-    fontSize: 17,
-    //fontWeight: 'bold', 
-    //backgroundColor: 'green', 
+    fontSize: 17, 
     width: Dimensions.get('window').width * 0.38
   },
   valueText:{
     marginLeft: 20, 
-    fontSize: 15, 
-    //backgroundColor: 'pink', 
+    fontSize: 15,  
     flex: 1 
   },
   divider:{

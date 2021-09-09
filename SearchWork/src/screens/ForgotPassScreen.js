@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
-import { Dimensions, ScrollView, Image, ImageBackground, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Button from '../Components/molecules/Button';
+import { Dimensions, ImageBackground, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CompanyLabel from '../Components/atoms/CompanyLabel';
 import Divider from '../Components/atoms/Divider';
-import colors from '../Constants/colors';
 import HeaderImage from '../Components/atoms/HeaderImage';
+import Logo from '../Components/atoms/Logo';
+import Button from '../Components/molecules/Button';
 import FixedContainer from '../Components/molecules/FixedContainer';
 import InputField from '../Components/molecules/InputField';
-import Logo from '../Components/atoms/Logo';
 import LanguagePicker from '../Components/organisms/LanguagePicker';
+import colors from '../Constants/colors';
+import Constants from '../Constants/Constants.json';
 
-const ForgotPassScreen = () => {
+const ForgotPassScreen = ({navigation}) => {
 
   const [country, setCountry] = useState('esp');
   const [dropDownOpen, setDropDownOpen] = useState(false);
@@ -66,8 +67,8 @@ const ForgotPassScreen = () => {
 
                   <Text style={{ color: 'gray', fontWeight: 'bold', fontSize: 12 }}>Already have an account?</Text>
 
-                  <TouchableOpacity>
-                    <Text style={{ marginLeft: 10, textDecorationLine: 'underline', color: colors.buttonColor, fontWeight: 'bold', fontSize: 12 }}>Log In</Text>
+                  <TouchableOpacity onPress={() => navigation.navigate(Constants.screen.LoginScreen)}>
+                    <Text style={styles.loginIn}>Log In</Text>
                   </TouchableOpacity>
 
                 </View>
@@ -110,10 +111,13 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold'
   },
-  // bottomImage: {
-  //   height: Dimensions.get('screen').height * 0.4,
-  //   width: Dimensions.get('window').width,
-  // }
+  loginIn:{
+    marginLeft: 10, 
+    textDecorationLine: 'underline', 
+    color: colors.buttonColor, 
+    fontWeight: 'bold', 
+    fontSize: 12
+  }
 });
 
 export default ForgotPassScreen;

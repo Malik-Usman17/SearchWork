@@ -37,7 +37,7 @@ const EmployerDrawerContent = ({navigation}) => {
 
       <View style={styles.headerContainer}>
         
-        <View style={{ position: 'absolute', width: '100%', padding: 15 }}>
+        <View style={{ position: 'absolute', width: '100%', padding: 9 }}>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
@@ -144,7 +144,8 @@ const EmployerDrawerContent = ({navigation}) => {
 const styles = StyleSheet.create({
   headerContainer: {
     backgroundColor: colors.white,
-    height: Dimensions.get('window').height * 0.25,
+    height: Dimensions.get('window').height * 0.22,
+    //height: Dimensions.get('window').height * 0.25,
     width: '100%',
     borderBottomLeftRadius: 25,
     borderBottomRightRadius: 25,

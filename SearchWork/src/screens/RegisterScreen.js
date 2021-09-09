@@ -103,23 +103,11 @@ const RegisterScreen = ({navigation}) => {
       if(apiResponse.isAxiosError == true){
         setErrorModal(true)
         setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
-        //alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
         setLoader(false);
       }
       else{
         setModalVisible(!modalVisible)
-        //alert('Account Created.')
-        setLoader(false)
-        // navigation.navigate(Constants.screen.LoginScreen)
-        // setFullName('');
-        // setEmail('');
-        // setPhone('');
-        // setGender('');
-        // setAddress('');
-        // setStatePicker(0);
-        // setCity(0);
-        // setPassword('');
-        // setConfirmPassword('');   
+        setLoader(false) 
       }
     }
     catch(error){
@@ -164,10 +152,7 @@ const RegisterScreen = ({navigation}) => {
 
 
   return (
-    <ScrollView 
-      style={{ flex: 1 }} 
-      showsVerticalScrollIndicator={false}
-    >
+    <ScrollView  style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
 
       <CustomModal 
         isVisible={modalVisible}
@@ -280,29 +265,26 @@ const RegisterScreen = ({navigation}) => {
                         <View style={{alignItems: 'center', justifyContent: 'space-between', marginTop: 4}}>
 
                           <ProfilePicture
-                            style={{overflow: 'hidden', borderColor: colors.gray}} 
+                            emptyContainerStyle={{borderColor: colors.gray}}
                             iconSize={30}
                             onPress={() => {
                               let options;
                               launchImageLibrary(options={
                                 mediaType: 'photo',
                                 includeBase64: true
-                              }, (response) => {
-                                //console.log('RESPONSE:',response)             
+                              }, (response) => {             
                                 if(response?.didCancel){
-                                  //console.log('User cancelled image picker');
                                   setImageUrl('');
                                 } else if (response?.errorMessage){
                                   console.log('Error:',response?.errorMessage)
                                 }else{
                                   const source = response?.assets[0].uri
                                   setImageUrl(source)
-                                  //setImageType(response?.assets[0].type)
                                 }
                               })
                             }}
                             imageSource={imageUrl != '' ? imageUrl : undefined}
-                            // imageSource={imageUrl != '' ? imageUrl.uri : undefined}
+                            imageStyle={styles.profileImage}
                           />
 
                         </View>
@@ -353,32 +335,6 @@ const RegisterScreen = ({navigation}) => {
                           value={phone}
                           onChangeText={setPhone}
                         />
-
-                        {/* <View style={{flexDirection: 'row', marginTop: 10, backgroundColor: 'pink', alignItems: 'center', justifyContent: 'space-between'}}>
-                          
-                          <Text style={{color: colors.primaryColor, fontWeight: 'bold'}}>SignUp as</Text>
-
-                          <View style={styles.registerSwitchContainer}>
-                          
-                          <TouchableOpacity 
-                            style={{...styles.registerType, backgroundColor: register == false ? colors.yellow : '#E5DDDD'}}
-                            onPress={() => setRegister(false)}
-                          >
-                            <Text style={{fontWeight: 'bold'}}>Employee</Text>
-                          </TouchableOpacity>
-
-                          <TouchableOpacity 
-                            style={{...styles.registerType, backgroundColor: register == true ? colors.yellow : '#E5DDDD'}}
-                            onPress={() => setRegister(true)}
-                          >
-                            <Text style={{fontWeight: 'bold'}}>Employer</Text>
-                          </TouchableOpacity>
-
-                        </View>
-
-                        </View> */}
-
-                        
 
                         {
                           register == false ?
@@ -432,8 +388,6 @@ const RegisterScreen = ({navigation}) => {
                           </CustomPicker>
                         )
                       }
-
-                      
 
                         <InputField
                           title='Address'
@@ -505,7 +459,6 @@ const RegisterScreen = ({navigation}) => {
                               }
                               else{
                                 setModalVisible(!modalVisible)
-                                //alert('Some Information Are Missing')
                               }
                             }
                             else if(register == false){
@@ -514,7 +467,6 @@ const RegisterScreen = ({navigation}) => {
                               }
                               else{
                                 setModalVisible(!modalVisible)
-                                //alert('Some Information Are Missing')
                               }
                             }   
                           }}
@@ -529,11 +481,6 @@ const RegisterScreen = ({navigation}) => {
                           </TouchableOpacity>
 
                         </View>
-
-                        {/* <Image 
-                          source={{uri: "https://cdn.britannica.com/80/157180-050-7B906E02/Heads-wheat-grains.jpg"}}
-                          style={{height: 70, width: 100, backgroundColor: 'pink'}}
-                        /> */}
 
                         <Divider style={{ marginTop: 10 }} />
 
@@ -633,6 +580,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center', 
     flex: 1,
     borderRadius: 20,
+  },
+  profileImage:{
+    height: 80,
+    width: 80,
+    borderRadius: 40,
+    borderWidth: 2,
+    borderColor: colors.gray
   }
 });
 

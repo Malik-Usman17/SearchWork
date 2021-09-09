@@ -53,8 +53,9 @@ const EmployerDashboard = ({ navigation }) => {
 
       <View style={{ alignItems: 'center', marginBottom: 20 }}>
         <View style={{ position: 'absolute', bottom: -35 }}>
-          <ProfilePicture 
-            style={styles.profilePicture} 
+          <ProfilePicture
+            emptyContainerStyle={styles.profilePicture}
+            imageStyle={{...styles.profilePicture, borderWidth: 2}} 
             iconSize={50}
             imageSource={user?.image_urls != undefined && user?.image_urls['3x']}
             disabled={true} 

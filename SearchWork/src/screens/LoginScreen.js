@@ -1,30 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { Dimensions, ImageBackground, ScrollView, Image, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage'
-import Feather from 'react-native-vector-icons/Feather';
-import HeaderImage from '../Components/atoms/HeaderImage';
-import Logo from '../Components/atoms/Logo';
-import Button from '../Components/molecules/Button';
+import { CommonActions } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { Dimensions, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useDispatch, useSelector } from 'react-redux';
 import CompanyLabel from '../Components/atoms/CompanyLabel';
 import Divider from '../Components/atoms/Divider';
+import HeaderImage from '../Components/atoms/HeaderImage';
+import Loader from '../Components/atoms/Loader';
+import Logo from '../Components/atoms/Logo';
+import Button from '../Components/molecules/Button';
 import FixedContainer from '../Components/molecules/FixedContainer';
+import InputField from '../Components/molecules/InputField';
 import PasswordField from '../Components/molecules/PasswordField';
+import CustomModal from '../Components/organisms/CustomModal';
 import LanguagePicker from '../Components/organisms/LanguagePicker';
 import colors from '../Constants/colors';
-import InputField from '../Components/molecules/InputField';
 import Constants from '../Constants/Constants.json';
-import { useDispatch, useSelector } from 'react-redux';
-import { userLogin, login, isRememberMe, rememberMeOperation, saveUserCredential, userCredential } from '../redux/slices';
-import Loader from '../Components/atoms/Loader';
-import {apiCall} from '../service/ApiCall';
+import { isRememberMe, login, rememberMeOperation, saveUserCredential, userCredential } from '../redux/slices';
+import { apiCall } from '../service/ApiCall';
 import ApiConstants from '../service/ApiConstants.json';
-import Axios from 'axios';
-import { CommonActions, useIsFocused } from '@react-navigation/native';
-import CustomModal from '../Components/organisms/CustomModal';
-import Modal from "react-native-modal";
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 
 const LoginScreen = ({navigation}) => {
@@ -39,10 +33,8 @@ const LoginScreen = ({navigation}) => {
   const [validEmail, setValidEmail] = useState(true);
 
   const credentials = useSelector(userCredential);
-  const rememberMeCheck = useSelector(rememberMeOperation);
- 
+  const rememberMeCheck = useSelector(rememberMeOperation); 
   var credentialFields = { ...credentials }
-
   const dispatch = useDispatch();
 
   
@@ -109,7 +101,7 @@ const LoginScreen = ({navigation}) => {
         isVisible={modalVisible}
         type = 'confirmation'
         onPressOk={() => setModalVisible(false)}
-        message={(email != '' || credentials.email != '') || (password != ''  || credentials.password != '') ? 'Invalid Email or Password.' : 'Some fields are missing.'}
+        message={(email != '' || credentials.email != '') && (password != ''  || credentials.password != '') ? 'Invalid Email or Password.' : 'Some fields are missing.'}
         imageSource={require('../../assets/warning.png')}
         buttonText='Ok'
       />
@@ -151,6 +143,7 @@ const LoginScreen = ({navigation}) => {
                       <Text style={styles.loginText}>Login</Text>
                       <View style={{height:2, backgroundColor: colors.buttonColor, borderRadius: 5}}/>
                     </View>
+    
                   </TouchableOpacity>
 
                   <TouchableOpacity 
@@ -174,6 +167,7 @@ const LoginScreen = ({navigation}) => {
                     title='Email'
                     placeholder='Email Address'
                     iconName='mail'
+                    keyboardType='email-address'
                     autoCapitalize='none'
                     value={credentials.email != '' ? credentials.email : email}
                     onChangeText={(val) => {
@@ -260,7 +254,6 @@ const LoginScreen = ({navigation}) => {
 
                   <CompanyLabel style={{marginTop: 10}}/>
                   
-
                 </View>
 
               </View>
