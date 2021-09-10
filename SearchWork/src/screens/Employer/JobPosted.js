@@ -21,6 +21,7 @@ import ScreenTitle from '../../Components/atoms/ScreenTitle';
 import CustomPicker from '../../Components/organisms/CustomPicker';
 import Constants from '../../Constants/Constants.json';
 import CustomModal from '../../Components/organisms/CustomModal';
+import { useFocusEffect } from '@react-navigation/native';
 //import translate from 'google-translate-api';
 //import {GoogleTranslator} from '@translate-tools/core/translators/GoogleTranslator';
 
@@ -33,9 +34,14 @@ const JobPosted = ({ navigation }) => {
   var jobObj = { ...job }
   //console.log('Job Object:',jobObj)
 
+  //console.log('Job Duration:',jobObj.duration)
+
   const dispatch = useDispatch();
 
-  console.log('Length:',job.length)
+ 
+  
+
+  //console.log('Length:',job.length)
 
 
   // const translator = new GoogleTranslator();
@@ -47,19 +53,24 @@ const JobPosted = ({ navigation }) => {
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
   const [jobTitle, setJobTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [hourlyPay, setHourlyPay] = useState('');
+  const [jobDuration, setJobDuration] = useState('');
+  const [jobCategory, setJobCategroy] = useState(0);
+  const [jobSubCategory, setJobSubCategory] = useState(0);
+  const [jobDescription, setJobDescription] = useState('');
+  const [jobPostNos, setJobPostNos] = useState('');
   const [statePicker, setStatePicker] = useState(0);
   const [city, setCity] = useState(0);
-  const [jobDuration, setJobDuration] = useState('');
-  const [jobPostNos, setJobPostNos] = useState('');
-  const [pay, setPay] = useState('');
+  const [zipCode, setZipCode] = useState('');
+  const [address, setAddress] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imageFileName, setImageFileName] = useState('');
-  const [employeesNo, setEmployeesNo] = useState(0);
-  const [zipCode, setZipCode] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [draftModal, setDraftModal] = useState(true);
 
+  // console.log()
+
+  // console.log('Job Title:',jobTitle.length)
   
 
   //console.log('ImageUrl:',imageUrl)
@@ -76,6 +87,26 @@ const JobPosted = ({ navigation }) => {
   ]
 
   var test;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
+        setDraftModal(true)
+    }
+    setJobTitle('')
+    setHourlyPay('')
+    setJobDuration(0)
+    setJobCategroy(0)
+    setJobSubCategory(0)
+    setJobDescription('')
+    setJobPostNos(0)
+    setStatePicker(0)
+    setCity(0)
+    setZipCode('')
+    setAddress('')
+    }, [])
+  )
+
 
 
   // // useEffect(() => {
@@ -206,7 +237,9 @@ const JobPosted = ({ navigation }) => {
   // });
 
 
-   console.log('Title:',jobTitle)
+   //console.log('Title:',jobTitle)
+
+   
   return (
     <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
 
@@ -246,9 +279,8 @@ const JobPosted = ({ navigation }) => {
           buttonText='Ok'
         />
       }
-
-{(jobObj.jobTitle != '' || jobObj.hourlyPay != ''  || jobObj.duration != 0  || jobObj.jobCategory != 0  || jobObj.jobSubCategory != 0  || jobObj.jobDescription != '' || jobObj.noOfEmployees != 0  || jobObj.state != 0  || jobObj.city != 0 || jobObj.zipCode != '' || jobObj.address != '')&&
-        <CustomModal 
+      
+      <CustomModal 
           isVisible={draftModal}
           message='You have unposted job.'
           imageSource={require('../../../assets/diagnostic.png')}
@@ -258,7 +290,6 @@ const JobPosted = ({ navigation }) => {
           }}
           onPressNo={() => setDraftModal(false)}
         />
-        }
 
       <StatusBar backgroundColor={colors.primaryColor} />
 
@@ -308,11 +339,13 @@ const JobPosted = ({ navigation }) => {
               //textStyle={{color: job.hourlyPay == '' ? 'red' : colors.primaryColor}}
               style={{ flex: 0.45 }}
               keyboardType={'number-pad'}
+              maxLength={3}
               title='Hourly Pay'
               iconName='person'
               placeholder='0$'
-              value={job.hourlyPay}
+              value={hourlyPay}
               onChangeText={(val) => {
+                setHourlyPay(val)
                 jobObj.hourlyPay = val
                 dispatch(setJobPost(jobObj))
               }}
@@ -323,8 +356,9 @@ const JobPosted = ({ navigation }) => {
               pickerContainerStyle={{ marginTop: 10, flex: 0.52  }}
               label='Job Type'
               pickerTitle='Duration'
-              selectedValue={job.duration}
+              selectedValue={jobDuration}
               onValueChange={(itemValue, itemIndex) => {
+              setJobDuration(itemValue)
               jobObj.duration = itemValue
               dispatch(setJobPost(jobObj))
             }}
@@ -341,8 +375,9 @@ const JobPosted = ({ navigation }) => {
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select Job Category'
             pickerTitle='Job Category'
-            selectedValue={job.jobCategory}
+            selectedValue={jobCategory}
             onValueChange={(itemValue, itemIndex) => {
+              setJobCategroy(itemValue)
               jobObj.jobCategory = itemValue
               dispatch(setJobPost(jobObj))
             }}
@@ -363,8 +398,9 @@ const JobPosted = ({ navigation }) => {
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select Job Sub Category'
             pickerTitle='Job Sub Category'
-            selectedValue={job.jobSubCategory}
+            selectedValue={jobSubCategory}
             onValueChange={(itemValue, itemIndex) => {
+              setJobSubCategory(itemValue)
               jobObj.jobSubCategory = itemValue
               dispatch(setJobPost(jobObj))
             }}
@@ -426,11 +462,11 @@ const JobPosted = ({ navigation }) => {
             maxLength={250}
             multiline={true}
             inputFieldStyle={{ alignItems: 'flex-start', height: Dimensions.get('window').height * 0.2 }}
-            value={job.jobDescription}
+            value={jobDescription}
             onChangeText={(val) => {
+              setJobDescription(val)
               jobObj.jobDescription = val
               dispatch(setJobPost(jobObj))
-              setDescription(val)
             }}
           />
           <Text style={{ alignSelf: 'flex-end', color: colors.darkGray, fontWeight: 'bold', fontSize: 12 }}>
@@ -442,8 +478,9 @@ const JobPosted = ({ navigation }) => {
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select No. Of Employees'
             pickerTitle='No. Of Employees'
-            selectedValue={job.noOfEmployees}
+            selectedValue={jobPostNos}
             onValueChange={(itemValue, itemIndex) => {
+              setJobPostNos(itemValue)
               jobObj.noOfEmployees = itemValue
               dispatch(setJobPost(jobObj))
             }}
@@ -459,8 +496,9 @@ const JobPosted = ({ navigation }) => {
               //pickerTitleStyle={{color: job.state == 0 ? 'red' : colors.primaryColor}}
               pickerContainerStyle={{ marginTop: 10, flex: 0.49 }}
               items={cityStates}
-              selectedValue={job.state}
+              selectedValue={statePicker}
               onValueChange={(itemValue, itemIndex) => {
+                setStatePicker(itemValue)
                 jobObj.state = itemValue
                 dispatch(setJobPost(jobObj))
               }}
@@ -471,8 +509,9 @@ const JobPosted = ({ navigation }) => {
               pickerContainerStyle={{ marginTop: 10, flex: 0.49 }}
               label='Select City'
               pickerTitle='City'
-              selectedValue={job.city}
+              selectedValue={city}
               onValueChange={(itemValue, itemIndex) => {
+                setCity(itemValue)
                 jobObj.city = itemValue
                 dispatch(setJobPost(jobObj))
               }}
@@ -493,11 +532,12 @@ const JobPosted = ({ navigation }) => {
           <InputField
             //textStyle={{color: job.zipCode == '' ? 'red' : colors.primaryColor}}
             keyboardType={'number-pad'}
-            maxLength={4}
+            maxLength={5}
             title='Zip Code'
             placeholder='Zip Code'
-            value={job.zipCode}
+            value={zipCode}
             onChangeText={(val) => {
+              setZipCode(val)
               jobObj.zipCode = val
               dispatch(setJobPost(jobObj))
             }}
@@ -508,8 +548,9 @@ const JobPosted = ({ navigation }) => {
             title='Address'
             placeholder='Address'
             iconName='location-sharp'
-            value={job.address}
+            value={address}
             onChangeText={(val) => {
+              setAddress(val)
               jobObj.address = val
               dispatch(setJobPost(jobObj))
             }}

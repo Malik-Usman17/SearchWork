@@ -1,6 +1,7 @@
 import { CommonActions } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Dimensions, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { color } from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import CompanyLabel from '../Components/atoms/CompanyLabel';
@@ -271,6 +272,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   loginFieldContainer: {
+    //backgroundColor: colors.primaryColorLight,
     backgroundColor: colors.white,
     borderRadius: 15,
     width: Dimensions.get('window').width * 0.9

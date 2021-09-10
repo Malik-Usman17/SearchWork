@@ -24,7 +24,7 @@ const Draft = ({ navigation }) => {
   const job = useSelector(jobPostedSelector);
 
   var jobObj = { ...job }
-  console.log('Job Fields',jobObj)
+  //console.log('Job Fields',jobObj)
 
 
   const dispatch = useDispatch();
@@ -44,8 +44,6 @@ const Draft = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   
 
-  //console.log('ImageUrl:',imageUrl)
-
   const cities = cityStates.filter((value) => value.state == job.state)
   const cityItems = cities.length > 0 ? cities[0].cities : null
 
@@ -60,10 +58,10 @@ const Draft = ({ navigation }) => {
   return (
     (jobObj.jobTitle == '' && jobObj.hourlyPay == '' && jobObj.duration == 0  && jobObj.jobCategory == 0 && jobObj.jobSubCategory == 0 && jobObj.jobDescription == ''&& jobObj.noOfEmployees == 0  && jobObj.state == 0  && jobObj.city == 0 && jobObj.zipCode == '' && jobObj.address == '') ?
 
-    <View style={{flex: 1, backgroundColor: '#FFFFFF', alignItems: 'center', justifyContent: 'center'}}>
+    <View style={styles.emptyScreenContainer}>
       <Image source={require('../../../assets/noData.jpg')} resizeMode='contain' style={{height: 300, width:400}}/>
-      <TouchableOpacity style={{marginTop: 20}}>
-        <Text style={{color: colors.buttonColor, fontWeight: 'bold', textDecorationLine: 'underline'}}>Click here to post a job</Text>
+      <TouchableOpacity style={{marginTop: 20}} onPress={() => navigation.navigate(Constants.screen.JobPosted)}>
+        <Text style={styles.buttonText}>Click here to post a job</Text>
       </TouchableOpacity>
     </View>
     :
@@ -503,6 +501,17 @@ const styles = StyleSheet.create({
     borderWidth: 1.5, 
     flex: 0.93, 
     height: Dimensions.get('window').height * 0.065
+  },
+  emptyScreenContainer:{
+    flex: 1, 
+    backgroundColor: '#FFFFFF', 
+    alignItems: 'center', 
+    justifyContent: 'center'
+  },
+  buttonText:{
+    color: colors.buttonColor, 
+    fontWeight: 'bold', 
+    textDecorationLine: 'underline'
   }
 })
 

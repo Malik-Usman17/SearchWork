@@ -6,6 +6,8 @@ import { CommonActions } from '@react-navigation/native';
 import Constants from '../Constants/Constants.json';
 import { userLogin } from '../redux/slices';
 import { useSelector } from 'react-redux';
+import FadeAnimation from '../Components/molecules/FadeAnimation';
+
 
 const SplashScreen = ({navigation}) => {
   const user = useSelector(userLogin)
@@ -23,7 +25,7 @@ const SplashScreen = ({navigation}) => {
       else{
         navigation.dispatch(CommonActions.reset({index:0, routes:[{name: Constants.screen.LoginScreen}]}));
       }
-    }, 700)
+    }, 3000)
   }, [])
 
 
@@ -37,9 +39,13 @@ const SplashScreen = ({navigation}) => {
 
       <View style={styles.logoContainer}>
 
+        <FadeAnimation>
+
         <Image resizeMode='contain' source={require('../../assets/logo.png')} style={styles.logo} />
 
         <CompanyLabel style={{ color: colors.white ,marginTop: 15}}/>
+        
+        </FadeAnimation>
 
       </View>
 

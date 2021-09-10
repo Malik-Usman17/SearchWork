@@ -16,7 +16,7 @@ import Button from '../Components/molecules/Button';
 
 const Resume = () => {
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.lightGray, marginBottom: 7 }} showsVerticalScrollIndicator={false}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.lightGray }} showsVerticalScrollIndicator={false}>
       {/* <ImageBackground source={require('../../assets/blurBg.png')} style={styles.bg}> */}
 
       <View style={styles.resumeContainer}>
