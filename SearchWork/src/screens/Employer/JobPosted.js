@@ -22,24 +22,37 @@ import CustomPicker from '../../Components/organisms/CustomPicker';
 import Constants from '../../Constants/Constants.json';
 import CustomModal from '../../Components/organisms/CustomModal';
 import { useFocusEffect } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 //import translate from 'google-translate-api';
 //import {GoogleTranslator} from '@translate-tools/core/translators/GoogleTranslator';
 
 
 
 const JobPosted = ({ navigation }) => {
-  const job = useSelector(jobPostedSelector);
+  const isFocused = useIsFocused();
+  //console.log('Focus:',isFocused)
+  //const job = useSelector(jobPostedSelector);
+  var job = useSelector(jobPostedSelector);
+  console.log('Access Zip Code Outside:',job.zipCode)
   //console.log('JOB SLICE', job)
+
+  // console.log('Job Duration:',job.duration)
+  // console.log('Job Person required:',job.noOfEmployees)
+
+  const dispatch = useDispatch();
 
   var jobObj = { ...job }
   //console.log('Job Object:',jobObj)
 
   //console.log('Job Duration:',jobObj.duration)
 
-  const dispatch = useDispatch();
 
- 
-  
+  // console.log('Job Title:',job.jobTitle)
+  // console.log('Hourly pay:',job.hourlyPay)
+  // console.log('Job Duration:',job.duration)
+  // console.log('Job Category:',job.jobCategory)
+  // console.log('Job Sub Category:',job.jobSubCategory) 
+
 
   //console.log('Length:',job.length)
 
@@ -66,7 +79,10 @@ const JobPosted = ({ navigation }) => {
   const [imageUrl, setImageUrl] = useState('');
   const [imageFileName, setImageFileName] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
-  const [draftModal, setDraftModal] = useState(true);
+  const [draftModal, setDraftModal] = useState(false);
+
+
+  //console.log('Draft Modal:',draftModal)
 
   // console.log()
 
@@ -88,60 +104,42 @@ const JobPosted = ({ navigation }) => {
 
   var test;
 
-  useFocusEffect(
-    React.useCallback(() => {
-      if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
-        setDraftModal(true)
+  useEffect(() => {
+    console.log('Zip Code:',job.zipCode)
+        if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
+        console.log('If running')
+        setDraftModal(!draftModal)
     }
-    setJobTitle('')
-    setHourlyPay('')
-    setJobDuration(0)
-    setJobCategroy(0)
-    setJobSubCategory(0)
-    setJobDescription('')
-    setJobPostNos(0)
-    setStatePicker(0)
-    setCity(0)
-    setZipCode('')
-    setAddress('')
-    }, [])
-  )
+  }, [isFocused])
 
-
-
-  // // useEffect(() => {
-  //   if(jobObj.jobTitle != '' || jobObj.hourlyPay != ''  || jobObj.duration != 0  || jobObj.jobCategory != 0  || jobObj.jobSubCategory != 0  || jobObj.jobDescription != '' || jobObj.noOfEmployees != 0  || jobObj.state != 0  || jobObj.city != 0 || jobObj.zipCode != '' || jobObj.address != ''){
-  //   setDraftModal(!draftModal)
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     //job = useSelector(jobPostedSelector);
+  //     if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
+  //       console.log('If running')
+  //       setDraftModal(!draftModal)
   //   }
-  // // }, [])
+  //   console.log('Zip Code:',job.zipCode)
+  //   setJobTitle('')
+  //   setHourlyPay('')
+  //   setJobDuration(0)
+  //   setJobCategroy(0)
+  //   setJobSubCategory(0)
+  //   setJobDescription('')
+  //   setJobPostNos(0)
+  //   setStatePicker(0)
+  //   setCity(0)
+  //   setZipCode('')
+  //   setAddress('')
+  //   }, [])
+  // )
 
-
-  // const openGallery = () => {
-  //   const options = {
-  //     storageOptions: {
-  //       path: 'images',
-  //       mediaType: 'video'
-  //     },
-  //     includeBase64: true
+  // useFocusEffect(() => {
+  //   if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
+  //     console.log('if running')
+  //     setDraftModal(true)
   //   }
-
-  //   launchImageLibrary(options, (response) => {
-  //     console.log('Response:', response);
-  //     console.log('Image Path:',response.assets[0].uri)
-    
-  //     if (response.didCancel) {
-  //       console.log('User cancelled image picker');
-  //     } else if (response.error) {
-  //       console.log('ImagePicker Error: ', response.error);
-  //     } else if (response.customButton) {
-  //       console.log('User tapped custom button: ', response.customButton);
-  //     } else {
-  //       //const source = {uri: response.uri}
-  //       const source = { uri: 'data:image/jpeg;base64,' + response.base64 };
-  //       setImageUrl(response.assets[0].uri)
-  // }})}
-
-  
+  // }, [])
   
   // const result = translate("I'm fine.", {
   //   tld: 'cn',
@@ -262,7 +260,7 @@ const JobPosted = ({ navigation }) => {
           onPressOk={() => {
             setModalVisible(false)
             navigation.navigate(Constants.screen.JobPostedList)
-            setJobTitle('')
+            //setJobTitle('')
                 jobObj.jobTitle = '' 
                 jobObj.hourlyPay = '' 
                 jobObj.duration = 0 
@@ -285,11 +283,11 @@ const JobPosted = ({ navigation }) => {
           message='You have unposted job.'
           imageSource={require('../../../assets/diagnostic.png')}
           onPressYes={() => {
-            //setDraftModal(false)
             navigation.navigate(Constants.screen.Draft)
+            setDraftModal(!draftModal)
           }}
-          onPressNo={() => setDraftModal(false)}
-        />
+          onPressNo={() => setDraftModal(!draftModal)}
+      />
 
       <StatusBar backgroundColor={colors.primaryColor} />
 
@@ -363,8 +361,8 @@ const JobPosted = ({ navigation }) => {
               dispatch(setJobPost(jobObj))
             }}
             >
-            <Picker.Item label='Part Time' value={'Part Time'} style={{ fontSize: 14 }} />
-            <Picker.Item label='Full Time' value={'Full Time'} style={{ fontSize: 14 }} />
+            <Picker.Item label='Part Time' value={'Part Time'} />
+            <Picker.Item label='Full Time' value={'Full Time'} />
             
           </CustomPicker>
 
@@ -443,6 +441,7 @@ const JobPosted = ({ navigation }) => {
 
                   if(response.didCancel){
                     console.log('User cancelled image picker');
+                    setImageUrl('')
                   } else if (response.errorMessage){
                     console.log('Error:',response.errorMessage)
                   }else{

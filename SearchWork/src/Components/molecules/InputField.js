@@ -3,7 +3,7 @@ import { Dimensions, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import colors from '../../Constants/colors';
 
-const InputField = ({style, textStyle, onSubmitEditing, inputFieldStyle, editable, autoCapitalize, maxLength, multiline, title, iconName, placeholder, keyboardType, value, onChangeText, secureTextEntry}) => {
+const InputField = ({style, textStyle, onSubmitEditing, inputFieldStyle, textFieldStyle, editable, autoCapitalize, maxLength, multiline, title, iconName, placeholder, keyboardType, value, onChangeText, secureTextEntry}) => {
   return(
     <View style={[styles.container, style]}>
 
@@ -19,7 +19,7 @@ const InputField = ({style, textStyle, onSubmitEditing, inputFieldStyle, editabl
         />
 
         <TextInput
-          style={styles.inputFied} 
+          style={[styles.inputFied, textFieldStyle]} 
           placeholder={placeholder}
           secureTextEntry={secureTextEntry}
           editable={editable}

@@ -3,6 +3,7 @@ import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { Dimensions, Image, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Entypo from 'react-native-vector-icons/Entypo';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import CompanyLabel from '../Components/atoms/CompanyLabel';
 import HeaderImage from '../Components/atoms/HeaderImage';
 import Logo from '../Components/atoms/Logo';
@@ -53,9 +54,12 @@ const RegisterScreen = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [errorModal, setErrorModal] = useState(false);
+  const [imageSelection, setImageSelection] = useState(false);
 
   const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
+
+  console.log('Image Url:',imageUrl)
 
 
   const dispatch = useDispatch();
@@ -150,6 +154,51 @@ const RegisterScreen = ({navigation}) => {
     }
   }
 
+  
+  const pickFromGallery = () => {
+    launchImageLibrary({
+      mediaType: 'photo',
+      maxHeight: 500,
+      maxWidth: 500
+      //includeBase64: true
+    }, (response) => {
+      if(response?.didCancel){
+        setImageUrl('')
+      }
+      else if (response?.errorMessage){
+        console.log('Error:',response?.errorMessage)
+      }
+      else{
+        const source = response?.assets[0].uri
+        setImageUrl(source)
+      }
+    })
+  }
+
+  const camera = () => {
+    launchCamera({
+      mediaType: 'photo',
+      //saveToPhotos: true,
+      cameraType: 'back',
+      maxHeight: 500,
+      maxWidth: 500
+    }, (response) => {
+      if(response?.didCancel){
+        setImageUrl('')
+        //console.log('if block',response?.didCancel)
+      }
+      else if(response?.errorMessage){
+        console.log('Error:',response?.errorMessage)
+      }
+      else{
+        const source = response?.assets[0].uri
+        setImageUrl(source)
+      }
+    })
+  }
+
+
+  //console.log('Phone:',phone)
 
   return (
     <ScrollView  style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
@@ -268,24 +317,54 @@ const RegisterScreen = ({navigation}) => {
                             emptyContainerStyle={{borderColor: colors.gray}}
                             iconSize={30}
                             onPress={() => {
-                              let options;
-                              launchImageLibrary(options={
-                                mediaType: 'photo',
-                                includeBase64: true
-                              }, (response) => {             
-                                if(response?.didCancel){
-                                  setImageUrl('');
-                                } else if (response?.errorMessage){
-                                  console.log('Error:',response?.errorMessage)
-                                }else{
-                                  const source = response?.assets[0].uri
-                                  setImageUrl(source)
-                                }
-                              })
+                              setImageSelection(!imageSelection)
+                              // let options;
+                              // launchImageLibrary(options={
+                              //   mediaType: 'photo',
+                              //   includeBase64: true
+                              // }, (response) => {             
+                              //   if(response?.didCancel){
+                              //     setImageUrl('');
+                              //   } else if (response?.errorMessage){
+                              //     console.log('Error:',response?.errorMessage)
+                              //   }else{
+                              //     const source = response?.assets[0].uri
+                              //     setImageUrl(source)
+                              //   }
+                              // })
                             }}
                             imageSource={imageUrl != '' ? imageUrl : undefined}
                             imageStyle={styles.profileImage}
                           />
+
+                          {
+                            imageSelection == true &&
+                            <View style={{backgroundColor: 'pink', flexDirection: 'row', paddingVertical: 7, marginTop: 3, width: 140, borderRadius: 10, justifyContent: 'space-around'}}>
+                              
+                              <View style={{alignItems: 'center'}}>
+                              <TouchableOpacity 
+                                style={{backgroundColor: colors.primaryColor, height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}
+                                onPress={() => camera()}
+                              >
+                                <Entypo name='camera' size={20} color={colors.white}/>
+                              </TouchableOpacity>
+                              <Text style={{fontSize: 12, color: colors.darkGray}}>Camera</Text>
+                              </View>
+                              
+                              <View style={{alignItems: 'center'}}>
+                              <TouchableOpacity 
+                                style={{backgroundColor: colors.buttonColor, height: 40, width: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center'}}
+                                onPress={() => pickFromGallery()}
+                              >
+                                <Ionicons name='image-sharp' size={20} color={colors.white}/>
+                              </TouchableOpacity>
+                              <Text style={{fontSize: 12, color: colors.darkGray}}>Gallery</Text>
+                            </View>
+                            
+                            </View>
+                          }
+
+                          
 
                         </View>
 
@@ -330,9 +409,10 @@ const RegisterScreen = ({navigation}) => {
                           title='Phone'
                           placeholder='Phone Number'
                           keyboardType='phone-pad'
-                          maxLength={11}
+                          maxLength={12}
                           iconName='phone-portrait'
-                          value={phone}
+                          value={phone == '' ? '+1'+phone : phone}
+                          //value={phone == '' ? '+1'+' '+phone : phone}
                           onChangeText={setPhone}
                         />
 

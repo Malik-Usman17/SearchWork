@@ -12,9 +12,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import IconText from '../Components/atoms/IconText';
 import Logo from '../Components/atoms/Logo';
 import Button from '../Components/molecules/Button';
+import {userLogin} from '../redux/slices';
+import { useSelector } from 'react-redux';
 
 
 const Resume = () => {
+
+  const user = useSelector(userLogin);
+  //console.log('User Info on Resume Screen:',user)
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.lightGray }} showsVerticalScrollIndicator={false}>
       {/* <ImageBackground source={require('../../assets/blurBg.png')} style={styles.bg}> */}
@@ -132,7 +138,11 @@ const Resume = () => {
 
       </View>
 
-        <View style={{flexDirection: 'row', marginTop: 10}}>
+      {
+        user?.type == 'employer' &&
+      
+
+        <View style={{flexDirection: 'row'}}>
           <Button 
             title='Call' 
             style={styles.button} 
@@ -158,9 +168,8 @@ const Resume = () => {
             onPress={() => Linking.openURL('mailto: example@gmail.com')}
           />
         </View>
-      
-      {/* </ImageBackground> */}
-    
+      }
+          
     </ScrollView>
   )
 }
@@ -173,7 +182,8 @@ const styles = StyleSheet.create({
   resumeContainer: {
     borderRadius: 20,
     marginHorizontal: 8,
-    marginTop: 20,
+    marginVertical: 10,
+    //marginTop: 20,
     backgroundColor: colors.white
   },
   rowContainer: {

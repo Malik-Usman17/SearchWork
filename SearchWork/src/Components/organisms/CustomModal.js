@@ -49,12 +49,13 @@ const styles = StyleSheet.create({
   modalText: {
     fontSize: 15,
     fontWeight: 'bold',
-    bottom: 12
+    bottom: 15,
+    //backgroundColor: 'pink'
   },
   icon: {
     height: 60,
     width: 60,
-    bottom: 30
+    bottom: 30,
   },
   buttonContainer: {
     flexDirection: 'row',

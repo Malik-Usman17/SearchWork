@@ -303,6 +303,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   bgImage: {
+    //height: Dimensions.get('window').height,
     height: Dimensions.get('screen').height,
     width: Dimensions.get('window').width
   },

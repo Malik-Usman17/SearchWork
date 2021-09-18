@@ -17,7 +17,7 @@ import { useSelector } from 'react-redux';
 const EmployeeProfile = ({navigation}) => {
 
     const user = useSelector(userLogin);
-    console.log('Employee Profile User:',user)
+    //console.log('Employee Profile User:',user)
     const [dropDown, setDropDown] = useState(false);
     const [lang, setLang] = useState('eng');
 
@@ -34,8 +34,9 @@ const EmployeeProfile = ({navigation}) => {
               <View style={{alignItems: 'center', width: 190, overflow:'hidden'}}>
                 <ProfilePicture 
                   iconSize={40}
+                  emptyContainerStyle={styles.profilePicture}
+                  imageStyle={{...styles.profilePicture, borderWidth: 2}}
                   imageSource={user?.image_urls != undefined && user?.image_urls['3x']} 
-                  //imageSource={user.image_urls? user.image_urls['1x']}
                   disabled={true}
                 />
                 <Text numberOfLines={1} ellipsizeMode='clip' style={{fontSize: 18, fontWeight: 'bold', color: colors.white}}>{user?.name}</Text>
@@ -52,7 +53,7 @@ const EmployeeProfile = ({navigation}) => {
 
       </HeaderRowContainer>
 
-             <Text style={{alignSelf: 'center', paddingHorizontal: 15, color: colors.white, position: 'absolute', top: 130}}>
+             <Text style={{alignSelf: 'center', paddingHorizontal: 15, color: colors.white, position: 'absolute', top: 125}}>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam pellentesque erat vitae nibh feugiat sollicitudin.
             </Text>
 
@@ -175,7 +176,13 @@ const styles = StyleSheet.create({
     borderColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center'
-  }
+  },
+  profilePicture: {
+    borderColor: colors.white,
+    height: 80,
+    width: 80,
+    borderRadius: 40
+  },
 })
 
 export default EmployeeProfile;

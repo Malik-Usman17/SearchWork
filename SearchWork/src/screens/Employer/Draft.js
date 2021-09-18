@@ -23,6 +23,8 @@ import { jobPostedSelector, setJobPost } from '../../redux/slices';
 const Draft = ({ navigation }) => {
   const job = useSelector(jobPostedSelector);
 
+
+
   var jobObj = { ...job }
   //console.log('Job Fields',jobObj)
 
@@ -127,7 +129,7 @@ const Draft = ({ navigation }) => {
 
         <View style={styles.infoContainer}>
           <InputField
-            //textStyle={{color: job.jobTitle == '' ? 'red' : colors.primaryColor}}
+            textStyle={{color: job.jobTitle == '' ? 'red' : colors.primaryColor}}
             title='Job Title'
             iconName='person'
             placeholder='Job Title'
@@ -141,7 +143,7 @@ const Draft = ({ navigation }) => {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
             <InputField
-              //textStyle={{color: job.hourlyPay == '' ? 'red' : colors.primaryColor}}
+              textStyle={{color: job.hourlyPay == '' ? 'red' : colors.primaryColor}}
               style={{ flex: 0.45 }}
               keyboardType={'number-pad'}
               title='Hourly Pay'
@@ -329,7 +331,7 @@ const Draft = ({ navigation }) => {
           <InputField
             textStyle={{color: job.zipCode == '' ? 'red' : colors.primaryColor}}
             keyboardType={'number-pad'}
-            maxLength={4}
+            maxLength={5}
             title='Zip Code'
             placeholder='Zip Code'
             value={job.zipCode}
