@@ -23,8 +23,6 @@ import { jobPostedSelector, setJobPost } from '../../redux/slices';
 const Draft = ({ navigation }) => {
   const job = useSelector(jobPostedSelector);
 
-
-
   var jobObj = { ...job }
   //console.log('Job Fields',jobObj)
 
@@ -44,6 +42,8 @@ const Draft = ({ navigation }) => {
   const [employeesNo, setEmployeesNo] = useState(0);
   const [zipCode, setZipCode] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+
+ // console.log(job.jobTitle.length)
   
 
   const cities = cityStates.filter((value) => value.state == job.state)
@@ -68,7 +68,7 @@ const Draft = ({ navigation }) => {
     </View>
     :
     <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-{
+      {
         (jobObj.jobTitle == '' || jobObj.hourlyPay == ''  || jobObj.duration == 0  || jobObj.jobCategory == 0  || jobObj.jobSubCategory == 0  || jobObj.jobDescription == '' || jobObj.noOfEmployees == 0  || jobObj.state == 0  || jobObj.city == 0 || jobObj.zipCode == '' || jobObj.address == '') ?
         <CustomModal 
           type='confirmation'
@@ -133,6 +133,7 @@ const Draft = ({ navigation }) => {
             title='Job Title'
             iconName='person'
             placeholder='Job Title'
+            maxLength={30}
             value={job.jobTitle}
             onChangeText={(val) => {
               jobObj.jobTitle = val
@@ -146,9 +147,10 @@ const Draft = ({ navigation }) => {
               textStyle={{color: job.hourlyPay == '' ? 'red' : colors.primaryColor}}
               style={{ flex: 0.45 }}
               keyboardType={'number-pad'}
+              maxLength={5}
               title='Hourly Pay'
               iconName='person'
-              placeholder='0$'
+              placeholder='$0.00'
               value={job.hourlyPay}
               onChangeText={(val) => {
                 jobObj.hourlyPay = val
@@ -293,6 +295,18 @@ const Draft = ({ navigation }) => {
             <Picker.Item label={'5'} value={'5'} />
           </CustomPicker>
 
+          <InputField
+            textStyle={{color: job.address == '' ? 'red' : colors.primaryColor}}
+            title='Address'
+            placeholder='Address'
+            iconName='location-sharp'
+            value={job.address}
+            onChangeText={(val) => {
+              jobObj.address = val
+              dispatch(setJobPost(jobObj))
+            }}
+          />
+
           {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}> */}
 
             <StatePicker
@@ -341,17 +355,7 @@ const Draft = ({ navigation }) => {
             }}
           />
 
-          <InputField
-            textStyle={{color: job.address == '' ? 'red' : colors.primaryColor}}
-            title='Address'
-            placeholder='Address'
-            iconName='location-sharp'
-            value={job.address}
-            onChangeText={(val) => {
-              jobObj.address = val
-              dispatch(setJobPost(jobObj))
-            }}
-          />
+          
 
           <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5, marginLeft: 7}}>
             <TouchableOpacity

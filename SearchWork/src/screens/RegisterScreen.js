@@ -59,10 +59,8 @@ const RegisterScreen = ({navigation}) => {
   const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
 
-  console.log('Image Url:',imageUrl)
+  //console.log('Image Url:',imageUrl)
 
-
-  const dispatch = useDispatch();
 
   const onChange = (event, selectedDate) => {
     const currentDate = selectedDate || date;
@@ -171,6 +169,7 @@ const RegisterScreen = ({navigation}) => {
       else{
         const source = response?.assets[0].uri
         setImageUrl(source)
+        setImageSelection(false)
       }
     })
   }
@@ -193,6 +192,7 @@ const RegisterScreen = ({navigation}) => {
       else{
         const source = response?.assets[0].uri
         setImageUrl(source)
+        setImageSelection(false)
       }
     })
   }
@@ -233,14 +233,14 @@ const RegisterScreen = ({navigation}) => {
         isVisible={errorModal}
         type = 'confirmation'
         onPressOk={() => setErrorModal(false)}
-        message={errorMessage}
+        message={errorMessage == '' ? 'Something went wrong.' : errorMessage}
         imageSource={require('../../assets/warning.png')}
         buttonText='Ok'
       />
 
       <StatusBar backgroundColor={colors.primaryColor} />
 
-        <ImageBackground source={require('../../assets/blurBg.png')} resizeMode='cover' style={styles.bg}>
+        <ImageBackground source={require('../../assets/blurBg.png')} resizeMode='cover' style={imageSelection == true ? {...styles.bg, height: Dimensions.get('screen').height + 700} : styles.bg}>
 
           <HeaderImage />
 
@@ -318,20 +318,6 @@ const RegisterScreen = ({navigation}) => {
                             iconSize={30}
                             onPress={() => {
                               setImageSelection(!imageSelection)
-                              // let options;
-                              // launchImageLibrary(options={
-                              //   mediaType: 'photo',
-                              //   includeBase64: true
-                              // }, (response) => {             
-                              //   if(response?.didCancel){
-                              //     setImageUrl('');
-                              //   } else if (response?.errorMessage){
-                              //     console.log('Error:',response?.errorMessage)
-                              //   }else{
-                              //     const source = response?.assets[0].uri
-                              //     setImageUrl(source)
-                              //   }
-                              // })
                             }}
                             imageSource={imageUrl != '' ? imageUrl : undefined}
                             imageStyle={styles.profileImage}
@@ -339,7 +325,7 @@ const RegisterScreen = ({navigation}) => {
 
                           {
                             imageSelection == true &&
-                            <View style={{backgroundColor: 'pink', flexDirection: 'row', paddingVertical: 7, marginTop: 3, width: 140, borderRadius: 10, justifyContent: 'space-around'}}>
+                            <View style={{backgroundColor: colors.white, flexDirection: 'row', paddingVertical: 7, marginTop: 3, width: 140, borderRadius: 10, justifyContent: 'space-around'}}>
                               
                               <View style={{alignItems: 'center'}}>
                               <TouchableOpacity 
@@ -393,14 +379,6 @@ const RegisterScreen = ({navigation}) => {
                               }
                             }
                           }}
-                          // onSubmitEditing={() => {
-                          //   if(ValidateEmail(email) == false){
-                          //     setValidEmail(false)
-                          //   }
-                          //   else{
-                          //     setValidEmail(true)
-                          //   }
-                          // }}
                         />
  
                        {validEmail == false  && <Text style={{marginLeft: 7, fontWeight: 'bold', color: 'red'}}>Invalid Email Address</Text>}
@@ -427,7 +405,7 @@ const RegisterScreen = ({navigation}) => {
                               mode={mode}
                               maximumDate={date}
                               is24Hour={true}
-                              display="default"
+                              display='default'
                               onChange={onChange}
                             />
                           )}
@@ -542,7 +520,7 @@ const RegisterScreen = ({navigation}) => {
                               }
                             }
                             else if(register == false){
-                              if(fullName != '' && email != '' && phone != '' && gender != 0 && address != '' && statePicker != 0 && city != 0 && password != '' && confirmPassword != ''){
+                              if(fullName != '' && email != '' && phone != '' && imageUrl != '' && gender != 0 && address != '' && statePicker != 0 && city != 0 && password != '' && confirmPassword != ''){
                                 registerUser()
                               }
                               else{

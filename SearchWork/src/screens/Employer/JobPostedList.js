@@ -76,7 +76,6 @@ const JobPostedList = ({navigation}) => {
 
             </View>
 
-
           </View>
 
         </View>

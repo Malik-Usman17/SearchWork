@@ -3,6 +3,7 @@ export const DateFormat = (date) => {
   var monthName = months[date.getMonth()];
   var Dated = date.getDate()
   var year = date.getFullYear();
-  var dateFormat = Dated+' '+monthName+' '+year
+  var dateFormat = monthName+' '+Dated+' '+year
+  //var dateFormat = Dated+' '+monthName+' '+year
   return dateFormat
 }

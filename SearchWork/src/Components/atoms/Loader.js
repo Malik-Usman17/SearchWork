@@ -1,25 +1,31 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, StatusBar } from 'react-native';
 import colors from '../../Constants/colors';
 import EmployerLogo from './EmployerLogo';
+import Logo from './Logo';
 
 
 const Loader = () => {
-  return <View style={styles.Container}>
-    <EmployerLogo />
-    
-    <ActivityIndicator
-      style={{marginTop: 10}}
-      size='large'
-      color={colors.primaryColor}
-    />
+  return(
+    <View style={styles.Container}>
+     
+      <StatusBar backgroundColor={colors.primaryColor}/>
 
-  </View>;
+      <Logo />
+
+      <ActivityIndicator 
+        style={{marginTop: 10}}
+        size='large'
+        color={colors.white}
+      />
+
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
   Container: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.primaryColor,
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',

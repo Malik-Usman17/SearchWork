@@ -138,12 +138,13 @@ const UpdateJob = ({ navigation, route }) => {
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
             <InputField
-              textStyle={{color: job.hourlyPay == '' ? 'red' : colors.primaryColor}}
+              //textStyle={{color: job.hourlyPay == '' ? 'red' : colors.primaryColor}}
               style={{ flex: 0.45 }}
               keyboardType={'number-pad'}
               title='Hourly Pay'
               iconName='person'
               placeholder='0$'
+              maxLength={5}
               value={job.hourlyPay}
               onChangeText={(val) => {
                 jobObj.hourlyPay = val
@@ -152,7 +153,7 @@ const UpdateJob = ({ navigation, route }) => {
             />
 
             <CustomPicker
-              pickerTitleStyle={{color: job.duration == 0 ? 'red' : colors.primaryColor}}
+              //pickerTitleStyle={{color: job.duration == 0 ? 'red' : colors.primaryColor}}
               pickerContainerStyle={{ marginTop: 10, flex: 0.52  }}
               label='Job Type'
               pickerTitle='Duration'
@@ -170,7 +171,7 @@ const UpdateJob = ({ navigation, route }) => {
           </View>
 
           <CustomPicker
-            pickerTitleStyle={{color: job.jobCategory == 0 ? 'red' : colors.primaryColor}}
+            //pickerTitleStyle={{color: job.jobCategory == 0 ? 'red' : colors.primaryColor}}
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select Job Category'
             pickerTitle='Job Category'
@@ -192,7 +193,7 @@ const UpdateJob = ({ navigation, route }) => {
           </CustomPicker>
 
           <CustomPicker
-            pickerTitleStyle={{color: job.jobSubCategory == 0 ? 'red' : colors.primaryColor}}
+            //pickerTitleStyle={{color: job.jobSubCategory == 0 ? 'red' : colors.primaryColor}}
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select Job Sub Category'
             pickerTitle='Job Sub Category'
@@ -286,6 +287,18 @@ const UpdateJob = ({ navigation, route }) => {
             <Picker.Item label={'5'} value={'5'} />
           </CustomPicker>
 
+          <InputField
+            //textStyle={{color: job.address == '' ? 'red' : colors.primaryColor}}
+            title='Address'
+            placeholder='Address'
+            iconName='location-sharp'
+            value={job.address}
+            onChangeText={(val) => {
+              jobObj.address = val
+              dispatch(setJobPost(jobObj))
+            }}
+          />
+
           {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}> */}
 
             <StatePicker
@@ -321,6 +334,8 @@ const UpdateJob = ({ navigation, route }) => {
 
           {/* </View> */}
 
+          
+
           <InputField
             //textStyle={{color: job.zipCode == '' ? 'red' : colors.primaryColor}}
             keyboardType={'number-pad'}
@@ -334,17 +349,7 @@ const UpdateJob = ({ navigation, route }) => {
             }}
           />
 
-          <InputField
-            //textStyle={{color: job.address == '' ? 'red' : colors.primaryColor}}
-            title='Address'
-            placeholder='Address'
-            iconName='location-sharp'
-            value={job.address}
-            onChangeText={(val) => {
-              jobObj.address = val
-              dispatch(setJobPost(jobObj))
-            }}
-          />
+         
 
           <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5, marginLeft: 7}}>
             <TouchableOpacity

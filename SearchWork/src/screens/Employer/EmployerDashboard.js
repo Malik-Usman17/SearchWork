@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Image, StatusBar, ScrollView, StyleSheet, Text, View } from 'react-native';
 import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
 import Divider from '../../Components/atoms/Divider';
 import EmployerLogo from '../../Components/atoms/EmployerLogo';
@@ -26,6 +26,8 @@ const EmployerDashboard = ({ navigation }) => {
 
   return (
     <ScrollView style={{ backgroundColor: colors.white, flex: 1 }} showsVerticalScrollIndicator={false}>
+
+      <StatusBar backgroundColor={colors.primaryColor}/>
 
       <View style={styles.headerContainer}>
 

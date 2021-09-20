@@ -104,35 +104,35 @@ const JobPosted = ({ navigation }) => {
 
   var test;
 
-  useEffect(() => {
-    console.log('Zip Code:',job.zipCode)
-        if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
-        console.log('If running')
-        setDraftModal(!draftModal)
-    }
-  }, [isFocused])
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     //job = useSelector(jobPostedSelector);
-  //     if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
+  // useEffect(() => {
+  //   console.log('Zip Code:',job.zipCode)
+  //       if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
   //       console.log('If running')
   //       setDraftModal(!draftModal)
   //   }
-  //   console.log('Zip Code:',job.zipCode)
-  //   setJobTitle('')
-  //   setHourlyPay('')
-  //   setJobDuration(0)
-  //   setJobCategroy(0)
-  //   setJobSubCategory(0)
-  //   setJobDescription('')
-  //   setJobPostNos(0)
-  //   setStatePicker(0)
-  //   setCity(0)
-  //   setZipCode('')
-  //   setAddress('')
-  //   }, [])
-  // )
+  // }, [isFocused])
+
+  useFocusEffect(
+    React.useCallback(() => {
+      //job = useSelector(jobPostedSelector);
+      if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
+        //console.log('If running')
+        setDraftModal(!draftModal)
+    }
+    //console.log('Zip Code:',job.zipCode)
+    setJobTitle('')
+    setHourlyPay('')
+    setJobDuration(0)
+    setJobCategroy(0)
+    setJobSubCategory(0)
+    setJobDescription('')
+    setJobPostNos(0)
+    setStatePicker(0)
+    setCity(0)
+    setZipCode('')
+    setAddress('')
+    }, [])
+  )
 
   // useFocusEffect(() => {
   //   if(job.jobTitle != '' || job.hourlyPay != ''  || job.duration != 0  || job.jobCategory != 0  || job.jobSubCategory != 0  || job.jobDescription != '' || job.noOfEmployees != 0  || job.state != 0  || job.city != 0 || job.zipCode != '' || job.address != ''){
@@ -337,7 +337,7 @@ const JobPosted = ({ navigation }) => {
               //textStyle={{color: job.hourlyPay == '' ? 'red' : colors.primaryColor}}
               style={{ flex: 0.45 }}
               keyboardType={'number-pad'}
-              maxLength={3}
+              maxLength={5}
               title='Hourly Pay'
               iconName='person'
               placeholder='0$'
@@ -491,6 +491,19 @@ const JobPosted = ({ navigation }) => {
             <Picker.Item label={'5'} value={'5'} />
           </CustomPicker>
 
+          <InputField
+            //textStyle={{color: job.address == '' ? 'red' : colors.primaryColor}}
+            title='Address'
+            placeholder='Address'
+            iconName='location-sharp'
+            value={address}
+            onChangeText={(val) => {
+              setAddress(val)
+              jobObj.address = val
+              dispatch(setJobPost(jobObj))
+            }}
+          />
+
             <StatePicker
               //pickerTitleStyle={{color: job.state == 0 ? 'red' : colors.primaryColor}}
               pickerContainerStyle={{ marginTop: 10, flex: 0.49 }}
@@ -538,19 +551,6 @@ const JobPosted = ({ navigation }) => {
             onChangeText={(val) => {
               setZipCode(val)
               jobObj.zipCode = val
-              dispatch(setJobPost(jobObj))
-            }}
-          />
-
-          <InputField
-            //textStyle={{color: job.address == '' ? 'red' : colors.primaryColor}}
-            title='Address'
-            placeholder='Address'
-            iconName='location-sharp'
-            value={address}
-            onChangeText={(val) => {
-              setAddress(val)
-              jobObj.address = val
               dispatch(setJobPost(jobObj))
             }}
           />

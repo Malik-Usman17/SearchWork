@@ -227,7 +227,7 @@ const LoginScreen = ({navigation}) => {
                     iconName='login'
                     onPress={() => {
                       if((email == '' && credentials.email == '') || (password == '' && credentials.password == '')){
-                        console.log('if running')
+                        //console.log('if running')
                         setModalVisible(!modalVisible)
                       }
                       else{
@@ -272,7 +272,6 @@ const styles = StyleSheet.create({
     flex: 1
   },
   loginFieldContainer: {
-    //backgroundColor: colors.primaryColorLight,
     backgroundColor: colors.white,
     borderRadius: 15,
     width: Dimensions.get('window').width * 0.9
@@ -303,12 +302,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   bgImage: {
-    //height: Dimensions.get('window').height,
     height: Dimensions.get('screen').height,
     width: Dimensions.get('window').width
   },
-
-
   modalContainer: {
     width: 300,
     alignSelf: 'center',
