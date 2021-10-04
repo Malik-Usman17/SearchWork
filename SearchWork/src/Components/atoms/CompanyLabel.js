@@ -1,12 +1,12 @@
 import React from 'react';
-import {Text, View, StyleSheet} from 'react-native';
+import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
 
 
-const CompanyLabel = ({style}) => {
+const CompanyLabel = ({style, onPress}) => {
   return(
-    <View>
+    <TouchableOpacity onPress={onPress}>
       <Text style={[styles.text, style]}>Powered by: Hegemonic Softwares</Text>
-    </View>
+    </TouchableOpacity>
   )
 }
 

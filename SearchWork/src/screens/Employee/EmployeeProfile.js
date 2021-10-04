@@ -92,9 +92,15 @@ const EmployeeProfile = ({navigation}) => {
             editable={false}  
           />
 
-          <Heading title='ADDITIONAL INFORMATION' style={{marginTop: 16}}/>
-
           <ProfileTextField 
+            title='LANGUAGES'
+            value={'English & Spanish'}
+            editable={false}  
+          />
+
+          {/* <Heading title='ADDITIONAL INFORMATION' style={{marginTop: 16}}/> */}
+
+          {/* <ProfileTextField 
             title='SKILLS'
             value={'MS Excel & MS Word'}
             editable={false}  
@@ -104,13 +110,13 @@ const EmployeeProfile = ({navigation}) => {
             title='QUALIFICATION'
             value={'Masters'}
             editable={false}  
-          />
+          /> */}
 
-          <ProfileTextField 
+          {/* <ProfileTextField 
             title='LANGUAGES'
             value={'English & Spanish'}
             editable={false}  
-          />
+          /> */}
 
           <Heading title='LOCATION' style={{marginTop: 16}}/>
 

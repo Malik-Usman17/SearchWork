@@ -18,14 +18,19 @@ import {userLogin} from '../redux/slices';
 import HeaderRowContainer from '../Components/molecules/HeaderRowContainer';
 
 
-const IndividualJob = ({navigation}) => {
+const IndividualJob = ({navigation, route}) => {
 
   const user = useSelector(userLogin)
+  console.log(user)
+  const {jobDetail} = route.params;
+  console.log('DETAILS:',jobDetail)
 
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
+  const [isSave, setIsSave] = useState(false);
   //const url = `https://www.google.com/maps/search/${lang}`
-  const url = 'https://www.google.com/maps/search/'+'Sybrid Pvt Ltd Karachi Pakistan'; 
+  //const url = 'https://www.google.com/maps/search/'+'Sybrid Pvt Ltd Karachi Pakistan';
+  const url = `https://www.google.com/maps/search/${jobDetail.st_address}, ${jobDetail.state}, ${jobDetail.city}, ${jobDetail.zipcode}` 
 
   return (
     <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
@@ -39,7 +44,7 @@ const IndividualJob = ({navigation}) => {
 
         <HeaderImage />
 
-        <View style={{ position: 'absolute', width: '100%', padding: 15, flex: 1}}>
+        <View style={{ position: 'absolute', width: '100%', padding: 9, flex: 1}}>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
@@ -68,13 +73,21 @@ const IndividualJob = ({navigation}) => {
 
             <View style={styles.jobTitleContainer}>
 
-              <Text style={{ fontSize: 22, fontWeight: 'bold', color: colors.primaryColor }}>Petrol Pump Filler</Text>
+              <Text 
+                ellipsizeMode='tail' 
+                numberOfLines={2} 
+                style={{ fontSize: 22, fontWeight: 'bold', color: colors.primaryColor, flex: 1, marginRight: 5 }}
+              >
+                  {jobDetail.title}
+              </Text>
 
-              <FontAwesome
-                name="bookmark"
-                color={colors.primaryColor}
-                size={26}
-              />
+              <TouchableOpacity onPress={() => setIsSave(!isSave)}>
+                <FontAwesome
+                  name={isSave == true ? "bookmark" : 'bookmark-o'}
+                  color={colors.primaryColor}
+                  size={26}
+                />
+              </TouchableOpacity>
 
             </View>
 
@@ -91,18 +104,16 @@ const IndividualJob = ({navigation}) => {
 
                 <View style={{ flexDirection: 'row' }}>
                   <Text style={{ marginRight: 2, color: colors.gray }}>No of Posts:</Text>
-                  <Text style={{ fontWeight: 'bold' }}>16</Text>
+                  <Text style={{ fontWeight: 'bold' }}>{jobDetail.no_of_posts}</Text>
                 </View>
 
-                <Ionicons name='people' size={25} color={colors.primaryColor} style={{ marginLeft: 3 }} />
+                <Ionicons name='people' size={22} color={colors.primaryColor} style={{ marginLeft: 3 }} />
 
               </View>
 
             </View>
 
-                   <Text style={{ paddingLeft: 15, paddingRight: 15 }}>
-             In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available.
-           </Text>
+            <Text style={{ paddingLeft: 15, paddingRight: 15 }}>{jobDetail.description}</Text>
 
            <Divider style={{ marginLeft: 15, marginTop: 15, width: '90%' }} />
 
@@ -110,7 +121,7 @@ const IndividualJob = ({navigation}) => {
              <MaterialIcons name='person' size={25} color={colors.primaryColor} />
            </IconText>
 
-           <Text style={{ marginLeft: 35, marginTop: 2, color: colors.gray }}>Petrol Pump Person</Text>
+           <Text style={{ marginLeft: 35, marginTop: 2, color: colors.gray }}>{jobDetail.title}</Text>
 
            <Divider style={{ marginLeft: 15, marginTop: 15, width: '90%' }} />
 
@@ -118,7 +129,9 @@ const IndividualJob = ({navigation}) => {
              <Ionicons name='location-sharp' size={25} color={colors.primaryColor} />
            </IconText>
 
-           <Text style={{ marginLeft: 35, marginTop: 2, color: colors.gray }}>124, Blvd Street SW, Texas, Houston</Text>
+          <Text style={{ marginLeft: 35, marginTop: 2, color: colors.gray }}>
+            {`${jobDetail.st_address}, ${jobDetail.state}, ${jobDetail.city}, ${jobDetail.zipcode}`}
+          </Text>
 
            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, marginBottom: 10 }}>
 

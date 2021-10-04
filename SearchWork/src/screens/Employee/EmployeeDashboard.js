@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dimensions, Image, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import Swiper from 'react-native-swiper';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -11,25 +11,103 @@ import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
 import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
-import { useSelector } from 'react-redux';
-import {userLogin} from '../../redux/slices';
+import { useSelector, useDispatch } from 'react-redux';
+import {userLogin, getJobCategory, jobsCategoryList, getJobList, jobsListing} from '../../redux/slices';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Loader from '../../Components/atoms/Loader';
+import { apiCall } from '../../service/ApiCall';
+import ApiConstants from '../../service/ApiConstants.json';
+import { useIsFocused } from '@react-navigation/native';
 
- 
+
 const EmployeeDashboard = ({navigation}) => {
 
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
+  const [loader, setLoader] = useState(false);
+
+  const dispatch = useDispatch();
+  const isFocused = useIsFocused();
 
   const user = useSelector(userLogin)
-  console.log('User Information:',user)
- 
+  const jobsCategory = useSelector(jobsCategoryList);
+  const jobs = useSelector(jobsListing);
+  //console.log('JOB CATEGORY:',jobsCategory)
+ // console.log('Jobs Listing:',jobs)
 
-  //console.log(lang)
+
+  useEffect(() => {
+    async function getJobsCategory(){
+      setLoader(true)
+
+      if(jobsCategory  != undefined){
+        setLoader(false)
+      }
+
+      try{
+        var response = await apiCall(
+          ApiConstants.methods.GET, 
+          ApiConstants.endPoints.JobsCategory,
+        );
+
+        if(response.isAxiosError == true){
+          console.log('Axios error') 
+          setLoader(false)
+        }
+        else{
+          dispatch(getJobCategory(response.data.response.data))
+          setLoader(false)
+        }
+      }
+      catch(error){
+        console.log('Catch Body:',error);
+        setLoader(false)
+      }
+    }
+
+    async function getJobsList(){
+      setLoader(true)
+
+      // if(jobs != undefined){
+      //   setLoader(false)
+      // }
+
+      try{
+        var apiResponse = await apiCall(
+          ApiConstants.methods.GET, 
+          ApiConstants.endPoints.JobsList,
+        );
+
+        if(apiResponse.isAxiosError == true){
+          console.log('Axios error') 
+          setLoader(false)
+        }
+        else{
+          dispatch(getJobList(apiResponse.data.response.data))
+          setLoader(false)
+        }
+      }
+      catch(error){
+        console.log('Catch Body:',error);
+        setLoader(false)
+      }
+    }
+    getJobsCategory();
+    getJobsList();
+  }, [isFocused])
+
+  if(loader == true){
+    return(
+      <Loader />
+    )
+  }
+
 
   const jobDetails = [
     {description: 'In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available', jobTitle: 'Gardener'},
     {description: 'In publishing and graphic design, demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available', jobTitle: 'Maid'},
   ]
+
 
 
   return(
@@ -62,32 +140,28 @@ const EmployeeDashboard = ({navigation}) => {
         
         <Swiper
           containerStyle={{flex: 1}}
-          dot={<View style={styles.dot} />}
-          activeDot ={ <View style={styles.activeDot} /> }
-          paginationStyle={{marginBottom: -5}}
-          loop={false}
+          showsPagination={false}
+          autoplay={true}
+          autoplayTimeout={3}
         >
           <View style={styles.slide}>
             <Image 
               source={require('../../../assets/people.jpg')} 
-              style={styles.slideImage} 
-              resizeMode='cover' 
+              style={styles.slideImage}  
             />
           </View>
 
           <View style={styles.slide}>
             <Image 
               source={require('../../../assets/slider.png')} 
-              style={styles.slideImage} 
-              resizeMode='cover' 
+              style={styles.slideImage}   
             />
           </View>
 
           <View style={styles.slide}>
             <Image 
-              source={require('../../../assets/people.jpg')} 
+              source={require('../../../assets/bgSlide.jpg')} 
               style={styles.slideImage} 
-              resizeMode='cover'
             />
           </View>
 
@@ -95,37 +169,77 @@ const EmployeeDashboard = ({navigation}) => {
 
       </View>
 
+      
+
         <View style={{top: -10, borderRadius: 15, backgroundColor: colors.primaryColor, padding: 5, alignItems: 'center', marginHorizontal: 60}}>
           <Text style={{fontWeight: 'bold', color: colors.white}}>Discover By Industries</Text>
         </View>
-
-          <View style={styles.jobsCategoryContainer}>
-
-          <View style={styles.jobRowConatiner}>
-          <JobIconsView title='Carpenter' onPress={() => navigation.navigate(Constants.screen.JobCategoryList)}/>
-
-          <JobIconsView title='Petorl Filler Pump'/>
-
-          <JobIconsView title='Painter'/>
+       
+        <Swiper
+          containerStyle={{height: 275, marginBottom: 10}}
+          dot={<View style={styles.dot} />}
+          activeDot={<View style={styles.activeDot} />}
+          paginationStyle={{ marginBottom: -20 }}
+        >
+          <View style={styles.jobGridContainer}>
+            {
+              jobsCategory?.slice(0, 9).map((val, index) => (
+                <TouchableOpacity 
+                  key={index} 
+                  style={styles.jobIconContainer}
+                  onPress={() => {
+                    if(val.subcategories != null){
+                      navigation.navigate(Constants.screen.JobCategoryList, {val}) 
+                    }
+                    else{
+                      navigation.navigate(Constants.screen.JobListing, {jobCategoryId: val.category_id_decode, jobSubCategoryId: 0})
+                    } 
+                  }}
+                >
+                  <View style={styles.iconContainer}>
+                  <Image 
+                    source={{ uri: val.image_urls['1x'] }}
+                    style={styles.jobImage}  
+                    resizeMode='contain' 
+                  />
+                  </View>
+                  <Text numberOfLines={1} ellipsizeMode='tail' style={styles.jobIconText}>{val.name}</Text>
+                </TouchableOpacity>
+              ))
+            }
           </View>
 
-          <View style={{...styles.jobRowConatiner, marginTop: 20}}>
-          <JobIconsView title='Bar Tender'/>
-
-          <JobIconsView title='Gardener'/>
-
-          <JobIconsView title='Metro Cashier'/>
+          <View style={styles.jobGridContainer}>
+            {
+              jobsCategory?.slice(9,).map((val, index) => (
+                <TouchableOpacity 
+                  key={index} 
+                  style={styles.jobIconContainer}
+                  onPress={() => {
+                    if(val.subcategories != null){
+                      navigation.navigate(Constants.screen.JobCategoryList, {val})
+                    }
+                    else{
+                      navigation.navigate(Constants.screen.JobListing, {
+                        jobCategoryId: val.category_id_decode, 
+                        jobSubCategoryId: 0
+                      }
+                      )
+                    }}}     
+                >
+                  <View style={styles.iconContainer}>
+                  <Image 
+                    source={{ uri: val.image_urls['1x'] }}
+                    style={styles.jobImage}  
+                    resizeMode='contain' 
+                  />
+                  </View>
+                  <Text numberOfLines={1} ellipsizeMode='tail' style={styles.jobIconText}>{val.name}</Text>
+                </TouchableOpacity>
+              ))
+            }
           </View>
-
-          <View style={{...styles.jobRowConatiner, marginTop: 20}}>
-          <JobIconsView title='Carpenter'/>
-
-          <JobIconsView title='Dog Walk'/>
-
-          <JobIconsView title='Other'/>
-          </View>
-
-          </View>
+        </Swiper>
 
       <View style={{marginHorizontal: 15}}>
         
@@ -148,7 +262,7 @@ const EmployeeDashboard = ({navigation}) => {
         >
 
          <View style={{alignItems: 'center'}}>
-          <JobCard onPress={() => navigation.push(Constants.screen.IndividualJob)}/>
+          <JobCard onPress={() => navigation.navigate(Constants.screen.IndividualJob)}/>
           </View>
 
           <View style={{alignItems: 'center'}}>
@@ -177,11 +291,36 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height * 0.3,
     width: '100%',
   },
-  // logo:{
-  //   resizeMode: 'cover',
-  //   height: 85,
-  //   width: 180,
-  // },
+  jobGridContainer:{
+    flexDirection: 'row', 
+    flexWrap: 'wrap',
+    justifyContent: 'space-evenly'
+  },
+  jobIconContainer:{
+    alignItems: 'center', 
+    justifyContent: 'center',
+    width: 100,
+    marginHorizontal: 5,
+    marginBottom: 20 
+  },
+  iconContainer:{
+    height: 50, 
+    width: 50, 
+    borderRadius: 25, 
+    overflow:'hidden', 
+    backgroundColor: colors.white, 
+    alignItems: 'center', 
+    justifyContent: 'center'
+  },
+  jobImage:{
+    height: 40, 
+    width: 40
+  },
+  jobIconText:{
+    fontSize: 11, 
+    marginTop: 2, 
+    fontWeight: 'bold' 
+  },
   slide:{
     width: '100%',
     flex: 1

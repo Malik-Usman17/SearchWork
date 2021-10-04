@@ -1,9 +1,12 @@
 {
-  "baseUrl": "http://searchwork.livereps.co/api",
+  "baseUrl": "https://www.admin.searchwork.us/api",
   
   "endPoints": {
       "Login": "/login",
-      "Register": "/register"
+      "Register": "/register",
+      "JobsCategory": "/category/list_all",
+      "JobsList": "/jobs/list",
+      "PostJob": "/jobs/add"
   },
 
   "methods": {
@@ -23,3 +26,4 @@
       "failure": "Failure"
   }
 }
+

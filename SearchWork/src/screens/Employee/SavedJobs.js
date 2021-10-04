@@ -11,6 +11,8 @@ import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
 import SearchField from '../../Components/molecules/SearchField';
+import CustomModal from '../../Components/organisms/CustomModal';
+import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
 
 
 const SavedJobs = ({ navigation }) => {
@@ -18,9 +20,10 @@ const SavedJobs = ({ navigation }) => {
   const [dropDown, setDropDown] = useState(false);
   const [lang, setLang] = useState('eng');
   const [manageJobIcons, setManageJobIcons] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const data = [
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.' },
+    { image: require('../../../assets/people.jpg'), jobTitle: 'Junior Software Engineer night shift', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.' },
     { image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower' },
     { image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.' },
     { image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower' },
@@ -30,48 +33,36 @@ const SavedJobs = ({ navigation }) => {
 
   const jobCard = ({ item }) => {
     return (
-      <TouchableOpacity style={styles.jobContainer} onPress={() => Alert.alert('Alert Title', 'Are Sure You want To delete this', [{
-        text: 'CANCEL',
-        //onPress: ()
-      }, {
-        text: 'OK',
-        onPress: () => alert('Cancel Pressed')
-      }])}>
+      <View style={styles.jobContainer}>
 
         <Image source={item.image} style={styles.jobImage} />
 
-        <View style={{ marginLeft: 8, flex: 1 }}>
+        <View style={{ marginLeft: 8, flex: 1}}>
 
-          <Text style={styles.jobTitle}>{item.jobTitle}</Text>
+          <Text ellipsizeMode='tail' numberOfLines={1} style={styles.jobTitle}>{item.jobTitle}</Text>
 
           <Text ellipsizeMode='tail' numberOfLines={3} style={{ fontSize: 12 }}>
             {item.description}
           </Text>
-          {/* 
-          <TouchableOpacity activeOpacity={0.7} style={styles.viewApplicantsButton} onPress={() => navigation.navigate(Constants.screen.IndividualJob)}>
-
-            <View style={{ height: 30, width: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.white }}>
-              <Image
-                source={require('../../../assets/applicants.png')}
-                resizeMode='contain'
-                style={styles.applicantImageIcon}
-              />
-            </View>
-
-            <Text style={{ marginLeft: 3, color: colors.white, fontWeight: 'bold', fontSize: 12 }}>View Job Details</Text>
-
-          </TouchableOpacity> */}
 
           <View style={styles.jobIconsContainer}>
             {
               manageJobIcons == true ?
                 <>
-                  <TouchableOpacity style={{ alignItems: 'center' }} onPress={() => navigation.navigate(Constants.screen.IndividualJob)}>
+                  <TouchableOpacity 
+                    style={{ alignItems: 'center' }} 
+                    onPress={() => navigation.navigate(Constants.screen.IndividualJob, {jobDetail: item})}
+                  >
                     <Ionicons name='eye' size={18} color={colors.buttonColor} />
                     <Text style={{ fontSize: 10 }}>View</Text>
                   </TouchableOpacity>
 
-                  <TouchableOpacity style={styles.icons}>
+                  <TouchableOpacity 
+                    style={styles.icons}
+                    onPress={() => {
+                      setModalVisible(true)
+                    }}
+                  >
                     <MaterialCommunityIcons name='delete' size={18} color='red' />
                     <Text style={{ fontSize: 10 }}>Delete</Text>
                   </TouchableOpacity>
@@ -106,7 +97,7 @@ const SavedJobs = ({ navigation }) => {
 
         </View>
 
-      </TouchableOpacity>
+      </View>
     )
   }
 
@@ -116,11 +107,22 @@ const SavedJobs = ({ navigation }) => {
 
       <StatusBar backgroundColor={colors.primaryColor} />
 
+      <CustomModal
+        isVisible={modalVisible} 
+        imageSource={require('../../../assets/warning.png')}
+        message='Are you sure you want to delete this job.'
+        onPressYes={() => {
+          navigation.navigate(Constants.screen.IndividualJob, {jobDetail})
+          setModalVisible(false)
+        }}
+        onPressNo={() => setModalVisible(false)}
+      />
+
       <ImageBackground source={require('../../../assets/grayBg.jpg')} style={{ flex: 1 }}>
 
         <HeaderImage style={{ height: Dimensions.get('window').height * 0.22 }} />
 
-        <View style={{ position: 'absolute', width: '100%', padding: 15 }}>
+        <View style={{ position: 'absolute', width: '100%', padding: 9 }}>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
@@ -156,8 +158,6 @@ const SavedJobs = ({ navigation }) => {
           titleStyle={{ fontSize: 12 }}
         />
 
-        {/* <CompanyLabelCard /> */}
-
       </ImageBackground>
 
     </View>
@@ -165,14 +165,6 @@ const SavedJobs = ({ navigation }) => {
 }
 
 const styles = StyleSheet.create({
-  // searchFieldConatiner: {
-  //   paddingHorizontal: 3,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginTop: 25,
-  //   borderRadius: 20,
-  //   backgroundColor: colors.primaryColorLight
-  // },
   image: {
     height: 165,
     width: '100%'
@@ -206,22 +198,9 @@ const styles = StyleSheet.create({
   },
   jobTitle: {
     color: colors.primaryColor,
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold'
   },
-  // viewApplicantsButton: {
-  //   marginTop: 'auto',
-  //   padding: 2,
-  //   borderRadius: 25,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   backgroundColor: colors.buttonColor,
-  //   width: 132
-  // },
-  // applicantImageIcon: {
-  //   height: 20,
-  //   width: 20
-  // },
   findJobChip: {
     flex: 0.4,
     justifyContent: 'space-evenly',

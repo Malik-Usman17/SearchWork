@@ -24,6 +24,7 @@
         "BottomTabNavigation": "BottomTabNavigation",
         "DrawerNavigation": "DrawerNavigation",
         "EmployerDrawerStack": "EmployerDrawerStack",
-        "DrawerContent": "DrawerContent"
+        "DrawerContent": "DrawerContent",
+        "JobCategory": "JobCategory"
     }
 }

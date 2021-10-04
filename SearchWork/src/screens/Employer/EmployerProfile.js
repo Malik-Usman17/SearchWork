@@ -11,9 +11,14 @@ import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import ProfileTextField from '../../Components/molecules/ProfileTextField';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { useSelector } from 'react-redux';
+import { userLogin } from '../../redux/slices';
 
 
 const EmployerProfile = ({ navigation }) => {
+
+  const user = useSelector(userLogin);
+ // console.log('User Info:',user)
 
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
@@ -30,6 +35,19 @@ const EmployerProfile = ({ navigation }) => {
 
   console.log('Image Url:',imageUrl)
 
+  function profileImage(){
+    if(imageUrl == ''){
+      if(user?.image_urls != undefined){
+        return user?.image_urls['3x']
+      }
+    }
+    else{
+      return imageUrl
+    }
+  }
+
+
+  console.log('Checking:',profileImage())
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.white }} showsVerticalScrollIndicator={false}>
 
@@ -41,13 +59,13 @@ const EmployerProfile = ({ navigation }) => {
         <MenuIcon onPress={() => navigation.openDrawer()} />
 
         <View>
-          <ProfilePicture 
+          {/* <ProfilePicture 
             iconSize={40} 
             onPress={() => {
               launchImageLibrary({
                 mediaType: 'photo',
               }, (response) => {
-                console.log('Response:',response)
+                //console.log('Response:',response)
                 if(response?.didCancel){
                   setImageUrl('')
                 }else if (response?.errorMessage){
@@ -59,7 +77,27 @@ const EmployerProfile = ({ navigation }) => {
             }}
             imageSource={imageUrl != '' ? imageUrl : undefined}
             imageStyle={{height: 80, width: 80, borderRadius: 40, borderWidth: 2, borderColor: colors.white}}
+          /> */}
+
+          <ProfilePicture 
+            iconSize={40} 
+            onPress={() => {
+              launchImageLibrary({
+                mediaType: 'photo',
+              }, (response) => {
+                if(response?.didCancel){
+                  setImageUrl('')
+                }else if (response?.errorMessage){
+                  console.log('Error:',response?.errorMessage)
+                } else {
+                  setImageUrl(response?.assets[0].uri)
+                }
+              })
+            }}
+            imageSource={profileImage()}
+            imageStyle={{height: 80, width: 80, borderRadius: 40, borderWidth: 2, borderColor: colors.white}}
           />
+
           <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.white }}>John Doe</Text>
         </View>
 

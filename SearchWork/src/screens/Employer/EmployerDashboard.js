@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dimensions, Image, StatusBar, ScrollView, StyleSheet, Text, View } from 'react-native';
 import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
 import Divider from '../../Components/atoms/Divider';
@@ -9,20 +9,64 @@ import BgCard from '../../Components/molecules/BgCard';
 import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
 import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
+import Loader from '../../Components/atoms/Loader';
 import Constants from '../../Constants/Constants.json';
-import { useSelector } from 'react-redux';
-import { userLogin } from '../../redux/slices';
+import { useSelector, useDispatch } from 'react-redux';
+import { userLogin, getJobCategory, jobsCategoryList } from '../../redux/slices';
+import { apiCall } from '../../service/ApiCall';
+import ApiConstants from '../../service/ApiConstants.json';
 
 
 const EmployerDashboard = ({ navigation }) => {
 
   const user = useSelector(userLogin);
-  //console.log('Employer Dashbaord User',user) 
+  const categoryList = useSelector(jobsCategoryList);
+  // console.log('CategoryList:',categoryList)
+
+  
+  const dispatch = useDispatch();
+  
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
+  const [loader, setLoader] = useState(false);
 
-  // console.log(user?.image_urls['1x'])
-  // console.log(user?.image)
+
+  useEffect(() => {
+    async function getJobsCategory(){
+      setLoader(true)
+
+      if(categoryList != undefined){
+        setLoader(false)
+      }
+
+      try{
+        var response = await apiCall(
+          ApiConstants.methods.GET, 
+          ApiConstants.endPoints.JobsCategory,
+        );
+
+        if(response.isAxiosError == true){
+          console.log('Axios error') 
+          setLoader(false)
+        }
+        else{
+          dispatch(getJobCategory(response.data.response.data))
+          setLoader(false)
+        }
+      }
+      catch(error){
+        console.log('Catch Body:',error);
+        setLoader(false)
+      }
+    }
+    getJobsCategory();
+  }, [])
+
+  if(loader == true){
+    return(
+      <Loader />
+    )
+  }
 
   return (
     <ScrollView style={{ backgroundColor: colors.white, flex: 1 }} showsVerticalScrollIndicator={false}>

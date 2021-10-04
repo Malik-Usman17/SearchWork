@@ -13,31 +13,50 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
 import SearchField from '../../Components/molecules/SearchField';
 import Constants from '../../Constants/Constants.json';
+import { useSelector, useDispatch } from 'react-redux';
+import {userLogin, getJobCategory, jobsCategoryList, getJobList, jobsListing} from '../../redux/slices';
 
 
-const JobListing = ({navigation}) => {
+const JobListing = ({navigation, route}) => {
 
   const [dropDown, setDropDown] = useState(false);
   const [lang, setLang] = useState('eng');
+  
 
-  const data = [
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower' },
-  ]
+  const {jobSubCategoryId, jobCategoryId} = route.params;
+  // console.log('Job Category Id:',jobCategoryId)
+  // console.log('Sub Category Id:',jobSubCategoryId)
+
+  const jobs = useSelector(jobsListing);
+  //console.log('JOBS:',jobs)
+
+  var myJobs;
+  if(jobSubCategoryId != 0){
+     myJobs = jobs.filter((x, index) => x.category_id == jobCategoryId && x.sub_category_id == jobSubCategoryId)
+  }
+  else{
+    myJobs = jobs.filter((x, index) => x.category_id == jobCategoryId)
+  }
+
+
+  console.log('MY JOBS:',myJobs)
+
 
   const jobCard = ({ item }) => {
     return (
       <View style={styles.jobContainer}>
 
-        <Image source={item.image} style={styles.jobImage} />
+        <View style={{height: 120, width: 120, borderRadius: 15, backgroundColor: colors.primaryColorLight, alignItems: 'center', justifyContent: 'center'}}>
+          <Image
+            resizeMode={'contain'} 
+            source={item.image_urls ? {uri: item.image_urls['3x']} : require('../../../assets/logo.png')}
+            style={styles.jobImage}
+          />
+        </View>
 
         <View style={{ marginLeft: 8, flex: 1 }}>
 
-          <Text style={styles.jobTitle}>{item.jobTitle}</Text>
+          <Text style={styles.jobTitle}>{item.title}</Text>
 
           <Text ellipsizeMode='tail' numberOfLines={3} style={{ fontSize: 12 }}>
             {item.description}
@@ -46,7 +65,7 @@ const JobListing = ({navigation}) => {
           <TouchableOpacity 
             activeOpacity={0.7} 
             style={styles.viewApplicantsButton} 
-            onPress={() => navigation.navigate(Constants.screen.IndividualJob)}
+            onPress={() => navigation.navigate(Constants.screen.IndividualJob, {jobDetail: item})}
           >
 
             <View style={{ height: 30, width: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.white }}>
@@ -98,7 +117,7 @@ const JobListing = ({navigation}) => {
 
         <FlatList
           showsVerticalScrollIndicator={false}
-          data={data}
+          data={myJobs}
           keyExtractor={(key, index) => index.toString()}
           renderItem={jobCard}
         />
@@ -141,15 +160,13 @@ const styles = StyleSheet.create({
     //backgroundColor: 'pink'
   },
   jobImage: {
-    height: 120,
-    width: 120,
-    borderRadius: 15
+    height: 100,
+    width: 100,
   },
-  jobImage: {
-    height: 120,
-    width: 120,
-    borderRadius: 15
-  },
+  // emptyJobImage:{
+  //   height: 100,
+  //   width: 100,
+  // },
   manageJobButton: {
     borderRadius: 20,
     marginLeft: 6,

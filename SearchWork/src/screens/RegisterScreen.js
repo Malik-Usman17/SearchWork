@@ -49,7 +49,7 @@ const RegisterScreen = ({navigation}) => {
   const [password, setPassword] = useState('');
   const [address, setAddress] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [imageType, setImageType] = useState('');
+  const [zipCode, setZipCode] = useState('');
   const [validEmail, setValidEmail] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -58,8 +58,6 @@ const RegisterScreen = ({navigation}) => {
 
   const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
-
-  //console.log('Image Url:',imageUrl)
 
 
   const onChange = (event, selectedDate) => {
@@ -91,6 +89,7 @@ const RegisterScreen = ({navigation}) => {
   bodyFormData.append('address', address)
   bodyFormData.append('city', city)
   bodyFormData.append('state', statePicker)
+  bodyFormData.append('zipcode', zipCode)
   bodyFormData.append('confirm_password', confirmPassword)
   register == false && bodyFormData.append('gender', gender)
   register == false && bodyFormData.append('dob', DateFormat(date))
@@ -135,7 +134,7 @@ const RegisterScreen = ({navigation}) => {
 
   function fieldsMissingCheck(){
     if(register == true){
-      if(fullName == '' || email == '' || phone == '' || address == '' || statePicker == 0 || city == 0 || password == '' || confirmPassword == ''){
+      if(fullName == '' || email == '' || phone == '' || address == '' || statePicker == 0 || city == 0 || zipCode == '' || password == '' || confirmPassword == ''){
         return 'Some fields are missing.'
       }
       else{
@@ -143,7 +142,7 @@ const RegisterScreen = ({navigation}) => {
       }
     }
     else{
-      if(fullName == '' || email == '' || phone == '' || gender == '' || address == '' || statePicker == 0 || city == 0 || password == '' || confirmPassword == ''){
+      if(imageUrl == '' || fullName == '' || email == '' || phone == '' || gender == '' || address == '' || statePicker == 0 || city == 0 || zipCode == '' || password == '' || confirmPassword == ''){
         return 'Some fields are missing.'
       }
       else{
@@ -367,6 +366,7 @@ const RegisterScreen = ({navigation}) => {
                           placeholder='Email Address'
                           iconName='mail'
                           autoCapitalize='none'
+                          keyboardType='email-address'
                           value={email}
                           onChangeText={setEmail}
                           onSubmitEditing={() => {
@@ -486,6 +486,15 @@ const RegisterScreen = ({navigation}) => {
                             }
                           </CustomPicker>
 
+                        <InputField 
+                          title='Zip Code'
+                          placeholder='Zip Code'
+                          maxLength={5}
+                          keyboardType='number-pad'
+                          value={zipCode}
+                          onChangeText={setZipCode}
+                        />
+
                         <PasswordField
                           title='Password'
                           placeholder='Set Password'
@@ -512,7 +521,7 @@ const RegisterScreen = ({navigation}) => {
                           style={{marginTop: 15}}
                           onPress={() => {
                             if(register == true){
-                              if(fullName != '' && email != '' && phone != '' && address != '' && statePicker != 0 && city != 0 && password != '' && confirmPassword != ''){
+                              if(fullName != '' && email != '' && phone != '' && address != '' && statePicker != 0 && city != 0 && zipCode != '' && password != '' && confirmPassword != ''){
                                 registerUser()
                               }
                               else{
@@ -520,7 +529,7 @@ const RegisterScreen = ({navigation}) => {
                               }
                             }
                             else if(register == false){
-                              if(fullName != '' && email != '' && phone != '' && imageUrl != '' && gender != 0 && address != '' && statePicker != 0 && city != 0 && password != '' && confirmPassword != ''){
+                              if(fullName != '' && email != '' && phone != '' && imageUrl != '' && gender != 0 && address != '' && statePicker != 0 && city != 0 && zipCode != '' && password != '' && confirmPassword != ''){
                                 registerUser()
                               }
                               else{
@@ -560,10 +569,8 @@ const RegisterScreen = ({navigation}) => {
 
 const styles = StyleSheet.create({
   bg: {
-    //flex: 1
-    //height: Dimensions.get('screen').height + 310,
     width: Dimensions.get('window').width,
-    height: Dimensions.get('screen').height + 600,
+    height: Dimensions.get('screen').height + 670,
   },
   image: {
     resizeMode: 'cover',

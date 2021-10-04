@@ -1,7 +1,6 @@
 import { CommonActions } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Dimensions, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { color } from 'react-native-reanimated';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useDispatch, useSelector } from 'react-redux';
 import CompanyLabel from '../Components/atoms/CompanyLabel';
@@ -20,6 +19,7 @@ import Constants from '../Constants/Constants.json';
 import { isRememberMe, login, rememberMeOperation, saveUserCredential, userCredential } from '../redux/slices';
 import { apiCall } from '../service/ApiCall';
 import ApiConstants from '../service/ApiConstants.json';
+import Axios from 'axios';
 
 
 const LoginScreen = ({navigation}) => {
@@ -55,8 +55,6 @@ const LoginScreen = ({navigation}) => {
         user
       );
 
-      //console.log('Api Response:',apiResponse.data)
-
       if(apiResponse.isAxiosError == true){
         setModalVisible(!modalVisible) 
         setLoader(false)
@@ -64,6 +62,7 @@ const LoginScreen = ({navigation}) => {
       else{
         dispatch(login(apiResponse.data.response.data))
         setLoader(false)
+        Axios.defaults.headers.common['Authorization'] = `Bearer ${apiResponse.data.response.data.access_token}`;
         
         if(apiResponse.data.response.data.type == 'employer'){
           navigation.dispatch(CommonActions.reset({index:0, routes:[{name: Constants.screen.EmployerDrawerStack}]}));
@@ -202,7 +201,7 @@ const LoginScreen = ({navigation}) => {
                     }}
                   />
 
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 7, alignItems: 'center'}}>
+                  <View style={styles.rememberForgetContainer}>
                     
                     <TouchableOpacity 
                       style={{ flexDirection: 'row', alignItems: 'center' }}
@@ -211,11 +210,13 @@ const LoginScreen = ({navigation}) => {
                       }}
                     >
                       <MaterialIcons name={rememberMeCheck == false ? 'crop-square' : 'check-box'} size={18} color={colors.primaryColor}/>
-                      <Text style={{ marginLeft: 3, color: rememberMeCheck == true ? colors.primaryColor : 'gray', fontWeight: '700', fontSize: 12 }}>Remember Me</Text>
+                      <Text style={{ marginLeft: 3, color: rememberMeCheck == true ? colors.primaryColor : 'gray', fontWeight: '700', fontSize: 12 }}>
+                        Remember Me
+                      </Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={() => navigation.push(Constants.screen.ForgotPassScreen)}>
-                      <Text style={{ color: 'gray', fontWeight: 'bold', fontSize: 12, textDecorationLine: 'underline'}}>Forgot Password?</Text>
+                      <Text style={{...styles.underlineLink, color: colors.gray}}>Forgot Password?</Text>
                     </TouchableOpacity>
 
                   </View>
@@ -227,7 +228,6 @@ const LoginScreen = ({navigation}) => {
                     iconName='login'
                     onPress={() => {
                       if((email == '' && credentials.email == '') || (password == '' && credentials.password == '')){
-                        //console.log('if running')
                         setModalVisible(!modalVisible)
                       }
                       else{
@@ -246,7 +246,7 @@ const LoginScreen = ({navigation}) => {
                     <Text style={{color: 'gray', fontWeight: 'bold', fontSize: 12}}>Don't have an account?</Text>
                     
                     <TouchableOpacity onPress={() => navigation.push(Constants.screen.RegisterScreen)}>
-                      <Text style={{textDecorationLine: 'underline', color: colors.buttonColor, fontWeight: 'bold', fontSize: 12}}>Create an Account</Text>
+                      <Text style={styles.underlineLink}>Create an Account</Text>
                     </TouchableOpacity>
                   
                   </View>
@@ -343,6 +343,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: colors.white
+  },
+  underlineLink:{
+    textDecorationLine: 'underline', 
+    color: colors.buttonColor, 
+    fontWeight: 'bold', 
+    fontSize: 12
+  },
+  rememberForgetContainer:{
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginTop: 7, 
+    alignItems: 'center'
   }
 });
 

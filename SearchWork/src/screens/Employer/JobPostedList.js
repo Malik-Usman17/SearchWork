@@ -117,7 +117,7 @@ const JobPostedList = ({navigation}) => {
 
         <HeaderImage style={{height: Dimensions.get('window').height * 0.23}}/>
 
-        <View style={{ position: 'absolute', width: '100%', padding: 15 }}>
+        <View style={{ position: 'absolute', width: '100%', padding: 9 }}>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 

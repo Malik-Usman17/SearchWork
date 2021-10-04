@@ -1,6 +1,6 @@
 import { CommonActions } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ScrollView, StyleSheet, Linking, Text, TouchableOpacity, View } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -121,7 +121,12 @@ const EmployerDrawerContent = ({navigation}) => {
 
       <View style={styles.bottomContainer}>
         
-        <CompanyLabel style={{color: colors.white, alignSelf: 'flex-start', marginLeft: 15}}/>
+        <CompanyLabel 
+          style={{color: colors.white, alignSelf: 'flex-start', marginLeft: 15}}
+          onPress={() => {
+            Linking.openURL('https://hegemonicsoftwares.com/').catch(err => console.error('An error occurred', err));
+          }}
+        />
         
         <View style={{marginRight: 15}}>
           
