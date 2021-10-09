@@ -203,7 +203,8 @@ const LoginScreen = ({navigation}) => {
 
                   <View style={styles.rememberForgetContainer}>
                     
-                    <TouchableOpacity 
+                    <TouchableOpacity
+                      activeOpacity={1} 
                       style={{ flexDirection: 'row', alignItems: 'center' }}
                       onPress={() => {
                         dispatch(isRememberMe(!rememberMeCheck))

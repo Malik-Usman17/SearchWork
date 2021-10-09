@@ -96,6 +96,8 @@ const RegisterScreen = ({navigation}) => {
   imageUrl != '' && bodyFormData.append('image', {uri: imageUrl, name: 'profile_picture', type: 'image/*'})
 
 
+  
+
   async function registerUser(){
     try{
       setLoader(true)

@@ -25,6 +25,7 @@
         "DrawerNavigation": "DrawerNavigation",
         "EmployerDrawerStack": "EmployerDrawerStack",
         "DrawerContent": "DrawerContent",
-        "JobCategory": "JobCategory"
+        "JobCategory": "JobCategory",
+        "ViewJob": "ViewJob"
     }
 }

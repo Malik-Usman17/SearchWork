@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dimensions, Image, StatusBar, ScrollView, StyleSheet, Text, View } from 'react-native';
 import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
 import Divider from '../../Components/atoms/Divider';
@@ -12,55 +12,87 @@ import colors from '../../Constants/colors';
 import Loader from '../../Components/atoms/Loader';
 import Constants from '../../Constants/Constants.json';
 import { useSelector, useDispatch } from 'react-redux';
-import { userLogin, getJobCategory, jobsCategoryList } from '../../redux/slices';
+import { userLogin, getJobCategory, getJobList, jobsListing, jobsCategoryList } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const EmployerDashboard = ({ navigation }) => {
 
-  const user = useSelector(userLogin);
-  const categoryList = useSelector(jobsCategoryList);
-  // console.log('CategoryList:',categoryList)
-
-  
-  const dispatch = useDispatch();
-  
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
   const [loader, setLoader] = useState(false);
+  
+  const dispatch = useDispatch();
 
 
-  useEffect(() => {
-    async function getJobsCategory(){
-      setLoader(true)
+  const user = useSelector(userLogin);
+  const categoryList = useSelector(jobsCategoryList);
 
-      if(categoryList != undefined){
-        setLoader(false)
-      }
-
-      try{
-        var response = await apiCall(
-          ApiConstants.methods.GET, 
-          ApiConstants.endPoints.JobsCategory,
-        );
-
-        if(response.isAxiosError == true){
-          console.log('Axios error') 
+  
+  useFocusEffect(
+    useCallback(() => {
+      async function getJobsCategory(){
+        setLoader(true)
+  
+        if(categoryList != undefined){
           setLoader(false)
         }
-        else{
-          dispatch(getJobCategory(response.data.response.data))
+  
+        try{
+          var response = await apiCall(
+            ApiConstants.methods.GET, 
+            ApiConstants.endPoints.JobsCategory,
+          );
+  
+          if(response.isAxiosError == true){
+            console.log('Axios error') 
+            setLoader(false)
+          }
+          else{
+            dispatch(getJobCategory(response.data.response.data))
+            setLoader(false)
+          }
+        }
+        catch(error){
+          console.log('Catch Body:',error);
           setLoader(false)
         }
       }
-      catch(error){
-        console.log('Catch Body:',error);
-        setLoader(false)
-      }
-    }
-    getJobsCategory();
-  }, [])
+
+      // async function getJobsList(){
+      //   setLoader(true)
+  
+      //   if(jobs != undefined){
+      //     setLoader(false)
+      //   }
+  
+      //   try{
+      //     var apiResponse = await apiCall(
+      //       ApiConstants.methods.GET, 
+      //       ApiConstants.endPoints.JobsList,
+      //     );
+  
+      //     if(apiResponse.isAxiosError == true){
+      //       console.log('Axios error') 
+      //       setLoader(false)
+      //     }
+      //     else{
+      //       dispatch(getJobList(apiResponse.data.response.data))
+      //       setLoader(false)
+      //     }
+      //   }
+      //   catch(error){
+      //     console.log('Catch Body:',error);
+      //     setLoader(false)
+      //   }
+      // }
+      getJobsCategory();
+     //getJobsList();
+    }, [])
+  )
+
 
   if(loader == true){
     return(

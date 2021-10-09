@@ -123,9 +123,6 @@ const EmployerDrawerContent = ({navigation}) => {
         
         <CompanyLabel 
           style={{color: colors.white, alignSelf: 'flex-start', marginLeft: 15}}
-          onPress={() => {
-            Linking.openURL('https://hegemonicsoftwares.com/').catch(err => console.error('An error occurred', err));
-          }}
         />
         
         <View style={{marginRight: 15}}>

@@ -18,6 +18,7 @@ import Loader from '../../Components/atoms/Loader';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import { useIsFocused } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const EmployeeDashboard = ({navigation}) => {
@@ -33,10 +34,11 @@ const EmployeeDashboard = ({navigation}) => {
   const jobsCategory = useSelector(jobsCategoryList);
   const jobs = useSelector(jobsListing);
   //console.log('JOB CATEGORY:',jobsCategory)
- // console.log('Jobs Listing:',jobs)
+  //console.log('Jobs Listing:',jobs)
 
 
-  useEffect(() => {
+ useFocusEffect(
+   React.useCallback(() => {
     async function getJobsCategory(){
       setLoader(true)
 
@@ -68,9 +70,9 @@ const EmployeeDashboard = ({navigation}) => {
     async function getJobsList(){
       setLoader(true)
 
-      // if(jobs != undefined){
-      //   setLoader(false)
-      // }
+      if(jobs != undefined){
+        setLoader(false)
+      }
 
       try{
         var apiResponse = await apiCall(
@@ -94,20 +96,14 @@ const EmployeeDashboard = ({navigation}) => {
     }
     getJobsCategory();
     getJobsList();
-  }, [isFocused])
+   }, [])
+ )
 
   if(loader == true){
     return(
       <Loader />
     )
   }
-
-
-  const jobDetails = [
-    {description: 'In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available', jobTitle: 'Gardener'},
-    {description: 'In publishing and graphic design, demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available', jobTitle: 'Maid'},
-  ]
-
 
 
   return(
@@ -198,7 +194,7 @@ const EmployeeDashboard = ({navigation}) => {
                 >
                   <View style={styles.iconContainer}>
                   <Image 
-                    source={{ uri: val.image_urls['1x'] }}
+                    source={val.image_urls ? { uri: val.image_urls['1x'] } : require('../../../assets/logoGreen.png')}
                     style={styles.jobImage}  
                     resizeMode='contain' 
                   />
@@ -253,7 +249,7 @@ const EmployeeDashboard = ({navigation}) => {
       </View>
     
     <View style={{height: 240, paddingVertical: 15}}>
-      <Swiper
+        <Swiper
           containerStyle={styles.swiperContainerStyle}
           dot={<View style={styles.dot} />}
           activeDot ={ <View style={styles.activeDot} /> }
@@ -261,12 +257,34 @@ const EmployeeDashboard = ({navigation}) => {
           loop={false}
         >
 
-         <View style={{alignItems: 'center'}}>
-          <JobCard onPress={() => navigation.navigate(Constants.screen.IndividualJob)}/>
+          <View style={{alignItems: 'center'}}>
+            <JobCard 
+              imageSource={jobs[0]?.image_urls ? {uri: jobs[0]?.image_urls['3x']} : require('../../../assets/logo.png')} 
+              jobTitle={jobs[0]?.title}
+              jobDescription={jobs[0]?.description}
+              duration={jobs[0]?.duration == 'full_time' ? 'Full-time' : 'Part-Time'}
+              location={`${jobs[0]?.state}, ${jobs[0]?.city}`}
+            />
           </View>
 
           <View style={{alignItems: 'center'}}>
-          <JobCard />
+          <JobCard
+            imageSource={jobs[1]?.image_urls ? {uri: jobs[1]?.image_urls['3x']} : require('../../../assets/logo.png')}   
+            jobTitle={jobs[1]?.title}
+            jobDescription={jobs[1]?.description}
+            duration={jobs[1]?.duration == 'full_time' ? 'Full-time' : 'Part-Time'}
+            location={`${jobs[1]?.state}, ${jobs[1]?.city}`}
+          />
+          </View>
+
+          <View style={{alignItems: 'center'}}>
+          <JobCard
+            imageSource={jobs[2]?.image_urls ? {uri: jobs[2]?.image_urls['3x']} : require('../../../assets/logo.png')}   
+            jobTitle={jobs[2]?.title}
+            jobDescription={jobs[2]?.description}
+            duration={jobs[2]?.duration == 'full_time' ? 'Full-time' : 'Part-Time'}
+            location={`${jobs[2]?.state}, ${jobs[1]?.city}`}
+          />
           </View>
 
         </Swiper>
@@ -359,7 +377,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between', 
   },
   swiperContainerStyle:{
-    marginHorizontal: 15, 
+    //marginHorizontal: 15, 
     justifyContent: 'center'
   },
   searchFieldConatiner: {

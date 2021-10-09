@@ -1,5 +1,5 @@
 import { Picker } from '@react-native-picker/picker';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Dimensions, Image, ImageBackground, Linking, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -17,89 +17,161 @@ import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import StatePicker from '../../Components/organisms/StatePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
-import { jobPostedSelector, setJobPost } from '../../redux/slices';
+import { jobPostedSelector, jobsCategoryList, setJobPost } from '../../redux/slices';
+import { useFocusEffect } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
+import { apiCall } from '../../service/ApiCall';
+import ApiConstants from '../../service/ApiConstants.json';
+import Loader from '../../Components/atoms/Loader';
 
 
 const UpdateJob = ({ navigation, route }) => {
-  const job = useSelector(jobPostedSelector);
-
-  const {value} = route.params
-
-  console.log('Checked Job Data:',value)
-
-
-
-  var jobObj = { ...job }
-  //console.log('Job Fields',jobObj)
-
-
-  const dispatch = useDispatch();
 
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
-  const [jobTitle, setJobTitle] = useState(value.title);
+  const [jobTitle, setJobTitle] = useState('');
   const [hourlyPay, setHourlyPay] = useState('');
-  const [jobDuration, setJobDuration] = useState('');
-  const [description, setDescription] = useState(value.description);
+  const [jobDuration, setJobDuration] = useState(0);
+  const [description, setDescription] = useState('');
+  const [jobCategory, setJobCategory] = useState(0);
+  const [subJobCategory, setSubJobCategory] = useState(0);
+  const [address, setAddress] = useState('');
   const [statePicker, setStatePicker] = useState(0);
   const [city, setCity] = useState(0);
-  const [jobPostNos, setJobPostNos] = useState('');
+  const [jobPostNos, setJobPostNos] = useState(0);
   const [pay, setPay] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [imageFileName, setImageFileName] = useState('');
   const [employeesNo, setEmployeesNo] = useState(0);
   const [zipCode, setZipCode] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
+  const [updateJobModal, setUpdateJobModal] = useState(false);
+  const [loader, setLoader] = useState(false);
+  const [missingFieldModal, setMissingFieldModal] = useState(false);
+
+  console.log('Zip Code:',zipCode)
+  
+  const job = useSelector(jobPostedSelector);
+  const jobCategoryList = useSelector(jobsCategoryList);
+  
+  const isFocused = useIsFocused();
+  const dispatch = useDispatch();
+
+  const {params} = route.params
+
+
+  const subCategoryItems = jobCategoryList?.filter(val => val.category_id_decode == jobCategory)[0]?.subcategories
+
+  var jobObj = { ...job }
   
 
-  const cities = cityStates.filter((value) => value.state == job.state)
+  const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
 
-  const job_Category = [
-    {'category': 'Petrol Pump'}, {'category': 'Office Helper'}, {'category': 'Lawn Mower'}
-  ]
+  useEffect(() => {
+    setJobTitle(params.title)
+    setHourlyPay(params.hourly_pay)
+    setJobDuration(params.duration)
+    setDescription(params.description)
+    setJobCategory(params.category_id)
+    setSubJobCategory(params.sub_category_id ? params.sub_category_id : 0)
+    setImageUrl(params.image_urls ? params.image_urls['3x'] : '')
+    setJobPostNos(params.no_of_posts ? params.no_of_posts : '0')
+    setAddress(params.st_address)
+    setStatePicker(params.state)
+    setCity(params.city)
+    setZipCode(params.zipcode)
+  }, [isFocused])
 
-  const job_sub_Category = [
-    {category: 'Gas Station Boy'}, {category: 'Office Boy'}, {category: 'Help Desk Person'}
-  ]
+  console.log('Image Url',imageUrl)
+
+  var bodyFormData = new FormData();
+  bodyFormData.append('id', params.id)
+  bodyFormData.append('title', jobTitle)
+  bodyFormData.append('category_id', jobCategory)
+  subJobCategory != 0 && bodyFormData.append('sub_category_id', subJobCategory)
+  bodyFormData.append('hourly_pay', hourlyPay)
+  bodyFormData.append('duration', jobDuration)
+  bodyFormData.append('description', description)
+  bodyFormData.append('st_address', address)
+  bodyFormData.append('city', city)
+  bodyFormData.append('state', statePicker)
+  imageUrl != '' && bodyFormData.append('image', { uri: imageUrl, name: 'test_image', type: 'image/*' })
+  bodyFormData.append('zipcode', zipCode)
+  jobPostNos != 0 && bodyFormData.append('no_of_posts', jobPostNos)
+
+  //console.log('Form Data:',bodyFormData)
+
+  const updateJob = async () => {
+    setLoader(true)
+
+    try {
+      var apiResponse = await apiCall(
+        ApiConstants.methods.POST,
+        ApiConstants.endPoints.UpdateJob,
+        bodyFormData
+      );
+
+      if (apiResponse.isAxiosError == true) {
+        console.log('Update Job Axios error')
+        alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        // apiResponse.response.data.error.messages.map(val => val+'\n')
+        // alert(apiResponse.error.response.data.error.messages)
+        setLoader(false)
+      }
+      else {
+        setLoader(false)
+        setUpdateJobModal(true)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
+  }
+
+  if (loader == true) {
+    return (
+      <Loader />
+    )
+  }
+
 
   return ( 
     <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-{/* {
-        (jobObj.jobTitle == '' || jobObj.hourlyPay == ''  || jobObj.duration == 0  || jobObj.jobCategory == 0  || jobObj.jobSubCategory == 0  || jobObj.jobDescription == '' || jobObj.noOfEmployees == 0  || jobObj.state == 0  || jobObj.city == 0 || jobObj.zipCode == '' || jobObj.address == '') ?
+
         <CustomModal 
           type='confirmation'
-          isVisible={modalVisible}
-          message='Some fields are missing.'
-          imageSource={require('../../../assets/warning.png')}
-          onPressOk={() => setModalVisible(false)}
-          buttonText='Ok'
-        />
-        :
-        <CustomModal 
-          type='confirmation'
-          isVisible={modalVisible}
-          message='Job has successfully created.'
+          isVisible={updateJobModal}
+          message='Job has been successfully updated.'
           imageSource={require('../../../assets/checked.png')}
           onPressOk={() => {
-            setModalVisible(false)
             navigation.navigate(Constants.screen.JobPostedList)
-                jobObj.jobTitle = '' 
-                jobObj.hourlyPay = '' 
-                jobObj.duration = 0 
-                jobObj.jobCategory = 0 
-                jobObj.jobSubCategory = 0 
-                jobObj.jobDescription = '' 
-                jobObj.noOfEmployees = 0 
-                jobObj.state = 0 
-                jobObj.city = 0
-                jobObj.zipCode = '' 
-                jobObj.address = ''
-                dispatch(setJobPost(jobObj))
+            setUpdateJobModal(false)
+            setJobTitle('')
+            setHourlyPay('')
+            setJobDuration(0)
+            setJobCategory(0)
+            setSubJobCategory(0)
+            setDescription('');
+            setJobPostNos(0);
+            setImageUrl('')
+            setAddress('')
+            setStatePicker(0)
+            setCity('')
+            setZipCode('')
           }}
           buttonText='Ok'
         />
-      } */}
+
+        <CustomModal 
+          type='confirmation'
+          isVisible={missingFieldModal}
+          message='Some fields are missing.'
+          imageSource={require('../../../assets/warning.png')}
+          onPressOk={() => setMissingFieldModal(false)}
+          buttonText='Ok'
+        />
 
       <StatusBar backgroundColor={colors.primaryColor} />
 
@@ -131,9 +203,9 @@ const UpdateJob = ({ navigation, route }) => {
             iconName='person'
             placeholder='Job Title'
             value={jobTitle}
-            maxLength={26}
-            //multiline={true}
-            onChangeText={setJobTitle}/>
+            maxLength={30}
+            onChangeText={setJobTitle}
+          />
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
@@ -145,11 +217,8 @@ const UpdateJob = ({ navigation, route }) => {
               iconName='person'
               placeholder='0$'
               maxLength={5}
-              value={job.hourlyPay}
-              onChangeText={(val) => {
-                jobObj.hourlyPay = val
-                dispatch(setJobPost(jobObj))
-              }}
+              value={hourlyPay}
+              onChangeText={setHourlyPay}
             />
 
             <CustomPicker
@@ -157,14 +226,11 @@ const UpdateJob = ({ navigation, route }) => {
               pickerContainerStyle={{ marginTop: 10, flex: 0.52  }}
               label='Job Type'
               pickerTitle='Duration'
-              selectedValue={job.duration}
-              onValueChange={(itemValue, itemIndex) => {
-              jobObj.duration = itemValue
-              dispatch(setJobPost(jobObj))
-            }}
+              selectedValue={jobDuration}
+              onValueChange={(itemValue, itemIndex) => setJobDuration(itemValue)}
             >
-            <Picker.Item label='Part Time' value={'Part Time'} style={{ fontSize: 14 }} />
-            <Picker.Item label='Full Time' value={'Full Time'} style={{ fontSize: 14 }} />
+            <Picker.Item label='Part Time' value={'part_time'} style={{ fontSize: 14 }} />
+            <Picker.Item label='Full Time' value={'full_time'} style={{ fontSize: 14 }} />
             
           </CustomPicker>
 
@@ -175,19 +241,12 @@ const UpdateJob = ({ navigation, route }) => {
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select Job Category'
             pickerTitle='Job Category'
-            selectedValue={job.jobCategory}
-            onValueChange={(itemValue, itemIndex) => {
-              jobObj.jobCategory = itemValue
-              dispatch(setJobPost(jobObj))
-            }}
+            selectedValue={jobCategory}
+            onValueChange={(itemValue, itemIndex) => setJobCategory(itemValue)}
           >
             {
-              job_Category.map((val, index) => (
-                <Picker.Item 
-                  key={index}
-                  label={val.category}
-                  value={val.category}
-                />
+              jobCategoryList.map((val, index) => (
+                <Picker.Item key={index} label={val.name} value={val.category_id_decode} />
               ))
             }
           </CustomPicker>
@@ -197,20 +256,15 @@ const UpdateJob = ({ navigation, route }) => {
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select Job Sub Category'
             pickerTitle='Job Sub Category'
-            selectedValue={job.jobSubCategory}
-            onValueChange={(itemValue, itemIndex) => {
-              jobObj.jobSubCategory = itemValue
-              dispatch(setJobPost(jobObj))
-            }}
+            selectedValue={subJobCategory}
+            onValueChange={(itemValue, itemIndex) => setSubJobCategory(itemValue)}
           >
             {
-              job_sub_Category.map((val, index) => (
-                <Picker.Item 
-                  key={index}
-                  label={val.category}
-                  value={val.category}
-                />
-              ))
+              subCategoryItems != null ?
+                subCategoryItems.map((val, index) => (
+                  <Picker.Item key={index} label={val.name} value={val.id} />
+                ))
+                : null
             }
           </CustomPicker>
 
@@ -221,7 +275,7 @@ const UpdateJob = ({ navigation, route }) => {
                <MaterialIcons name='cloud-upload' size={18} color={colors.gray}/>
                <Text style={imageUrl == '' ? styles.emptyUploadImageText : {color: colors.gray, opacity: 0.7}}>Upload Image</Text>
                {
-              imageUrl != '' ? <Image source={imageUrl} style={{height: 40, width: 50, borderRadius: 5}}/>
+              imageUrl != '' ? <Image source={{uri: imageUrl}} style={{height: 40, width: 50, borderRadius: 5}}/>
             : null
             }
              </View>
@@ -235,16 +289,17 @@ const UpdateJob = ({ navigation, route }) => {
                 let options;
                 launchImageLibrary(options={
                   mediaType: 'photo',
-                  includeBase64: true
+                  maxHeight: 500,
+                  maxWidth: 500
                 }, (response) => {
-                  //console.log('Response:',response)
-
                   if(response.didCancel){
                     console.log('User cancelled image picker');
+                    setImageUrl('')
                   } else if (response.errorMessage){
                     console.log('Error:',response.errorMessage)
                   }else{
-                    const source = {uri: response.assets[0].uri}
+                    const source = response?.assets[0].uri
+                    //const source = {uri: response.assets[0].uri}
                     setImageUrl(source)
                     //setImageFileName(response.assets[0].fileName)
                   }
@@ -266,7 +321,7 @@ const UpdateJob = ({ navigation, route }) => {
             onChangeText={setDescription}
           />
           <Text style={{ alignSelf: 'flex-end', color: colors.darkGray, fontWeight: 'bold', fontSize: 12 }}>
-            {`${description.length} / 250 Characters`}
+            {`${description?.length} / 250 Characters`}
           </Text>
 
           <CustomPicker
@@ -274,17 +329,18 @@ const UpdateJob = ({ navigation, route }) => {
             pickerContainerStyle={{ marginTop: 10 }}
             label='Select No. Of Employees'
             pickerTitle='No. Of Employees'
-            selectedValue={job.noOfEmployees}
-            onValueChange={(itemValue, itemIndex) => {
-              jobObj.noOfEmployees = itemValue
-              dispatch(setJobPost(jobObj))
-            }}
+            selectedValue={jobPostNos}
+            onValueChange={(itemValue, itemIndex) => setJobPostNos(itemValue)}
+            // onValueChange={(itemValue, itemIndex) => {
+            //   jobObj.noOfEmployees = itemValue
+            //   dispatch(setJobPost(jobObj))
+            // }}
           >
-            <Picker.Item label={'1'} value={'1'} />
-            <Picker.Item label={'2'} value={'2'} />
-            <Picker.Item label={'3'} value={'3'} />
-            <Picker.Item label={'4'} value={'4'} />
-            <Picker.Item label={'5'} value={'5'} />
+            <Picker.Item label={'1'} value={1} />
+            <Picker.Item label={'2'} value={2} />
+            <Picker.Item label={'3'} value={3} />
+            <Picker.Item label={'4'} value={4} />
+            <Picker.Item label={'5'} value={5} />
           </CustomPicker>
 
           <InputField
@@ -292,11 +348,12 @@ const UpdateJob = ({ navigation, route }) => {
             title='Address'
             placeholder='Address'
             iconName='location-sharp'
-            value={job.address}
-            onChangeText={(val) => {
-              jobObj.address = val
-              dispatch(setJobPost(jobObj))
-            }}
+            value={address}
+            onChangeText={setAddress}
+            // onChangeText={(val) => {
+            //   jobObj.address = val
+            //   dispatch(setJobPost(jobObj))
+            // }}
           />
 
           {/* <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}> */}
@@ -305,11 +362,13 @@ const UpdateJob = ({ navigation, route }) => {
               //pickerTitleStyle={{color: job.state == 0 ? 'red' : colors.primaryColor}}
               pickerContainerStyle={{ marginTop: 10, flex: 0.49 }}
               items={cityStates}
-              selectedValue={job.state}
-              onValueChange={(itemValue, itemIndex) => {
-                jobObj.state = itemValue
-                dispatch(setJobPost(jobObj))
-              }}
+              selectedValue={statePicker}
+              onValueChange={(itemValue, itemIndex) => setStatePicker(itemValue)}
+              // selectedValue={job.state}
+              // onValueChange={(itemValue, itemIndex) => {
+              //   jobObj.state = itemValue
+              //   dispatch(setJobPost(jobObj))
+              // }}
             />
 
             <CustomPicker
@@ -317,16 +376,18 @@ const UpdateJob = ({ navigation, route }) => {
               pickerContainerStyle={{ marginTop: 10, flex: 0.49 }}
               label='Select City'
               pickerTitle='City'
-              selectedValue={job.city}
-              onValueChange={(itemValue, itemIndex) => {
-                jobObj.city = itemValue
-                dispatch(setJobPost(jobObj))
-              }}
+              selectedValue={city}
+              onValueChange={(itemValue, itemIndex) => setCity(itemValue)}
+              // selectedValue={job.city}
+              // onValueChange={(itemValue, itemIndex) => {
+              //   jobObj.city = itemValue
+              //   dispatch(setJobPost(jobObj))
+              // }}
             >
               {
                 cities.length > 0 ?
                   cityItems.map((val, index) => (
-                    <Picker.Item key={index} label={val.city} value={val.city} />
+                    <Picker.Item key={index} label={val.city} value={val.city} style={{fontSize: 14}}/>
                   ))
                   : null
               }
@@ -342,18 +403,20 @@ const UpdateJob = ({ navigation, route }) => {
             maxLength={5}
             title='Zip Code'
             placeholder='Zip Code'
-            value={job.zipCode}
-            onChangeText={(val) => {
-              jobObj.zipCode = val
-              dispatch(setJobPost(jobObj))
-            }}
+            value={zipCode}
+            onChangeText={setZipCode}
+            // onChangeText={(val) => {
+            //   jobObj.zipCode = val
+            //   dispatch(setJobPost(jobObj))
+            // }}
           />
 
          
 
           <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5, marginLeft: 7}}>
             <TouchableOpacity
-             onPress={() => Linking.openURL('https://www.google.com/maps/search/' + 'Sybrid Pvt Ltd Karachi Pakistan').catch(err => console.error('An error occurred', err))}
+              //onPress={()}
+             //onPress={() => Linking.openURL('https://www.google.com/maps/search/' + 'Sybrid Pvt Ltd Karachi Pakistan').catch(err => console.error('An error occurred', err))}
             >
               <Text style={{fontSize: 12, color: colors.buttonColor}}>Click here to view full address</Text>
             </TouchableOpacity>
@@ -369,31 +432,14 @@ const UpdateJob = ({ navigation, route }) => {
           <Button
             style={{ ...styles.button, backgroundColor: colors.primaryColor }}
             title='Post'
-            // onPress={() => {
-            //   if(jobObj.jobTitle = '' || jobObj.hourlyPay == ''  || jobObj.duration == 0  || jobObj.jobCategory == 0  || jobObj.jobSubCategory == 0  || jobObj.jobDescription == '' || jobObj.noOfEmployees == 0  || jobObj.state == 0  || jobObj.city == 0 || jobObj.zipCode == '' || jobObj.address == ''){
-            //     setModalVisible(!modalVisible)
-            //   }
-            //   else{
-            //     setModalVisible(!modalVisible)
-            //   }
-            // }}
-
-            // onPress={() => {
-            //   jobObj.jobTitle = '' 
-            //   jobObj.hourlyPay = '' 
-            //   jobObj.duration = 0 
-            //   jobObj.jobCategory = 0 
-            //   jobObj.jobSubCategory = 0 
-            //   jobObj.jobDescription = '' 
-            //   jobObj.noOfEmployees = 0 
-            //   jobObj.state = 0 
-            //   jobObj.city = 0
-            //   jobObj.zipCode = '' 
-            //   jobObj.address = ''
-            //   dispatch(setJobPost(jobObj))
-            //   alert('Job Has Been Successfully Posted')
-            //   navigation.navigate(Constants.screen.JobPostedList)
-            // }}
+            onPress={() => {
+              if(jobTitle == '' || hourlyPay == '' || jobDuration == 0 || jobCategory == 0 || description == '' || statePicker == 0 || city == 0 || address == '' || (zipCode == '' || zipCode == null)){
+                setMissingFieldModal(true)
+              }
+              else{
+                updateJob()
+              }
+            }}
           />
 
           <Button
@@ -425,8 +471,8 @@ const styles = StyleSheet.create({
   infoContainer: {
     backgroundColor: colors.white,
     borderRadius: 10,
-    marginVertical: 15,
-    marginHorizontal: 15,
+    marginVertical: 9,
+    marginHorizontal: 9,
     padding: 10
   },
   picker: {

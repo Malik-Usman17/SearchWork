@@ -7,8 +7,9 @@ import DrawerContent from '../screens/Employee/DrawerContent';
 import JobCategoryList from '../screens/Employee/JobCategoryList';
 import JobListing from '../screens/Employee/JobListing';
 import BottomTabNavigation from './BottomTabNavigation';
-import IndividualJob from '../screens/IndividualJob';
+import IndividualJob from '../screens/Employee/IndividualJob';
 import JobCategory from '../screens/Employee/JobCategory';
+import SavedJobs from '../screens/Employee/SavedJobs';
 
 
 const Drawer = createDrawerNavigator();
@@ -25,6 +26,7 @@ const DrawerNavigation = () => {
       <Drawer.Screen name={Constants.screen.JobListing} component={JobListing}/>
       <Drawer.Screen name={Constants.screen.JobCategoryList} component={JobCategoryList}/> 
       <Drawer.Screen name={Constants.screen.JobCategory} component={JobCategory}/>
+      {/* <Drawer.Screen name={Constants.screen.SavedJobs} component={SavedJobs} /> */}
     
     </Drawer.Navigator>
   )

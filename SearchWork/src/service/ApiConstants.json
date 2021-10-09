@@ -6,7 +6,13 @@
       "Register": "/register",
       "JobsCategory": "/category/list_all",
       "JobsList": "/jobs/list",
-      "PostJob": "/jobs/add"
+      "PostJob": "/jobs/add",
+      "DeleteJob": "/jobs/delete",
+      "UpdateJob": "/jobs/update",
+      "ViewJob": "/jobs/view",
+      "MarkSavedJob": "/save/jobs",
+      "SavedJobsList": "/save/list",
+      "DeleteSavedJob": "/save/delete"
   },
 
   "methods": {

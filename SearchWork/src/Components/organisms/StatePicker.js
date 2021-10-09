@@ -21,11 +21,11 @@ const StatePicker = ({selectedValue, onValueChange, items, pickerContainerStyle,
           selectedValue={selectedValue}
           onValueChange={onValueChange}
         >
-          <Picker.Item label='Select State' value={0} />
+          <Picker.Item label='Select State' value={0} style={{fontSize: 14}}/>
           {
             data.map((val, index) => (
               <Picker.Item
-                //style={{fontSize: 14}} 
+                style={{fontSize: 14}} 
                 key={index}
                 label={val.state}
                 value={val.state}

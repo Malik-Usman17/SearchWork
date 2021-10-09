@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Dimensions, Image, ImageBackground, StatusBar, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { Dimensions, Image, ImageBackground, StatusBar, FlatList, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
@@ -11,8 +11,17 @@ import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
 import CustomModal from '../../Components/organisms/CustomModal';
+import { useDispatch, useSelector } from 'react-redux';
+import { jobsListing, getJobList, getViewJob } from '../../redux/slices';
+import Loader from '../../Components/atoms/Loader';
+import { useFocusEffect } from '@react-navigation/native';
+import { apiCall } from '../../service/ApiCall';
+import ApiConstants from '../../service/ApiConstants.json';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Axios from 'axios';
 
-const JobPostedList = ({navigation}) => {
+const JobPostedList = ({ navigation }) => {
 
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
@@ -20,113 +29,249 @@ const JobPostedList = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [params, setParams] = useState('');
+  const [loader, setLoader] = useState(false)
+  const [pageNo, setPageNo] = useState(1);
+  const [deleteJobId, setDeleteJobId] = useState('');
+  const [deletedConfirmModal, setDeletedConfirmModal] = useState(false);
+  const [editJobModal, setEditJobModal] = useState(false);
+  const [updateJobItems, setUpdateJobItems] = useState('');
+
+  const dispatch = useDispatch();
+  const url = `${ApiConstants.baseUrl}${ApiConstants.endPoints.ViewJob}`
+  //console.log('URL:',)
+
+  const jobs = useSelector(jobsListing)
   
 
-  const jobData = [
-    {id: '1', title: 'Petrol Pump Filler', description: 'In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available.', image: require('../../../assets/people.jpg')},
-    {id: '2', title: 'Janpanses Boy Chef Required', description: 'In publishing and graphic design, Lorem ipsum is a placeholder text commonly used.', image: require('../../../assets/people.jpg')}
-  ]
+  const getList = async () => {
+    setLoader(true)
 
-  
-  const jobComponent = ({item}) => {
-    
-    return(
+    if (jobs != undefined) {
+      setLoader(false)
+    }
+
+    try {
+      var apiResponse = await apiCall(
+        ApiConstants.methods.GET,
+        ApiConstants.endPoints.JobsList,
+      );
+
+      if (apiResponse.isAxiosError == true) {
+        console.log('Axios error')
+        setLoader(false)
+      }
+      else {
+        dispatch(getJobList(apiResponse.data.response.data))
+        setLoader(false)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
+  }
+
+  const viewJob = async (jobId) => {
+    console.log('Job Id:',jobId)
+    setLoader(true)
+
+    try {
+      var apiResult = await Axios.get(`${ApiConstants.baseUrl}${ApiConstants.endPoints.ViewJob}`, {params: {id: jobId}})
+
+      if (apiResult.isAxiosError == true) {
+        console.log('Axios error')
+        setLoader(false)
+      }
+      else {
+        console.log('Api Result:',apiResult.data.response.data)
+        dispatch(getViewJob(apiResult.data.response.data[0]))
+        navigation.navigate(Constants.screen.ViewJob)
+        setLoader(false)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
+  }
+
+
+
+  const deleteJob = async (id) => {
+    setLoader(true)
+
+    let body = {
+      is_block: '1',
+      id: id
+    }
+
+    try {
+      var apiResponse = await apiCall(
+        ApiConstants.methods.POST,
+        ApiConstants.endPoints.DeleteJob,
+        body
+      );
+
+      if (apiResponse.isAxiosError == true) {
+        console.log('Delete Job Axios error')
+        setLoader(false)
+      }
+      else {
+        setLoader(false)
+        setModalVisible(false)
+        setDeletedConfirmModal(true)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      getList();
+      setPageNo(1)
+    }, [])
+  )
+
+  if (loader == true) {
+    return (
+      <Loader />
+    )
+  }
+
+  const jobComponent = ({ item }) => {
+
+    return (
       <View style={styles.jobContainer}>
 
-          <Image source={item.image} style={styles.jobImage}/>
-          
-          <View style={{marginLeft: 8, flex: 1}}>
-            
-            <Text ellipsizeMode='tail' numberOfLines={1} style={{color: colors.darkGray, fontSize: 16, fontWeight: 'bold'}}>{item.title}</Text>
-            <Text ellipsizeMode='tail' numberOfLines={3} style={{fontSize: 12}}>{item.description}</Text>
+        <View style={styles.jobImageContainer}>
+          <Image
+            resizeMode='contain'
+            source={item.image_urls ? { uri: item.image_urls['3x'] } : require('../../../assets/logo.png')}
+            style={styles.jobImage}
+          />
+        </View>
 
-            <View style={styles.jobIconsContainer}>
-              {
-                mangaeJobIcons == true ?
-              <>
-              <TouchableOpacity style={{alignItems: 'center'}} onPress={() => navigation.navigate(Constants.screen.IndividualJob)}>
-                <Ionicons name='eye' size={18} color={colors.buttonColor}/>
-                <Text style={{fontSize: 10}}>View</Text>
-              </TouchableOpacity>
+        <View style={{ marginLeft: 8, flex: 1 }}>
 
-              <TouchableOpacity style={styles.icons} onPress={() => {
-                setEditModalVisible(!editModalVisible)
-                setParams(item)
-              }}>
-                <MaterialCommunityIcons name='file-document-edit' size={18} color={colors.primaryColor}/>
-                <Text style={{fontSize: 10}}>Edit</Text>
-              </TouchableOpacity>
+          <Text
+            ellipsizeMode='tail'
+            numberOfLines={1}
+            style={{ color: colors.darkGray, fontSize: 16, fontWeight: 'bold' }}
+          >
+            {item.title}
+          </Text>
+          <Text ellipsizeMode='tail' numberOfLines={3} style={{ fontSize: 12 }}>{item.description}</Text>
 
-              <TouchableOpacity style={styles.icons} onPress={() => {
-                setModalVisible(!modalVisible)
-              }}
-              >
-                <MaterialCommunityIcons name='delete' size={18} color='red'/>
-                <Text style={{fontSize: 10}}>Delete</Text>
-              </TouchableOpacity>
-              </>
-            : null}
+          <View style={styles.jobIconsContainer}>
+            {
+              mangaeJobIcons == true ?
+                <>
+                  <TouchableOpacity 
+                    style={{ alignItems: 'center' }} 
+                    onPress={() => {
+                      viewJob(item.id)
+                    }}
+                  >
+                    <Ionicons name='eye' size={18} color={colors.buttonColor} />
+                    <Text style={{ fontSize: 10 }}>View</Text>
+                  </TouchableOpacity>
 
-              <Button 
-                title='Manage Jobs'
-                titleStyle={{fontSize: 12}}
-                style={styles.manageJobButton}
-                onPress={() => setManageJobIcons(!mangaeJobIcons)}
-              />
+                  <TouchableOpacity style={styles.icons} onPress={() => {
+                    setEditJobModal(true)
+                    setParams(item)
+                  }}>
+                    <MaterialCommunityIcons name='file-document-edit' size={18} color={colors.primaryColor} />
+                    <Text style={{ fontSize: 10 }}>Edit</Text>
+                  </TouchableOpacity>
 
-            </View>
+                  <TouchableOpacity style={styles.icons} onPress={() => {
+                    setModalVisible(!modalVisible)
+                    setDeleteJobId(item.id)
+                  }}
+                  >
+                    <MaterialCommunityIcons name='delete' size={18} color='red' />
+                    <Text style={{ fontSize: 10 }}>Delete</Text>
+                  </TouchableOpacity>
+                </>
+                : null}
+
+            <Button
+              title='Manage Jobs'
+              titleStyle={{ fontSize: 12 }}
+              style={styles.manageJobButton}
+              onPress={() => setManageJobIcons(!mangaeJobIcons)}
+            />
 
           </View>
 
         </View>
+
+      </View>
     )
   }
 
 
-  return(
-    <View style={{flex: 1}}>
+  return (
+    jobs == undefined || jobs.length == 0 ?
+    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.pureWhite}}>
+      <Image source={require('../../../assets/noData.jpg')} resizeMode='contain' style={{ height: 300, width: 400 }} />
+    </View>
+    :
+    <View style={{ flex: 1 }}>
 
       <CustomModal 
-        isVisible={modalVisible == true ? modalVisible : editModalVisible}
+        isVisible={modalVisible}
         imageSource={require('../../../assets/diagnostic.png')}
-        message={modalVisible == true ? 'Are you sure you want to delete this job?' : 'Are you sure you want to edit this job?'}
+        message={'Are you sure you want to delete this job?'}
         onPressYes={() => {
-          if(modalVisible == true){
-            setModalVisible(!modalVisible)
-          }
-          else{
-            navigation.navigate(Constants.screen.UpdateJob, {value: params})
-            setEditModalVisible(!editModalVisible)
-          }
+          setModalVisible(true)
+          deleteJob(deleteJobId)
         }}
-        onPressNo={() => {
-          if(modalVisible == true){
-            setModalVisible(!modalVisible)
-          }
-          else{
-            setEditModalVisible(!editModalVisible)
-          }
-        }}
+        onPressNo={() => setModalVisible(false)}
       />
-      
+
+      <CustomModal 
+        isVisible={editJobModal}
+        imageSource={require('../../../assets/diagnostic.png')}
+        message={'Are you sure you want to edit this job?'}
+        onPressYes={() => {
+          navigation.navigate(Constants.screen.UpdateJob, {params})
+          setEditJobModal(false)
+        }}
+        onPressNo={() => setEditJobModal(false)}
+      />
+
+      <CustomModal
+        type = 'confirmation' 
+        isVisible={deletedConfirmModal}
+        imageSource={require('../../../assets/checked.png')}
+        message={'Job is deleted.'}
+        buttonText={'Ok'}
+        onPressOk={() => {
+          setDeletedConfirmModal(false)
+          navigation.navigate(Constants.screen.EmployerDashboard)
+        }}
+      />      
+
       <StatusBar backgroundColor={colors.primaryColor} />
 
-      
-      
       <ImageBackground source={require('../../../assets/grayBg.jpg')} style={styles.bg}>
 
-        <HeaderImage style={{height: Dimensions.get('window').height * 0.23}}/>
+        <HeaderImage style={{ height: Dimensions.get('window').height * 0.23 }} />
 
         <View style={{ position: 'absolute', width: '100%', padding: 9 }}>
 
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
 
-              <MenuIcon onPress={() => navigation.openDrawer()}/>
+            <MenuIcon onPress={() => navigation.openDrawer()} />
 
-              <ScreenTitle title='My Jobs' />
-            
+            <ScreenTitle title='My Jobs' />
+
             <LanguagePicker
-              viewStyle={{width: 80}}
+              viewStyle={{ width: 80 }}
               containerStyle={{ flex: 1 }}
               value={lang}
               setValue={setLang}
@@ -138,80 +283,61 @@ const JobPostedList = ({navigation}) => {
 
           <View style={styles.headerButtonContainer}>
 
-            <Button 
+            <Button
               title='All Jobs'
               style={styles.headerButton}
-              titleStyle={{fontSize: 16}}
+              titleStyle={{ fontSize: 16 }}
             />
 
-            <Button 
-              title='Active Jobs' 
-              style={styles.headerButton} 
-              titleStyle={{fontSize: 16}}
+            <Button
+              title='Active Jobs'
+              style={styles.headerButton}
+              titleStyle={{ fontSize: 16 }}
             />
 
-            <Button 
-              title='Pause Jobs' 
-              style={styles.headerButton} 
-              titleStyle={{fontSize: 16}}
+            <Button
+              title='Pause Jobs'
+              style={styles.headerButton}
+              titleStyle={{ fontSize: 16 }}
             />
 
           </View>
 
         </View>
 
-        {/* <View style={styles.jobContainer}>
 
-          <Image source={require('../../../assets/people.jpg')} style={styles.jobImage}/>
-          
-          <View style={{marginLeft: 8, flex: 1}}>
-            
-            <Text style={{color: colors.darkGray, fontSize: 18, fontWeight: 'bold'}}>Petrol Pump Filler</Text>
-            <Text ellipsizeMode='tail' numberOfLines={3} style={{fontSize: 12}}>
-              In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available.
-            </Text>
+      <View style={{marginTop: 10, flex: 1}}>
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={jobs}
+          renderItem={jobComponent}
+          keyExtractor={(key, index) => index.toString()}
+          refreshControl={
+            <RefreshControl
+              refreshing={loader}
+              onRefresh={getList}
+            />
+          }
+        />
+      </View>
 
-            <View style={styles.jobIconsContainer}>
-              {
-                mangaeJobIcons == true ?
-              <>
-              <TouchableOpacity style={{alignItems: 'center'}} onPress={() => navigation.navigate(Constants.screen.IndividualJob)}>
-                <Ionicons name='eye' size={18} color={colors.buttonColor}/>
-                <Text style={{fontSize: 10}}>View</Text>
-              </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 5 }}>
+            <TouchableOpacity>
+              <AntDesign name='left' color={colors.primaryColor} size={25} />
+            </TouchableOpacity>
 
-              <TouchableOpacity style={styles.icons} onPress={() => setEditModalVisible(!editModalVisible)}>
-                <MaterialCommunityIcons name='file-document-edit' size={18} color={colors.primaryColor}/>
-                <Text style={{fontSize: 10}}>Edit</Text>
-              </TouchableOpacity>
+            <Text style={{ fontWeight: 'bold', fontSize: 20, marginHorizontal: 5 }}>{pageNo}</Text>
 
-              <TouchableOpacity style={styles.icons} onPress={() => setModalVisible(!modalVisible)}>
-                <MaterialCommunityIcons name='delete' size={18} color='red'/>
-                <Text style={{fontSize: 10}}>Delete</Text>
-              </TouchableOpacity>
-              </>
-            : null}
-
-              <Button 
-                title='Manage Jobs'
-                titleStyle={{fontSize: 12}}
-                style={styles.manageJobButton}
-                onPress={() => setManageJobIcons(!mangaeJobIcons)}
-              />
-
-            </View>
-
+            <TouchableOpacity 
+            // onPress={() => {
+            //   setPageNo(pageNo + 1)
+            //   getList()
+            // }}
+            >
+              <AntDesign name='right' color={colors.primaryColor} size={25} />
+            </TouchableOpacity>
 
           </View>
-
-        </View> */}
-
-        <FlatList 
-          showsVerticalScrollIndicator={false}
-          data={jobData}
-          keyExtractor={(key, index) => index.toString()}
-          renderItem={jobComponent}
-        />
 
         <CompanyLabelCard />
 
@@ -222,49 +348,59 @@ const JobPostedList = ({navigation}) => {
 }
 
 const styles = StyleSheet.create({
-  bg:{
+  bg: {
     flex: 1,
   },
-  headerButtonContainer:{
+  headerButtonContainer: {
     marginTop: 30,
     flexDirection: 'row',
     justifyContent: 'space-between'
   },
-  headerButton:{
-    flex: 0.3, 
-    backgroundColor: colors.primaryColor, 
+  headerButton: {
+    flex: 0.3,
+    backgroundColor: colors.primaryColor,
     borderRadius: 20
   },
-  jobContainer:{
-    marginTop: 10,
+  jobContainer: {
+    // margin: 10,
+    // marginRight: 0,
+    marginBottom: 10,
+    // marginTop: 10,
     padding: 8,
     borderTopLeftRadius: 20,
     borderBottomLeftRadius: 20,
-    marginLeft: 10, 
+    marginLeft: 10,
     backgroundColor: colors.white,
     flexDirection: 'row'
   },
-  manageJobButton:{
-    borderRadius: 20, 
-    marginLeft: 6, 
-    backgroundColor: colors.darkGray, 
-    height: Dimensions.get('window').height * 0.05, 
+  manageJobButton: {
+    borderRadius: 20,
+    marginLeft: 6,
+    backgroundColor: colors.darkGray,
+    height: Dimensions.get('window').height * 0.05,
     width: 90
   },
-  jobIconsContainer:{
-    marginTop: 12,
-    flexDirection: 'row', 
-    alignItems: 'center', 
+  jobIconsContainer: {
+    marginTop: 'auto',
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'flex-end',
   },
-  icons:{
-    marginLeft: 6, 
+  icons: {
+    marginLeft: 6,
     alignItems: 'center'
   },
-  jobImage:{
-    height: 120, 
-    width: 120, 
-    borderRadius: 15
+  jobImage: {
+    height: 100,
+    width: 100,
+  },
+  jobImageContainer: {
+    height: 120,
+    width: 120,
+    borderRadius: 15,
+    backgroundColor: colors.primaryColorLight,
+    alignItems: 'center',
+    justifyContent: 'center'
   }
 });
 

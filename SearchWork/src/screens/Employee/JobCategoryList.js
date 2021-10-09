@@ -5,13 +5,15 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Constants from '../../Constants/Constants.json';
 import SearchField from '../../Components/molecules/SearchField';
+import { useFocusEffect } from '@react-navigation/native';
 
 const JobCategoryList = ({navigation, route}) => {
 
   const [searchCatgeory, setSearchCategory] = useState('');
+  const [endLimit, setEndLimit] = useState(5);
+
 
   const {val} = route.params;
-  //console.log('VALUEs:',val)
 
   var jobSubCategory;
   if(searchCatgeory != ''){
@@ -38,6 +40,12 @@ const JobCategoryList = ({navigation, route}) => {
     )
   }
 
+  useFocusEffect(
+    React.useCallback(()=> {
+      setEndLimit(5);
+    }, [])
+  )
+
   return (
     <View style={{ flex: 1 }}>
       
@@ -63,20 +71,30 @@ const JobCategoryList = ({navigation, route}) => {
             textStyle={{fontSize: 13}}
             placeholder='Search Category'
             value={searchCatgeory}
-            onChangeText={setSearchCategory}
+            onChangeText={(val) => {
+              setSearchCategory(val)
+              setEndLimit(5)
+            }}
           />
         
         <View style={styles.flatListContainer}>
-          <FlatList 
-            data={jobSubCategory}
+          <FlatList
+            data={jobSubCategory.slice(0,endLimit)} 
             renderItem={jobCategory}
             keyExtractor={(item, index) => index.toString()}
           />
         </View>
-
-          <TouchableOpacity onPress={() => navigation.navigate(Constants.screen.JobListing)}>
+        
+        {
+          jobSubCategory.slice(endLimit,).length > 0 ?
+  
+          <TouchableOpacity onPress={() => {
+             setEndLimit(jobSubCategory.length)
+          }}>
             <Text style={styles.seeAllButton}>See All</Text>
           </TouchableOpacity>
+        : null
+        }
 
         </View>
 

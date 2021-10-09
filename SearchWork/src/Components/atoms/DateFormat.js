@@ -7,3 +7,5 @@ export const DateFormat = (date) => {
   //var dateFormat = Dated+' '+monthName+' '+year
   return dateFormat
 }
+
+

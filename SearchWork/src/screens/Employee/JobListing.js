@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dimensions, FlatList, Image, ImageBackground, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
@@ -15,6 +15,8 @@ import SearchField from '../../Components/molecules/SearchField';
 import Constants from '../../Constants/Constants.json';
 import { useSelector, useDispatch } from 'react-redux';
 import {userLogin, getJobCategory, jobsCategoryList, getJobList, jobsListing} from '../../redux/slices';
+import { color } from 'react-native-reanimated';
+import { useFocusEffect } from '@react-navigation/core';
 
 
 const JobListing = ({navigation, route}) => {
@@ -24,8 +26,6 @@ const JobListing = ({navigation, route}) => {
   
 
   const {jobSubCategoryId, jobCategoryId} = route.params;
-  // console.log('Job Category Id:',jobCategoryId)
-  // console.log('Sub Category Id:',jobSubCategoryId)
 
   const jobs = useSelector(jobsListing);
   //console.log('JOBS:',jobs)
@@ -37,9 +37,6 @@ const JobListing = ({navigation, route}) => {
   else{
     myJobs = jobs.filter((x, index) => x.category_id == jobCategoryId)
   }
-
-
-  console.log('MY JOBS:',myJobs)
 
 
   const jobCard = ({ item }) => {
@@ -88,6 +85,7 @@ const JobListing = ({navigation, route}) => {
 
 
   return (
+    myJobs.length > 0 ?
     <View style={{ flex: 1 }}>
 
       <StatusBar backgroundColor={colors.primaryColor} />
@@ -132,6 +130,10 @@ const JobListing = ({navigation, route}) => {
 
       </ImageBackground>
 
+    </View>
+    :
+    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#FFFFFF'}}>
+      <Image source={require('../../../assets/noData.jpg')} resizeMode='contain' style={{height: 300, width:400}}/>
     </View>
   )
 }

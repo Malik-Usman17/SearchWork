@@ -20,7 +20,7 @@ const CustomPicker = (props) => {
           selectedValue={props.selectedValue}
           onValueChange={props.onValueChange}
         >
-          <Picker.Item label={props.label} value={0} />
+          <Picker.Item label={props.label} value={0} style={{fontSize: 14}}/>
 
           {props.children}
 

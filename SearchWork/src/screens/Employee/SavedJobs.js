@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Alert, Dimensions, FlatList, Image, ImageBackground, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { Alert, Dimensions, FlatList, Image, ImageBackground, RefreshControl, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -13,6 +13,13 @@ import Constants from '../../Constants/Constants.json';
 import SearchField from '../../Components/molecules/SearchField';
 import CustomModal from '../../Components/organisms/CustomModal';
 import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
+import { apiCall } from '../../service/ApiCall';
+import ApiConstants from '../../service/ApiConstants.json';
+import Loader from '../../Components/atoms/Loader';
+import { useFocusEffect } from '@react-navigation/native';
+import {getSaveJobList, savedJobsList} from '../../redux/slices';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 
 const SavedJobs = ({ navigation }) => {
@@ -20,29 +27,40 @@ const SavedJobs = ({ navigation }) => {
   const [dropDown, setDropDown] = useState(false);
   const [lang, setLang] = useState('eng');
   const [manageJobIcons, setManageJobIcons] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [loader, setLoader] = useState(false);
+  const [deletJobModal, setDeleteJobModal] = useState(false);
+  const [confirmDeletedModal, setConfirmDeletedModal] = useState(false);
+  const [deleteJobId, setDeleteJobId] = useState('');
+  const [searchJob, setSearchJob] = useState('');
 
-  const data = [
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Junior Software Engineer night shift', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.' },
-    { image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower' },
-  ]
+  const savedList = useSelector(savedJobsList);
+  //console.log('Saved List:',savedList)
+
+  var searchSaveJob;
+  if(searchJob != ''){
+    searchSaveJob = savedList.filter((value) => (
+      value.job.title.toLowerCase().includes(searchJob.toLowerCase())
+    ))
+  }
+  else{
+    searchSaveJob = savedList
+  }
+
+  const dispatch = useDispatch();
+
 
   const jobCard = ({ item }) => {
     return (
       <View style={styles.jobContainer}>
 
-        <Image source={item.image} style={styles.jobImage} />
+        <Image source={item.job['image'] ? {uri: item.job['image']} : require('../../../assets/people.jpg')} style={styles.jobImage} />
 
         <View style={{ marginLeft: 8, flex: 1}}>
 
-          <Text ellipsizeMode='tail' numberOfLines={1} style={styles.jobTitle}>{item.jobTitle}</Text>
+          <Text ellipsizeMode='tail' numberOfLines={1} style={styles.jobTitle}>{item.job['title']}</Text>
 
           <Text ellipsizeMode='tail' numberOfLines={3} style={{ fontSize: 12 }}>
-            {item.description}
+            {item.job['description']}
           </Text>
 
           <View style={styles.jobIconsContainer}>
@@ -60,7 +78,8 @@ const SavedJobs = ({ navigation }) => {
                   <TouchableOpacity 
                     style={styles.icons}
                     onPress={() => {
-                      setModalVisible(true)
+                      setDeleteJobId(item.id)
+                      setDeleteJobModal(true)
                     }}
                   >
                     <MaterialCommunityIcons name='delete' size={18} color='red' />
@@ -78,44 +97,111 @@ const SavedJobs = ({ navigation }) => {
             />
 
           </View>
-
-          {/* <View style={{flexDirection: 'row'}}>
-            <Chips title='Part Time'>
-              <AntDesign name='clockcircle' size={17} color={colors.gray}/>
-            </Chips>
-
-            <Chips title='Full time'>
-              <AntDesign name='clockcircle' size={17} color={colors.gray}/>
-            </Chips>
-
-            <Chips title='Texas'>
-              <AntDesign name='clockcircle' size={17} color={colors.gray}/>
-            </Chips>
-
-          </View> */}
-
-
         </View>
 
       </View>
     )
   }
 
+  async function getSavedJobsList(){
+    setLoader(true)
+
+    if(savedList.length > 0){
+      setLoader(false);
+    }
+
+    try{
+      var response = await apiCall(
+        ApiConstants.methods.GET, 
+        ApiConstants.endPoints.SavedJobsList,
+      );
+
+      if(response.isAxiosError == true){
+        console.log('Axios error') 
+        setLoader(false)
+      }
+      else{
+        dispatch(getSaveJobList(response.data.response.data))
+        setLoader(false)
+      }
+    }
+    catch(error){
+      console.log('Catch Body:',error);
+      setLoader(false)
+    }
+  }
+
+  const deleteSaveJob = async (id) => {
+    setLoader(true)
+
+    let body = {
+      is_block: '1',
+      id: id
+    }
+
+    try {
+      var apiResponse = await apiCall(
+        ApiConstants.methods.POST,
+        ApiConstants.endPoints.DeleteSavedJob,
+        body
+      );
+
+      if (apiResponse.isAxiosError == true) {
+        console.log('Delete Save Job Axios error')
+        alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        setLoader(false)
+      }
+      else {
+        setLoader(false)
+        setConfirmDeletedModal(true)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
+  }
+
+  useFocusEffect(
+    useCallback(() => {
+      getSavedJobsList();
+    }, [])
+  )
+
+  if(loader == true){
+    return(
+      <Loader />
+    )
+  }
 
   return (
+    savedList.length > 0
+    ?
     <View style={{ flex: 1 }}>
 
       <StatusBar backgroundColor={colors.primaryColor} />
 
       <CustomModal
-        isVisible={modalVisible} 
+        isVisible={deletJobModal} 
         imageSource={require('../../../assets/warning.png')}
         message='Are you sure you want to delete this job.'
         onPressYes={() => {
-          navigation.navigate(Constants.screen.IndividualJob, {jobDetail})
-          setModalVisible(false)
+          deleteSaveJob(deleteJobId)
+          setDeleteJobModal(false)
         }}
-        onPressNo={() => setModalVisible(false)}
+        onPressNo={() => setDeleteJobModal(false)}
+      />
+
+      <CustomModal
+        type={'confirmation'}
+        isVisible={confirmDeletedModal} 
+        imageSource={require('../../../assets/checked.png')}
+        message='Job is Deleted.'
+        buttonText='Ok'
+        onPressOk={() => {
+          setConfirmDeletedModal(false)
+          navigation.navigate(Constants.screen.EmployeeDashboard)
+        }}
       />
 
       <ImageBackground source={require('../../../assets/grayBg.jpg')} style={{ flex: 1 }}>
@@ -141,15 +227,24 @@ const SavedJobs = ({ navigation }) => {
 
           </View>
 
-          <SearchField />
+          <SearchField 
+            value={searchJob}
+            onChangeText={setSearchJob}
+          />
           
         </View>
 
         <FlatList
           showsVerticalScrollIndicator={false}
-          data={data}
+          data={searchSaveJob}
           keyExtractor={(key, index) => index.toString()}
           renderItem={jobCard}
+          refreshControl={
+            <RefreshControl 
+              refreshing={loader}
+              onRefresh={getSavedJobsList}
+            />
+          }
         />
 
         <Button
@@ -160,6 +255,10 @@ const SavedJobs = ({ navigation }) => {
 
       </ImageBackground>
 
+    </View>
+    :
+    <View style={{backgroundColor: colors.pureWhite, flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+      <Image source={require('../../../assets/noData.jpg')} resizeMode='contain' style={{height: 300, width:400}}/>
     </View>
   )
 }
@@ -177,7 +276,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     backgroundColor: colors.white,
     flexDirection: 'row',
-    //backgroundColor: 'pink'
   },
   jobImage: {
     height: 120,

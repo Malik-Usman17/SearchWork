@@ -19,7 +19,7 @@ const PasswordField = ({title, placeholder, secureTextEntry, onPress, iconName, 
         />
 
         <TextInput
-          style={{ marginLeft: 3, flex: 0.96 }}
+          style={{ marginLeft: 3, flex: 0.96, }}
           placeholder={placeholder}
           secureTextEntry={secureTextEntry}
           value={value}

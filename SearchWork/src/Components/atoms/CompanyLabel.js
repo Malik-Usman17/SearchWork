@@ -1,10 +1,16 @@
 import React from 'react';
-import {Text, View, StyleSheet, TouchableOpacity} from 'react-native';
+import {Text, View, StyleSheet, TouchableOpacity, Linking} from 'react-native';
 
 
-const CompanyLabel = ({style, onPress}) => {
+const CompanyLabel = ({style, onPress, disabled}) => {
   return(
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity
+      activeOpacity={0.7} 
+      disabled={disabled} 
+      onPress={() => {
+        Linking.openURL('https://hegemonicsoftwares.com/').catch(err => console.error('An error occurred', err))
+      }}
+    >
       <Text style={[styles.text, style]}>Powered by: Hegemonic Softwares</Text>
     </TouchableOpacity>
   )
