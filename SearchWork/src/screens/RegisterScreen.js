@@ -450,9 +450,12 @@ const RegisterScreen = ({navigation}) => {
                       }
 
                         <InputField
+                          inputFieldStyle={address.length > 35 && {height: Dimensions.get('window').height * 0.078}}
                           title='Address'
                           placeholder='Your Full Address'
                           iconName='location-sharp'
+                          maxLength={50}
+                          multiline={address.length > 35 ? true : false}
                           value={address}
                           onChangeText={setAddress}
                         />
@@ -479,6 +482,7 @@ const RegisterScreen = ({navigation}) => {
                               cities.length > 0 ?
                                 cityItems.map((val, index) => (
                                   <Picker.Item
+                                   style={{fontSize: 14}}
                                    key={index}
                                    label={val.city}
                                    value={val.city}

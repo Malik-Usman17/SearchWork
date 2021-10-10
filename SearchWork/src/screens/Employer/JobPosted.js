@@ -287,7 +287,7 @@ const JobPosted = ({ navigation }) => {
           >
             {
               categoryList.map((val, index) => (
-                <Picker.Item key={index} label={val.name} value={val.category_id_decode} />
+                <Picker.Item style={{fontSize: 14}} key={index} label={val.name} value={val.category_id_decode} />
               ))
             }
           </CustomPicker>
@@ -307,7 +307,7 @@ const JobPosted = ({ navigation }) => {
             {
               subCategoryItems != null ?
                 subCategoryItems.map((val, index) => (
-                  <Picker.Item key={index} label={val.name} value={val.id} />
+                  <Picker.Item style={{fontSize: 14}} key={index} label={val.name} value={val.id} />
                 ))
                 : null
             }

@@ -48,8 +48,6 @@ const UpdateJob = ({ navigation, route }) => {
   const [updateJobModal, setUpdateJobModal] = useState(false);
   const [loader, setLoader] = useState(false);
   const [missingFieldModal, setMissingFieldModal] = useState(false);
-
-  console.log('Zip Code:',zipCode)
   
   const job = useSelector(jobPostedSelector);
   const jobCategoryList = useSelector(jobsCategoryList);
@@ -58,6 +56,8 @@ const UpdateJob = ({ navigation, route }) => {
   const dispatch = useDispatch();
 
   const {params} = route.params
+
+  console.log('IMAGE:',imageUrl)
 
 
   const subCategoryItems = jobCategoryList?.filter(val => val.category_id_decode == jobCategory)[0]?.subcategories
@@ -115,8 +115,6 @@ const UpdateJob = ({ navigation, route }) => {
       if (apiResponse.isAxiosError == true) {
         console.log('Update Job Axios error')
         alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
-        // apiResponse.response.data.error.messages.map(val => val+'\n')
-        // alert(apiResponse.error.response.data.error.messages)
         setLoader(false)
       }
       else {
@@ -415,8 +413,10 @@ const UpdateJob = ({ navigation, route }) => {
 
           <View style={{flexDirection: 'row', alignItems: 'center', marginTop: 5, marginLeft: 7}}>
             <TouchableOpacity
-              //onPress={()}
-             //onPress={() => Linking.openURL('https://www.google.com/maps/search/' + 'Sybrid Pvt Ltd Karachi Pakistan').catch(err => console.error('An error occurred', err))}
+            onPress={() => Linking.openURL(`https://www.google.com/maps/search/${address}, ${city}, ${statePicker}, ${zipCode}`)
+            .catch(err => console.error('An error occurred', err))
+            }
+             //onPress={() => Linking.openURL(`https://www.google.com/maps/search/' + 'Sybrid Pvt Ltd Karachi Pakistan').catch(err => console.error('An error occurred', err))}
             >
               <Text style={{fontSize: 12, color: colors.buttonColor}}>Click here to view full address</Text>
             </TouchableOpacity>

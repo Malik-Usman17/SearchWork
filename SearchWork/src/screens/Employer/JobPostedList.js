@@ -72,7 +72,6 @@ const JobPostedList = ({ navigation }) => {
   }
 
   const viewJob = async (jobId) => {
-    console.log('Job Id:',jobId)
     setLoader(true)
 
     try {
@@ -80,6 +79,7 @@ const JobPostedList = ({ navigation }) => {
 
       if (apiResult.isAxiosError == true) {
         console.log('Axios error')
+        alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
         setLoader(false)
       }
       else {
@@ -114,7 +114,9 @@ const JobPostedList = ({ navigation }) => {
 
       if (apiResponse.isAxiosError == true) {
         console.log('Delete Job Axios error')
+        alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
         setLoader(false)
+        setModalVisible(false)
       }
       else {
         setLoader(false)
@@ -321,7 +323,9 @@ const JobPostedList = ({ navigation }) => {
         />
       </View>
 
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 5 }}>
+      {/* pagination */}
+
+          {/* <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 5 }}>
             <TouchableOpacity>
               <AntDesign name='left' color={colors.primaryColor} size={25} />
             </TouchableOpacity>
@@ -329,15 +333,11 @@ const JobPostedList = ({ navigation }) => {
             <Text style={{ fontWeight: 'bold', fontSize: 20, marginHorizontal: 5 }}>{pageNo}</Text>
 
             <TouchableOpacity 
-            // onPress={() => {
-            //   setPageNo(pageNo + 1)
-            //   getList()
-            // }}
             >
               <AntDesign name='right' color={colors.primaryColor} size={25} />
             </TouchableOpacity>
 
-          </View>
+          </View> */}
 
         <CompanyLabelCard />
 

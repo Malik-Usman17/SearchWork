@@ -9,7 +9,7 @@ export const apiCall = async(methodType, endPoint, body, queryParams) => {
     try{
       switch (methodType) {
         case ApiConstants.methods.GET:
-          response = await Axios.get(`${ApiConstants.baseUrl}${endPoint}`
+          response = await Axios.get(`${ApiConstants.baseUrl}${endPoint}`, {params: queryParams}
           //   params:{
           //     page: pageNo
           //   }

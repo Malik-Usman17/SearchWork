@@ -1,25 +1,23 @@
-import React, { useState, useCallback } from 'react';
-import { Alert, Dimensions, FlatList, Image, ImageBackground, RefreshControl, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { Dimensions, FlatList, Image, ImageBackground, RefreshControl, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import HeaderImage from '../../Components/atoms/HeaderImage';
+import Loader from '../../Components/atoms/Loader';
 import MenuIcon from '../../Components/atoms/MenuIcon';
 import ScreenTitle from '../../Components/atoms/ScreenTitle';
 import Button from '../../Components/molecules/Button';
+import SearchField from '../../Components/molecules/SearchField';
+import CustomModal from '../../Components/organisms/CustomModal';
 import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
-import SearchField from '../../Components/molecules/SearchField';
-import CustomModal from '../../Components/organisms/CustomModal';
-import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
+import { getSaveJobList, getViewJob, savedJobsList } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
-import Loader from '../../Components/atoms/Loader';
-import { useFocusEffect } from '@react-navigation/native';
-import {getSaveJobList, savedJobsList} from '../../redux/slices';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+
 
 
 const SavedJobs = ({ navigation }) => {
@@ -33,8 +31,10 @@ const SavedJobs = ({ navigation }) => {
   const [deleteJobId, setDeleteJobId] = useState('');
   const [searchJob, setSearchJob] = useState('');
 
+  const dispatch = useDispatch();
+
   const savedList = useSelector(savedJobsList);
-  //console.log('Saved List:',savedList)
+ // console.log('Saved Job:',savedList)
 
   var searchSaveJob;
   if(searchJob != ''){
@@ -45,8 +45,6 @@ const SavedJobs = ({ navigation }) => {
   else{
     searchSaveJob = savedList
   }
-
-  const dispatch = useDispatch();
 
 
   const jobCard = ({ item }) => {
@@ -69,7 +67,9 @@ const SavedJobs = ({ navigation }) => {
                 <>
                   <TouchableOpacity 
                     style={{ alignItems: 'center' }} 
-                    onPress={() => navigation.navigate(Constants.screen.IndividualJob, {jobDetail: item})}
+                    onPress={() => {
+                      viewJob(item.job.id)
+                    }}
                   >
                     <Ionicons name='eye' size={18} color={colors.buttonColor} />
                     <Text style={{ fontSize: 10 }}>View</Text>
@@ -101,6 +101,38 @@ const SavedJobs = ({ navigation }) => {
 
       </View>
     )
+  }
+
+async function viewJob(jobId) {
+    
+    setLoader(true)
+
+    let queryParams = {
+      id: jobId
+    }
+
+    try {
+      var apiResult = await apiCall(
+        ApiConstants.methods.GET, 
+        ApiConstants.endPoints.ViewJob,
+        {},
+        queryParams
+        )
+
+      if (apiResult.isAxiosError == true) {
+        alert(apiResult.response.data.error.messages.map(val => val+'\n'))
+        setLoader(false)
+      }
+      else {
+        dispatch(getViewJob(apiResult.data.response.data[0]))
+        navigation.navigate(Constants.screen.IndividualJob)
+        setLoader(false)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
   }
 
   async function getSavedJobsList(){
@@ -247,11 +279,11 @@ const SavedJobs = ({ navigation }) => {
           }
         />
 
-        <Button
+        {/* <Button
           title='See More'
           style={styles.seeMoreButton}
           titleStyle={{ fontSize: 12 }}
-        />
+        /> */}
 
       </ImageBackground>
 

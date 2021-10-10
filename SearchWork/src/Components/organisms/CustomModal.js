@@ -18,7 +18,7 @@ const CustomModal = ({ isVisible, imageSource, type, message, buttonText, onPres
           type == 'confirmation' ?
 
               <TouchableOpacity style={styles.button} onPress={onPressOk}>
-                <Text style={styles.buttonText}>{buttonText}</Text>
+                <Text style={styles.buttonText}>{buttonText ? buttonText : 'Ok'}</Text>
               </TouchableOpacity>
             :
             <View style={styles.buttonContainer}>

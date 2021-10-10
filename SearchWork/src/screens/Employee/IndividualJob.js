@@ -8,6 +8,7 @@ import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
 import Divider from '../../Components/atoms/Divider';
 import HeaderImage from '../../Components/atoms/HeaderImage';
 import IconText from '../../Components/atoms/IconText';
+import Loader from '../../Components/atoms/Loader';
 import Logo from '../../Components/atoms/Logo';
 import MenuIcon from '../../Components/atoms/MenuIcon';
 import Button from '../../Components/molecules/Button';
@@ -15,10 +16,10 @@ import CustomModal from '../../Components/organisms/CustomModal';
 import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
-import { userLogin } from '../../redux/slices';
+import { jobViewDetails } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
-import Loader from '../../Components/atoms/Loader';
+
 
 const IndividualJob = ({ navigation, route }) => {
 
@@ -27,19 +28,19 @@ const IndividualJob = ({ navigation, route }) => {
   const [dropDown, setDropDown] = useState(false);
   const [isSave, setIsSave] = useState(false);
   const [loader, setLoader] = useState(false);
+  const [applyJobModal, setApplyJobModal] = useState(false);
 
+  const jobDetails = useSelector(jobViewDetails);
+  //console.log('Job Testing:',jobDetails);
 
-  const { jobDetail } = route.params;
-  const url = `https://www.google.com/maps/search/${jobDetail.st_address}, ${jobDetail.city}, ${jobDetail.state}, ${jobDetail.zipcode}`
-
-  console.log('JOBS Details:',jobDetail)
+  const url = `https://www.google.com/maps/search/${jobDetails.st_address}, ${jobDetails.city}, ${jobDetails.state}, ${jobDetails.zipcode}`
 
 
   async function saveJob() {
     setLoader(true)
 
     let body = {
-      job_id: jobDetail.id
+      job_id: jobDetails.id
     }
 
     try {
@@ -65,6 +66,36 @@ const IndividualJob = ({ navigation, route }) => {
     }
   }
 
+  async function applyJob() {
+    setLoader(true)
+
+    let body = {
+      job_id: jobDetails.id
+    }
+
+    try {
+      var response = await apiCall(
+        ApiConstants.methods.POST,
+        ApiConstants.endPoints.ApplyJob,
+        body
+      );
+
+      if (response.isAxiosError == true) {
+        console.log('Axios error')
+        setLoader(false)
+        alert(response.response.data.error.messages.map(val => val + '\n'))
+      }
+      else {
+        setLoader(false)
+        setApplyJobModal(true)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
+  }
+
   if (loader == true) {
     return (
       <Loader />
@@ -78,22 +109,18 @@ const IndividualJob = ({ navigation, route }) => {
 
       <CustomModal
         type='confirmation'
-        isVisible={saveJobModal}
-        message={'Job is saved.'}
+        isVisible={saveJobModal == true ? saveJobModal : applyJobModal}
+        message={saveJobModal == true ? 'Job is saved.' : 'Applied'}
         imageSource={require('../../../assets/checked.png')}
         onPressOk={() => {
           navigation.navigate(Constants.screen.SavedJobs)
           setSaveJobModal(false)
           setIsSave(false);
-          setIsSave(false)
+          setApplyJobModal(false)
         }}
-        buttonText='Ok'
       />
 
-      <ImageBackground
-        source={require('../../../assets/grayBg.jpg')}
-        style={styles.bgContainer}
-      >
+      <ImageBackground source={require('../../../assets/grayBg.jpg')} style={styles.bgContainer}>
 
         <HeaderImage />
 
@@ -118,7 +145,7 @@ const IndividualJob = ({ navigation, route }) => {
           </View>
 
           <View style={styles.JobContainer}>
-            <Image source={jobDetail.image_urls ? { uri: jobDetail.image_urls['3x'] } : require('../../../assets/people.jpg')} style={styles.image} />
+            <Image source={jobDetails.image_urls ? { uri: jobDetails.image_urls['3x'] } : require('../../../assets/people.jpg')} style={styles.image} />
 
             <TouchableOpacity style={{ position: 'absolute', top: 12, left: 12 }} onPress={() => navigation.goBack()}>
               <Ionicons name='arrow-back-circle' size={30} color={colors.darkGray} />
@@ -131,7 +158,7 @@ const IndividualJob = ({ navigation, route }) => {
                 numberOfLines={2}
                 style={{ fontSize: 22, fontWeight: 'bold', color: colors.primaryColor, flex: 1, marginRight: 5 }}
               >
-                {jobDetail.employername['name'] ? jobDetail.employername['name'] : null}
+                {jobDetails.employername['name']}
               </Text>
 
               <TouchableOpacity onPress={() => {
@@ -162,7 +189,7 @@ const IndividualJob = ({ navigation, route }) => {
 
                 <View style={{ flexDirection: 'row' }}>
                   <Text style={{ marginRight: 2, color: colors.gray }}>No of Posts:</Text>
-                  <Text style={{ fontWeight: 'bold' }}>{jobDetail.no_of_posts}</Text>
+                  <Text style={{ fontWeight: 'bold' }}>{jobDetails.no_of_posts}</Text>
                 </View>
 
                 <Ionicons name='people' size={22} color={colors.primaryColor} style={{ marginLeft: 3 }} />
@@ -171,7 +198,7 @@ const IndividualJob = ({ navigation, route }) => {
 
             </View>
 
-            <Text style={{ paddingLeft: 15, paddingRight: 15 }}>{jobDetail.description}</Text>
+            <Text style={{ paddingLeft: 15, paddingRight: 15 }}>{jobDetails.description}</Text>
 
             <Divider style={{ marginLeft: 15, marginTop: 15, width: '90%' }} />
 
@@ -179,7 +206,7 @@ const IndividualJob = ({ navigation, route }) => {
               <MaterialIcons name='person' size={25} color={colors.primaryColor} />
             </IconText>
 
-            <Text style={{ marginLeft: 35, marginTop: 2, color: colors.gray }}>{jobDetail.title}</Text>
+            <Text style={{ marginLeft: 35, marginTop: 2, color: colors.gray }}>{jobDetails.title}</Text>
 
             <Divider style={{ marginLeft: 15, marginTop: 15, width: '90%' }} />
 
@@ -188,7 +215,7 @@ const IndividualJob = ({ navigation, route }) => {
             </IconText>
 
             <Text numberOfLines={2} ellipsizeMode='tail' style={{ marginLeft: 35, marginRight: 9, marginTop: 2, color: colors.gray }}>
-              {`${jobDetail.st_address}, ${jobDetail.state}, ${jobDetail.city}, ${jobDetail.zipcode}`}
+              {`${jobDetails.st_address}, ${jobDetails.state}, ${jobDetails.city}, ${jobDetails.zipcode}`}
             </Text>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, marginBottom: 10 }}>
@@ -208,7 +235,9 @@ const IndividualJob = ({ navigation, route }) => {
 
               <Button
                 title='Apply'
-                style={styles.button} />
+                style={styles.button} 
+                onPress={() => applyJob()}
+              />
 
               <Button
                 style={styles.saveButton}
@@ -233,17 +262,11 @@ const IndividualJob = ({ navigation, route }) => {
 }
 
 const styles = StyleSheet.create({
-  bgContainerButtons: {
-    height: 850,
-    //height: Dimensions.get('screen').height + 95,
-    width: Dimensions.get('window').width
-  },
   bgContainer: {
-    height: 800,
+    height: Dimensions.get('screen').height + 70,
     width: Dimensions.get('window').width
   },
   JobContainer: {
-    //flex: 1,
     backgroundColor: colors.white,
     borderRadius: 20,
     borderBottomRightRadius: 40,

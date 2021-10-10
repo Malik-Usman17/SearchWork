@@ -241,7 +241,9 @@ const EmployeeDashboard = ({navigation}) => {
         
         <View style={{borderRadius:5, padding: 2, flexDirection: 'row', justifyContent: 'space-between', backgroundColor: colors.primaryColor, alignItems: 'center'}}>
           <Text style={{marginLeft: 7, fontWeight: 'bold', color: colors.white}}>Most Recent</Text>
-          <TouchableOpacity onPress={() => navigation.navigate(Constants.screen.JobListing)}>
+          <TouchableOpacity 
+            //</View>onPress={() => navigation.navigate(Constants.screen.JobListing)}
+          >
             <Text style={{marginRight: 7, fontWeight: 'bold', color: colors.white, textDecorationLine: 'underline'}}>See All</Text>
           </TouchableOpacity>
         </View>

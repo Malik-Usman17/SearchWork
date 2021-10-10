@@ -1,34 +1,36 @@
-import React, { useState, useCallback } from 'react';
-import { Dimensions, FlatList, Image, ImageBackground, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Axios from 'axios';
+import React, { useState } from 'react';
+import { Dimensions, FlatList, Image, ImageBackground, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
 import HeaderImage from '../../Components/atoms/HeaderImage';
+import Loader from '../../Components/atoms/Loader';
 import MenuIcon from '../../Components/atoms/MenuIcon';
 import ScreenTitle from '../../Components/atoms/ScreenTitle';
 import Button from '../../Components/molecules/Button';
-import LanguagePicker from '../../Components/organisms/LanguagePicker';
-import colors from '../../Constants/colors';
-import Chips from '../../Components/atoms/Chips';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
 import SearchField from '../../Components/molecules/SearchField';
+import LanguagePicker from '../../Components/organisms/LanguagePicker';
+import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
-import { useSelector, useDispatch } from 'react-redux';
-import {userLogin, getJobCategory, jobsCategoryList, getJobList, jobsListing} from '../../redux/slices';
-import { color } from 'react-native-reanimated';
-import { useFocusEffect } from '@react-navigation/core';
+import { getViewJob, jobsListing } from '../../redux/slices';
+import { apiCall } from '../../service/ApiCall';
+import ApiConstants from '../../service/ApiConstants.json';
 
 
 const JobListing = ({navigation, route}) => {
 
   const [dropDown, setDropDown] = useState(false);
   const [lang, setLang] = useState('eng');
+  const [loader, setLoader] = useState(false);
+
+  const dispatch = useDispatch();
   
 
   const {jobSubCategoryId, jobCategoryId} = route.params;
 
   const jobs = useSelector(jobsListing);
-  //console.log('JOBS:',jobs)
+
 
   var myJobs;
   if(jobSubCategoryId != 0){
@@ -38,6 +40,44 @@ const JobListing = ({navigation, route}) => {
     myJobs = jobs.filter((x, index) => x.category_id == jobCategoryId)
   }
 
+
+  const viewJob = async (jobId) => {
+    
+    setLoader(true)
+
+    let queryParams = {
+      id: jobId
+    }
+
+    try {
+      var apiResult = await apiCall(
+        ApiConstants.methods.GET, 
+        ApiConstants.endPoints.ViewJob,
+        {},
+        queryParams
+        )
+
+      if (apiResult.isAxiosError == true) {
+        alert(apiResult.response.data.error.messages.map(val => val+'\n'))
+        setLoader(false)
+      }
+      else {
+        dispatch(getViewJob(apiResult.data.response.data[0]))
+        navigation.navigate(Constants.screen.IndividualJob)
+        setLoader(false)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
+  }
+
+  if (loader == true) {
+    return (
+      <Loader />
+    )
+  }
 
   const jobCard = ({ item }) => {
     return (
@@ -62,7 +102,9 @@ const JobListing = ({navigation, route}) => {
           <TouchableOpacity 
             activeOpacity={0.7} 
             style={styles.viewApplicantsButton} 
-            onPress={() => navigation.navigate(Constants.screen.IndividualJob, {jobDetail: item})}
+            onPress={() => {
+              viewJob(item.id)
+            }}
           >
 
             <View style={{ height: 30, width: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.white }}>
@@ -111,7 +153,7 @@ const JobListing = ({navigation, route}) => {
 
         </HeaderRowContainer>
 
-        <SearchField style={{position: 'absolute', top: 60, marginHorizontal: 15}}/>
+        {/* <SearchField style={{position: 'absolute', top: 60, marginHorizontal: 15}}/> */}
 
         <FlatList
           showsVerticalScrollIndicator={false}
@@ -120,11 +162,11 @@ const JobListing = ({navigation, route}) => {
           renderItem={jobCard}
         />
 
-        <Button 
+        {/* <Button 
           title='See More'
           style={styles.seeMoreButton}
           titleStyle={{fontSize: 12}}
-        />
+        /> */}
 
         <CompanyLabelCard />
 

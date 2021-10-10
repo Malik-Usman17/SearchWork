@@ -12,7 +12,9 @@
       "ViewJob": "/jobs/view",
       "MarkSavedJob": "/save/jobs",
       "SavedJobsList": "/save/list",
-      "DeleteSavedJob": "/save/delete"
+      "DeleteSavedJob": "/save/delete",
+      "ApplyJob": "/apply",
+      "ApplicantsList": "/apply/list"
   },
 
   "methods": {

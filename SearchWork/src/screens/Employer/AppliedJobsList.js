@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dimensions, FlatList, Image, ImageBackground, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
 import HeaderImage from '../../Components/atoms/HeaderImage';
@@ -8,11 +8,27 @@ import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
 import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
+import { apiCall } from '../../service/ApiCall';
+import ApiConstants from '../../service/ApiConstants.json';
+import { useDispatch, useSelector } from 'react-redux';
+import Loader from '../../Components/atoms/Loader';
+import { getSaveJobList, getViewJob, savedJobsList, getApplicantsList, applicants } from '../../redux/slices';
+import { useFocusEffect } from '@react-navigation/native';
+import NoData from '../../Components/organisms/NoData';
+
 
 const AppliedJobsList = ({navigation}) => {
 
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
+  const [loader, setLoader] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const applicantsList = useSelector(applicants);
+  console.log('Applicants List:',applicantsList)
+
+  
 
   const data = [
     {image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.'},
@@ -32,7 +48,7 @@ const AppliedJobsList = ({navigation}) => {
     
     <View style={{marginLeft: 8, flex: 1}}>
       
-      <Text style={styles.jobTitle}>{item.jobTitle}</Text>
+      <Text numberOfLines={1} ellipsizeMode='tail' style={styles.jobTitle}>{item.jobTitle}</Text>
       
       <Text ellipsizeMode='tail' numberOfLines={3} style={{fontSize: 12}}>
         {item.description}
@@ -63,8 +79,70 @@ const AppliedJobsList = ({navigation}) => {
   )
   }
 
+  useFocusEffect(
+    useCallback(() => {
+      async function applicantsList() {
+    
+        setLoader(true)
+    
+        try {
+          var apiResult = await apiCall(
+            ApiConstants.methods.GET, 
+            ApiConstants.endPoints.ApplicantsList,
+            )
+    
+          if (apiResult.isAxiosError == true) {
+            alert(apiResult.response.data.error.messages.map(val => val+'\n'))
+            setLoader(false)
+          }
+          else {
+            dispatch(getApplicantsList(apiResult.data.response.data))
+            setLoader(false)
+          }
+        }
+        catch (error) {
+          console.log('Catch Body:', error);
+          setLoader(false)
+        }
+      }
+      applicantsList()
+    }, [])
+  )
+
+  if(loader == true){
+    return(
+      <Loader />
+    )
+  }
+
+  // async function applicantsList() {
+    
+  //   setLoader(true)
+
+  //   try {
+  //     var apiResult = await apiCall(
+  //       ApiConstants.methods.GET, 
+  //       ApiConstants.endPoints.ApplicantsList,
+  //       )
+
+  //     if (apiResult.isAxiosError == true) {
+  //       alert(apiResult.response.data.error.messages.map(val => val+'\n'))
+  //       setLoader(false)
+  //     }
+  //     else {
+  //       dispatch(getApplicantsList(apiResult.data.response.data))
+  //       setLoader(false)
+  //     }
+  //   }
+  //   catch (error) {
+  //     console.log('Catch Body:', error);
+  //     setLoader(false)
+  //   }
+  // }
+
 
   return(
+    applicantsList != undefined ?
     <View style={styles.container}>
 
       <StatusBar backgroundColor={colors.primaryColor} />
@@ -102,6 +180,8 @@ const AppliedJobsList = ({navigation}) => {
       </ImageBackground>
 
     </View>
+    :
+    <NoData />
   )
 }
 
@@ -137,7 +217,7 @@ const styles = StyleSheet.create({
   jobTitle:{
     color: colors.darkGray, 
     fontSize: 18, 
-    fontWeight: 'bold'
+    fontWeight: 'bold',
   },
   viewApplicantsButton:{
     marginTop: 'auto', 
