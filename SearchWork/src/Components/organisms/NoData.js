@@ -12,6 +12,7 @@ const NoData = () => {
 
 const styles = StyleSheet.create({
   container:{
+    flex: 1,
     backgroundColor: colors.pureWhite,
     alignItems: 'center',
     justifyContent: 'center'

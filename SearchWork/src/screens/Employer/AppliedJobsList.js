@@ -28,27 +28,21 @@ const AppliedJobsList = ({navigation}) => {
   const applicantsList = useSelector(applicants);
   console.log('Applicants List:',applicantsList)
 
-  
-
-  const data = [
-    {image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.'},
-    {image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower'},
-    {image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.'},
-    {image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower'},
-    {image: require('../../../assets/people.jpg'), jobTitle: 'Petrol Pump Filler', description: 'This is petrol pump filler job description, we need hard wroker person, who willing to work with us with dedication and have attitude to work.'},
-    {image: require('../../../assets/people.jpg'), jobTitle: 'Lawn Mower', description: 'Need a person for our company to work as a lawn mower'},
-  ]
-
 
   const jobCard = ({item}) => {
     return(
     <View style={styles.jobContainer}>
 
-    <Image source={item.image} style={styles.jobImage}/>
+      <Image 
+        source={item.image ? {uri: item.image} : require('../../../assets/people.jpg')} 
+        style={styles.jobImage}
+      />
     
     <View style={{marginLeft: 8, flex: 1}}>
       
-      <Text numberOfLines={1} ellipsizeMode='tail' style={styles.jobTitle}>{item.jobTitle}</Text>
+      <Text numberOfLines={1} ellipsizeMode='tail' style={styles.jobTitle}>
+        {item.title}
+      </Text>
       
       <Text ellipsizeMode='tail' numberOfLines={3} style={{fontSize: 12}}>
         {item.description}
@@ -81,9 +75,12 @@ const AppliedJobsList = ({navigation}) => {
 
   useFocusEffect(
     useCallback(() => {
-      async function applicantsList() {
-    
-        setLoader(true)
+      async function getAppliedJobList() {
+
+        if(applicantsList == undefined){
+          setLoader(true)
+        }
+  
     
         try {
           var apiResult = await apiCall(
@@ -105,7 +102,7 @@ const AppliedJobsList = ({navigation}) => {
           setLoader(false)
         }
       }
-      applicantsList()
+      getAppliedJobList()
     }, [])
   )
 
@@ -170,7 +167,7 @@ const AppliedJobsList = ({navigation}) => {
 
         <FlatList
           showsVerticalScrollIndicator={false}
-          data={data}
+          data={applicantsList}
           keyExtractor={(key, index) => index.toString()}
           renderItem={jobCard}
         />
@@ -232,6 +229,6 @@ const styles = StyleSheet.create({
     height: 25,
     width: 25
   }
-})
+});
 
 export default AppliedJobsList;

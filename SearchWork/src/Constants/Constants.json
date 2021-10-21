@@ -27,5 +27,6 @@
         "DrawerContent": "DrawerContent",
         "JobCategory": "JobCategory",
         "ViewJob": "ViewJob"
-    }
+    },
+    "Map": "https://www.google.com/maps/search/"
 }

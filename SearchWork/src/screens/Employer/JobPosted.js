@@ -12,8 +12,8 @@ import { cityStates } from '../../Components/organisms/CityStates';
 import StatePicker from '../../Components/organisms/StatePicker';
 import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from 'react-native-maps';
 import { useSelector, useDispatch } from 'react-redux';
-import { jobPostedSelector, jobsCategoryList, userLogin } from '../../redux/slices';
-import { setJobPost } from '../../redux/slices';
+import { jobPostedSelector, jobsCategoryList, userLogin, setJobPost } from '../../redux/slices';
+//import { setJobPost } from '../../redux/slices';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 //import translate from 'translate-google-api';
@@ -27,13 +27,14 @@ import Loader from '../../Components/atoms/Loader';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import { useRoute } from '@react-navigation/native';
-import { add } from 'react-native-reanimated';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 //import translate from 'google-translate-api';
 //import {GoogleTranslator} from '@translate-tools/core/translators/GoogleTranslator';
 
 
 
 const JobPosted = ({ navigation }) => {
+
   const route = useRoute();
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
@@ -49,28 +50,22 @@ const JobPosted = ({ navigation }) => {
   const [zipCode, setZipCode] = useState('');
   const [address, setAddress] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
-  const [draftModal, setDraftModal] = useState(false);
   const [loader, setLoader] = useState(false);
   const [missingFieldModal, setMissinFieldModal] = useState(false);
   const [missingField, setMissingField] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
+  const [isModal, setisModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(false);
+  const [errorModal, setErrorModal] = useState(false);
 
 
-  const [isModal, setisModal] = useState(false)
-
-  const reduxState = useSelector(jobPostedSelector)
-
-  const isFocused = useIsFocused();
   const dispatch = useDispatch();
 
-  var userDetails = useSelector(userLogin);
   var job = useSelector(jobPostedSelector);
   var jobObj = { ...job }
+  
   const categoryList = useSelector(jobsCategoryList);
-
   const subCategoryItems = categoryList.filter(val => val.category_id_decode == jobCategory)[0]?.subcategories
-
 
   const cities = cityStates.filter((value) => value.state == job.state)
   const cityItems = cities.length > 0 ? cities[0].cities : null
@@ -92,27 +87,56 @@ const JobPosted = ({ navigation }) => {
   jobPostNos != 0 && bodyFormData.append('no_of_posts', jobPostNos)
 
 
-  useEffect(
-    () => {
-      const unsubscribe = navigation.addListener('focus', () => {
-        if ((reduxState.jobTitle != '' || reduxState.address != '' ||
-          reduxState.city != 0 || reduxState.duration != 0 ||
-          reduxState.hourlyPay != '' || reduxState.jobCategory != 0 ||
-          reduxState.jobDescription != '' || reduxState.jobSubCategory != 0 ||
-          reduxState.zipCode != ''
-       ) && (route.name == "JobPosted")) {
-          setisModal(true)
-        }
-        else {
-          setisModal(false)
-        }
-      });
-      // console.log("!!!",route.name);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if ((job.jobTitle != '' || job.address != '' ||
+        job.city != 0 || job.duration != 0 ||
+        job.hourlyPay != '' || job.jobCategory != 0 ||
+        job.jobDescription != '' || job.jobSubCategory != 0 ||
+        job.zipCode != ''
+     ) && (route.name == "JobPosted")) {
+        setisModal(true)
+      }
+      else {
+        setisModal(false)
+      }
+    });
+  }, [navigation, job])
 
-    },
-    [navigation, reduxState],
-  );
 
+  useFocusEffect(
+    useCallback(() => {
+      setJobTitle('');
+      setHourlyPay('');
+      setJobDuration(0);
+      setJobCategory(0);
+      setJobSubCategory(0);
+      setImageUrl('');
+      setJobDescription('');
+      setJobPostNos(0);
+      setAddress('');
+      setStatePicker(0);
+      setCity(0);
+      setZipCode('');
+    }, [])
+  )
+
+  const onCancel = () => {
+    jobObj.jobTitle = '',
+    jobObj.hourlyPay = '',
+    jobObj.duration= 0,
+    jobObj.jobCategory= 0,
+    jobObj.jobSubCategory= 0,
+    jobObj.jobDescription= '',
+    jobObj.noOfEmployees= 0,
+    jobObj.state= 0,
+    jobObj.city= 0,
+    jobObj.zipCode= '',
+    jobObj.address= '',
+    dispatch(setJobPost(jobObj))
+  }
+
+ 
 
   async function jobPosted() {
 
@@ -122,11 +146,13 @@ const JobPosted = ({ navigation }) => {
       var apiResponse = await apiCall(ApiConstants.methods.POST, ApiConstants.endPoints.PostJob, bodyFormData);
 
       if (apiResponse.isAxiosError == true) {
-        console.log('JOB POSST AXIOS ERROR')
+        setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        setErrorModal(true)
         setLoader(false)
       }
       else {
         setLoader(false)
+        setErrorModal(false);
         setSuccessModal(true);
       }
     }
@@ -145,6 +171,12 @@ const JobPosted = ({ navigation }) => {
 
   return (
     <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+
+      <ErrorModal 
+        isVisible={errorModal}
+        message={errorMessage}
+        onPress={() => setErrorModal(false)}
+      />
 
       <CustomModal
         type='confirmation'
@@ -491,7 +523,10 @@ const JobPosted = ({ navigation }) => {
           <Button
             style={styles.button}
             title='Cancel'
-            onPress={() => navigation.goBack()}
+            onPress={() => {
+              navigation.navigate(Constants.screen.EmployerDashboard)
+              onCancel()
+            }}
           />
 
         </View>

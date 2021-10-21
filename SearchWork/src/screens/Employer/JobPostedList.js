@@ -20,6 +20,8 @@ import ApiConstants from '../../service/ApiConstants.json';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Axios from 'axios';
+import ErrorModal from '../../Components/organisms/ErrorModal';
+import NoData from '../../Components/organisms/NoData';
 
 const JobPostedList = ({ navigation }) => {
 
@@ -35,15 +37,17 @@ const JobPostedList = ({ navigation }) => {
   const [deletedConfirmModal, setDeletedConfirmModal] = useState(false);
   const [editJobModal, setEditJobModal] = useState(false);
   const [updateJobItems, setUpdateJobItems] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorModal, setErrorModal] = useState(false);
 
   const dispatch = useDispatch();
   const url = `${ApiConstants.baseUrl}${ApiConstants.endPoints.ViewJob}`
   //console.log('URL:',)
 
-  const jobs = useSelector(jobsListing)
-  
+  const jobs = useSelector(jobsListing);
+  console.log('JOBS:',jobs)
 
-  const getList = async () => {
+  const myJobs = async () => {
     setLoader(true)
 
     if (jobs != undefined) {
@@ -53,16 +57,19 @@ const JobPostedList = ({ navigation }) => {
     try {
       var apiResponse = await apiCall(
         ApiConstants.methods.GET,
-        ApiConstants.endPoints.JobsList,
+        ApiConstants.endPoints.EmployerJobs,
       );
 
       if (apiResponse.isAxiosError == true) {
         console.log('Axios error')
-        setLoader(false)
+        setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        setLoader(false);
+        setErrorModal(true);
       }
       else {
         dispatch(getJobList(apiResponse.data.response.data))
         setLoader(false)
+        setErrorModal(false)
       }
     }
     catch (error) {
@@ -70,6 +77,7 @@ const JobPostedList = ({ navigation }) => {
       setLoader(false)
     }
   }
+  
 
   const viewJob = async (jobId) => {
     setLoader(true)
@@ -132,7 +140,7 @@ const JobPostedList = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      getList();
+      myJobs();
       setPageNo(1)
     }, [])
   )
@@ -218,9 +226,7 @@ const JobPostedList = ({ navigation }) => {
 
   return (
     jobs == undefined || jobs.length == 0 ?
-    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.pureWhite}}>
-      <Image source={require('../../../assets/noData.jpg')} resizeMode='contain' style={{ height: 300, width: 400 }} />
-    </View>
+    <NoData />
     :
     <View style={{ flex: 1 }}>
 
@@ -256,6 +262,12 @@ const JobPostedList = ({ navigation }) => {
           setDeletedConfirmModal(false)
           navigation.navigate(Constants.screen.EmployerDashboard)
         }}
+      />
+
+      <ErrorModal 
+        isVisible={errorModal}
+        message={errorMessage}
+        onPress={() => setErrorModal(false)}
       />      
 
       <StatusBar backgroundColor={colors.primaryColor} />
@@ -298,8 +310,8 @@ const JobPostedList = ({ navigation }) => {
             />
 
             <Button
-              title='Pause Jobs'
-              style={styles.headerButton}
+              title='In Active Jobs'
+              style={{...styles.headerButton, flex: 0.31}}
               titleStyle={{ fontSize: 16 }}
             />
 
@@ -317,7 +329,7 @@ const JobPostedList = ({ navigation }) => {
           refreshControl={
             <RefreshControl
               refreshing={loader}
-              onRefresh={getList}
+              onRefresh={myJobs}
             />
           }
         />

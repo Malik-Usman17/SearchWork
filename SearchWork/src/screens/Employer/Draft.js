@@ -22,6 +22,8 @@ import { jobPostedSelector, jobsCategoryList, setJobPost } from '../../redux/sli
 import Loader from '../../Components/atoms/Loader';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
+import NoData from '../../Components/organisms/NoData';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 
 
 const Draft = ({ navigation }) => {
@@ -33,6 +35,8 @@ const Draft = ({ navigation }) => {
   const [isFieldEmpty, setIsFieldEmpty] = useState(false);
   const [loader, setLoader] = useState(false);
   const[successModal, setSuccessModal] = useState(false);
+  const [errorModal, setErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const job = useSelector(jobPostedSelector);
   const categoryList = useSelector(jobsCategoryList);
@@ -61,6 +65,7 @@ const Draft = ({ navigation }) => {
   bodyFormData.append('zipcode', job.zipCode)
   job.noOfEmployees != 0 && bodyFormData.append('no_of_posts', job.noOfEmployees)
 
+
   async function jobPosted() {
 
     try {
@@ -69,12 +74,14 @@ const Draft = ({ navigation }) => {
       var apiResponse = await apiCall(ApiConstants.methods.POST, ApiConstants.endPoints.PostJob, bodyFormData);
 
       if (apiResponse.isAxiosError == true) {
-        console.log('DRAFT JOB POST AXIOS ERROR')
+        setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        setErrorModal(true)
         setLoader(false)
       }
       else {
         setLoader(false)
         setSuccessModal(true);
+        setErrorModal(false)
       }
     }
     catch (error) {
@@ -87,6 +94,40 @@ const Draft = ({ navigation }) => {
     return (
       <Loader />
     )
+  }
+
+  const onCancel = () => {
+    jobObj.jobTitle = '',
+    jobObj.hourlyPay = '',
+    jobObj.duration= 0,
+    jobObj.jobCategory= 0,
+    jobObj.jobSubCategory= 0,
+    jobObj.jobDescription= '',
+    jobObj.noOfEmployees= 0,
+    jobObj.state= 0,
+    jobObj.city= 0,
+    jobObj.zipCode= '',
+    jobObj.address= '',
+    dispatch(setJobPost(jobObj))
+  }
+
+  const pickFromGallery = () => {
+    launchImageLibrary({
+      mediaType: 'photo',
+      maxHeight: 500,
+      maxWidth: 500
+    }, (response) => {
+      if(response?.didCancel){
+        setImageUrl('')
+      }
+      else if (response?.errorMessage){
+        console.log('Error:',response?.errorMessage)
+      }
+      else{
+        const source = response?.assets[0].uri
+        setImageUrl(source)
+      }
+    })
   }
 
 
@@ -139,41 +180,11 @@ const Draft = ({ navigation }) => {
               buttonText='Ok'
             />
 
-        {/* {
-          (jobObj.jobTitle == '' || jobObj.hourlyPay == '' || jobObj.duration == 0 || jobObj.jobCategory == 0 || jobObj.jobSubCategory == 0 || jobObj.jobDescription == '' || jobObj.noOfEmployees == 0 || jobObj.state == 0 || jobObj.city == 0 || jobObj.zipCode == '' || jobObj.address == '') ?
-            <CustomModal
-              type='confirmation'
-              isVisible={modalVisible}
-              message='Some fields are missing.'
-              imageSource={require('../../../assets/warning.png')}
-              onPressOk={() => setModalVisible(false)}
-              buttonText='Ok'
+            <ErrorModal 
+              isVisible={errorModal}
+              message={errorMessage}
+              onPress={() => setErrorModal(false)}
             />
-            :
-            <CustomModal
-              type='confirmation'
-              isVisible={successModal}
-              message='Job has been successfully created.'
-              imageSource={require('../../../assets/checked.png')}
-              onPressOk={() => {
-                setSuccessModal(false)
-                navigation.navigate(Constants.screen.JobPostedList)
-                jobObj.jobTitle = ''
-                jobObj.hourlyPay = ''
-                jobObj.duration = 0
-                jobObj.jobCategory = 0
-                jobObj.jobSubCategory = 0
-                jobObj.jobDescription = ''
-                jobObj.noOfEmployees = 0
-                jobObj.state = 0
-                jobObj.city = 0
-                jobObj.zipCode = ''
-                jobObj.address = ''
-                dispatch(setJobPost(jobObj))
-              }}
-              buttonText='Ok'
-            />
-        } */}
 
         <StatusBar backgroundColor={colors.primaryColor} />
 
@@ -297,7 +308,7 @@ const Draft = ({ navigation }) => {
                 <MaterialIcons name='cloud-upload' size={18} color={colors.gray} />
                 <Text style={imageUrl == '' ? styles.emptyUploadImageText : { color: colors.gray, opacity: 0.7 }}>Upload Image</Text>
                 {
-                  imageUrl != '' ? <Image source={imageUrl} style={{ height: 40, width: 50, borderRadius: 5 }} />
+                  imageUrl != '' ? <Image source={{ uri: imageUrl }} style={{ height: 40, width: 50, borderRadius: 5 }} />
                     : null
                 }
               </View>
@@ -308,23 +319,7 @@ const Draft = ({ navigation }) => {
                 iconName={'cloud-upload'}
                 title='Upload'
                 onPress={() => {
-                  let options;
-                  launchImageLibrary(options = {
-                    mediaType: 'photo',
-                    includeBase64: true
-                  }, (response) => {
-                    //console.log('Response:',response)
-
-                    if (response.didCancel) {
-                      console.log('User cancelled image picker');
-                    } else if (response.errorMessage) {
-                      console.log('Error:', response.errorMessage)
-                    } else {
-                      const source = { uri: response.assets[0].uri }
-                      setImageUrl(source)
-                      //setImageFileName(response.assets[0].fileName)
-                    }
-                  })
+                  pickFromGallery()
                 }}
               />
             </View>
@@ -340,7 +335,6 @@ const Draft = ({ navigation }) => {
               onChangeText={(val) => {
                 jobObj.jobDescription = val
                 dispatch(setJobPost(jobObj))
-                //setDescription(val)
               }}
             />
             <Text style={{ alignSelf: 'flex-end', color: colors.darkGray, fontWeight: 'bold', fontSize: 12 }}>
@@ -404,7 +398,7 @@ const Draft = ({ navigation }) => {
               {
                 cities.length > 0 ?
                   cityItems.map((val, index) => (
-                    <Picker.Item key={index} label={val.city} value={val.city} />
+                    <Picker.Item key={index} label={val.city} value={val.city} style={{fontSize: 14}}/>
                   ))
                   : null
               }
@@ -425,7 +419,7 @@ const Draft = ({ navigation }) => {
 
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5, marginLeft: 7 }}>
               <TouchableOpacity
-                onPress={() => Linking.openURL(`https://www.google.com/maps/search/${job.address}, ${job.state}, ${job.city}, ${job.zipCode}`)
+                onPress={() => Linking.openURL(`${Constants.Map}${job.address}, ${job.state}, ${job.city}, ${job.zipCode}`)
                 .catch(err => console.error('An error occurred', err))
               }
               >
@@ -457,7 +451,10 @@ const Draft = ({ navigation }) => {
             <Button
               style={styles.button}
               title='Cancel'
-              onPress={() => navigation.goBack()}
+              onPress={() => {
+                onCancel()
+                navigation.navigate(Constants.screen.EmployerDashboard)
+              }}
             />
 
           </View>

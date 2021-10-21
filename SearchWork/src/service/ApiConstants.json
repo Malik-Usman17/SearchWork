@@ -14,7 +14,9 @@
       "SavedJobsList": "/save/list",
       "DeleteSavedJob": "/save/delete",
       "ApplyJob": "/apply",
-      "ApplicantsList": "/apply/list"
+      "ApplicantsList": "/apply/list",
+      "ViewProfile": "/applicant/viewuser",
+      "EmployerJobs": "/jobs/myjobs"
   },
 
   "methods": {

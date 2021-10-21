@@ -32,6 +32,7 @@ const LoginScreen = ({navigation}) => {
   const [loader, setLoader] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [validEmail, setValidEmail] = useState(true);
+  const [isEmptyField, setIsEmptyField] = useState(false);
 
   const credentials = useSelector(userCredential);
   const rememberMeCheck = useSelector(rememberMeOperation); 
@@ -62,6 +63,7 @@ const LoginScreen = ({navigation}) => {
       else{
         dispatch(login(apiResponse.data.response.data))
         setLoader(false)
+        setIsEmptyField(false)
         Axios.defaults.headers.common['Authorization'] = `Bearer ${apiResponse.data.response.data.access_token}`;
         
         if(apiResponse.data.response.data.type == 'employer'){
@@ -100,7 +102,10 @@ const LoginScreen = ({navigation}) => {
       <CustomModal 
         isVisible={modalVisible}
         type = 'confirmation'
-        onPressOk={() => setModalVisible(false)}
+        onPressOk={() => {
+          setModalVisible(false)
+          setIsEmptyField(true)
+        }}
         message={(email != '' || credentials.email != '') && (password != ''  || credentials.password != '') ? 'Invalid Email or Password.' : 'Some fields are missing.'}
         imageSource={require('../../assets/warning.png')}
         buttonText='Ok'
@@ -164,6 +169,7 @@ const LoginScreen = ({navigation}) => {
                   <Text style={{ fontSize: 12, color: colors.gray, fontWeight: '700' }}>Part Time - Full Time</Text>
 
                   <InputField
+                    textStyle={{color: isEmptyField == true && email == '' ? 'red' : colors.primaryColor}}
                     title='Email'
                     placeholder='Email Address'
                     iconName='mail'
@@ -187,7 +193,8 @@ const LoginScreen = ({navigation}) => {
 
                   {validEmail == false && <Text style={{marginLeft: 7, fontWeight: 'bold', color: 'red'}}>Invalid Email Address</Text>}
                   
-                  <PasswordField 
+                  <PasswordField
+                    titleStyle={{color: isEmptyField == true && password == '' ? 'red' : colors.primaryColor}} 
                     title='Password'
                     placeholder='Password'
                     secureTextEntry={eye ? true : false}

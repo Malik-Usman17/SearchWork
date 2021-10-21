@@ -23,9 +23,12 @@ import { useIsFocused } from '@react-navigation/native';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import Loader from '../../Components/atoms/Loader';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 
 
 const UpdateJob = ({ navigation, route }) => {
+
+  const {params} = route.params
 
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
@@ -38,33 +41,25 @@ const UpdateJob = ({ navigation, route }) => {
   const [address, setAddress] = useState('');
   const [statePicker, setStatePicker] = useState(0);
   const [city, setCity] = useState(0);
-  const [jobPostNos, setJobPostNos] = useState(0);
-  const [pay, setPay] = useState('');
+  const [jobPostNos, setJobPostNos] = useState(0);;
   const [imageUrl, setImageUrl] = useState('');
-  const [imageFileName, setImageFileName] = useState('');
-  const [employeesNo, setEmployeesNo] = useState(0);
   const [zipCode, setZipCode] = useState('');
-  const [modalVisible, setModalVisible] = useState(false);
   const [updateJobModal, setUpdateJobModal] = useState(false);
   const [loader, setLoader] = useState(false);
   const [missingFieldModal, setMissingFieldModal] = useState(false);
-  
-  const job = useSelector(jobPostedSelector);
-  const jobCategoryList = useSelector(jobsCategoryList);
-  
+  const [errorModal, setErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
   const isFocused = useIsFocused();
   const dispatch = useDispatch();
 
-  const {params} = route.params
-
-  console.log('IMAGE:',imageUrl)
-
-
-  const subCategoryItems = jobCategoryList?.filter(val => val.category_id_decode == jobCategory)[0]?.subcategories
-
-  var jobObj = { ...job }
   
-
+  //const job = useSelector(jobPostedSelector);
+  
+  const jobCategoryList = useSelector(jobsCategoryList);
+  const subCategoryItems = jobCategoryList?.filter(val => val.category_id_decode == jobCategory)[0]?.subcategories
+  
+  
   const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
 
@@ -83,7 +78,6 @@ const UpdateJob = ({ navigation, route }) => {
     setZipCode(params.zipcode)
   }, [isFocused])
 
-  console.log('Image Url',imageUrl)
 
   var bodyFormData = new FormData();
   bodyFormData.append('id', params.id)
@@ -100,7 +94,6 @@ const UpdateJob = ({ navigation, route }) => {
   bodyFormData.append('zipcode', zipCode)
   jobPostNos != 0 && bodyFormData.append('no_of_posts', jobPostNos)
 
-  //console.log('Form Data:',bodyFormData)
 
   const updateJob = async () => {
     setLoader(true)
@@ -113,8 +106,8 @@ const UpdateJob = ({ navigation, route }) => {
       );
 
       if (apiResponse.isAxiosError == true) {
-        console.log('Update Job Axios error')
-        alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        setErrorModal(true)
         setLoader(false)
       }
       else {
@@ -132,6 +125,25 @@ const UpdateJob = ({ navigation, route }) => {
     return (
       <Loader />
     )
+  }
+
+  const pickFromGallery = () => {
+    launchImageLibrary({
+      mediaType: 'photo',
+      maxHeight: 500,
+      maxWidth: 500
+    }, (response) => {
+      if(response?.didCancel){
+        setImageUrl('')
+      }
+      else if (response?.errorMessage){
+        console.log('Error:',response?.errorMessage)
+      }
+      else{
+        const source = response?.assets[0].uri
+        setImageUrl(source)
+      }
+    })
   }
 
 
@@ -160,6 +172,12 @@ const UpdateJob = ({ navigation, route }) => {
             setZipCode('')
           }}
           buttonText='Ok'
+        />
+
+        <ErrorModal 
+          isVisible={errorModal}
+          message={errorMessage}
+          onPress={() => setErrorModal(false)}
         />
 
         <CustomModal 
@@ -284,24 +302,25 @@ const UpdateJob = ({ navigation, route }) => {
               iconName={'cloud-upload'}
               title='Upload'
               onPress={() => {
-                let options;
-                launchImageLibrary(options={
-                  mediaType: 'photo',
-                  maxHeight: 500,
-                  maxWidth: 500
-                }, (response) => {
-                  if(response.didCancel){
-                    console.log('User cancelled image picker');
-                    setImageUrl('')
-                  } else if (response.errorMessage){
-                    console.log('Error:',response.errorMessage)
-                  }else{
-                    const source = response?.assets[0].uri
-                    //const source = {uri: response.assets[0].uri}
-                    setImageUrl(source)
-                    //setImageFileName(response.assets[0].fileName)
-                  }
-                })
+                pickFromGallery()
+                // let options;
+                // launchImageLibrary(options={
+                //   mediaType: 'photo',
+                //   maxHeight: 500,
+                //   maxWidth: 500
+                // }, (response) => {
+                //   if(response.didCancel){
+                //     console.log('User cancelled image picker');
+                //     setImageUrl('')
+                //   } else if (response.errorMessage){
+                //     console.log('Error:',response.errorMessage)
+                //   }else{
+                //     const source = response?.assets[0].uri
+                //     //const source = {uri: response.assets[0].uri}
+                //     setImageUrl(source)
+                //     //setImageFileName(response.assets[0].fileName)
+                //   }
+                // })
               }}
             />
            </View>

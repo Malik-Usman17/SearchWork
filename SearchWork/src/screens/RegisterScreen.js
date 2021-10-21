@@ -1,32 +1,31 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
-import { Dimensions, Image, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { color } from 'react-native-reanimated';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import CompanyLabel from '../Components/atoms/CompanyLabel';
-import HeaderImage from '../Components/atoms/HeaderImage';
-import Logo from '../Components/atoms/Logo';
-import Button from '../Components/molecules/Button';
+import { DateFormat } from '../Components/atoms/DateFormat';
 import Divider from '../Components/atoms/Divider';
-import InputField from '../Components/molecules/InputField';
-import FixedContainer from '../Components/molecules/FixedContainer';
-import LanguagePicker from '../Components/organisms/LanguagePicker';
-import PasswordField from '../Components/molecules/PasswordField';
-import colors from '../Constants/colors';
-import StatePicker from '../Components/organisms/StatePicker';
-import {cityStates} from '../Components/organisms/CityStates';
-import CustomPicker from '../Components/organisms/CustomPicker';
-import {DateFormat} from '../Components/atoms/DateFormat';
-import Constants from '../Constants/Constants.json';
-import ProfilePicture from '../Components/atoms/ProfilePicture';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { CommonActions } from '@react-navigation/native';
-import { useDispatch, useSelector } from 'react-redux';
+import HeaderImage from '../Components/atoms/HeaderImage';
 import Loader from '../Components/atoms/Loader';
-import {apiCall} from '../service/ApiCall';
-import ApiConstants from '../service/ApiConstants.json';
+import Logo from '../Components/atoms/Logo';
+import ProfilePicture from '../Components/atoms/ProfilePicture';
+import Button from '../Components/molecules/Button';
+import FixedContainer from '../Components/molecules/FixedContainer';
+import InputField from '../Components/molecules/InputField';
+import PasswordField from '../Components/molecules/PasswordField';
+import { cityStates } from '../Components/organisms/CityStates';
 import CustomModal from '../Components/organisms/CustomModal';
+import CustomPicker from '../Components/organisms/CustomPicker';
+import LanguagePicker from '../Components/organisms/LanguagePicker';
+import StatePicker from '../Components/organisms/StatePicker';
+import colors from '../Constants/colors';
+import Constants from '../Constants/Constants.json';
+import { apiCall } from '../service/ApiCall';
+import ApiConstants from '../service/ApiConstants.json';
 
 const RegisterScreen = ({navigation}) => {
 
@@ -55,6 +54,7 @@ const RegisterScreen = ({navigation}) => {
   const [errorMessage, setErrorMessage] = useState('');
   const [errorModal, setErrorModal] = useState(false);
   const [imageSelection, setImageSelection] = useState(false);
+  const [isFieldEmpty, setIsFieldEmpty] = useState(false);
 
   const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
@@ -73,10 +73,6 @@ const RegisterScreen = ({navigation}) => {
 
   const showDatepicker = () => {
     showMode('date');
-  };
-
-  const showTimepicker = () => {
-    showMode('time');
   };
 
   var bodyFormData = new FormData();
@@ -110,6 +106,7 @@ const RegisterScreen = ({navigation}) => {
       }
       else{
         setModalVisible(!modalVisible)
+        setIsFieldEmpty(false)
         setLoader(false) 
       }
     }
@@ -185,7 +182,6 @@ const RegisterScreen = ({navigation}) => {
     }, (response) => {
       if(response?.didCancel){
         setImageUrl('')
-        //console.log('if block',response?.didCancel)
       }
       else if(response?.errorMessage){
         console.log('Error:',response?.errorMessage)
@@ -220,9 +216,11 @@ const RegisterScreen = ({navigation}) => {
           setCity(0);
           setPassword('');
           setConfirmPassword('');
+          setIsFieldEmpty(false);
           }
           else{
             setModalVisible(false)
+            setIsFieldEmpty(true)
           } 
         }}
         message={fieldsMissingCheck()}
@@ -350,12 +348,10 @@ const RegisterScreen = ({navigation}) => {
                             
                             </View>
                           }
-
-                          
-
                         </View>
 
                         <InputField
+                          textStyle={{ color: isFieldEmpty == true && fullName == '' ? 'red' : colors.primaryColor}}
                           title={register == false ? 'Full Name': 'Full Name / Business Name'}
                           placeholder={register == false ? 'Enter Your Name': 'Enter your Name / Business Name'}
                           iconName='person'
@@ -364,6 +360,7 @@ const RegisterScreen = ({navigation}) => {
                         />
 
                         <InputField
+                          textStyle={{ color: isFieldEmpty == true && email == '' ? 'red' : colors.primaryColor}}
                           title='Email'
                           placeholder='Email Address'
                           iconName='mail'
@@ -386,13 +383,13 @@ const RegisterScreen = ({navigation}) => {
                        {validEmail == false  && <Text style={{marginLeft: 7, fontWeight: 'bold', color: 'red'}}>Invalid Email Address</Text>}
 
                         <InputField
+                          textStyle={{ color: isFieldEmpty == true && phone == '' ? 'red' : colors.primaryColor}}
                           title='Phone'
                           placeholder='Phone Number'
                           keyboardType='phone-pad'
                           maxLength={12}
                           iconName='phone-portrait'
                           value={phone == '' ? '+1'+phone : phone}
-                          //value={phone == '' ? '+1'+' '+phone : phone}
                           onChangeText={setPhone}
                         />
 
@@ -437,19 +434,21 @@ const RegisterScreen = ({navigation}) => {
                       {
                         register == false && (
                           <CustomPicker
+                            pickerTitleStyle={{ color: isFieldEmpty == true && gender == 0 ? 'red' : colors.primaryColor}}
                             pickerTitle='Gender'
                             label='Select Gender' 
                             pickerContainerStyle={{marginTop: 10, flex: 0.49}}
                             selectedValue={gender}
                             onValueChange={(itemValue, itemIndex) => setGender(itemValue)}
                           >
-                            <Picker.Item label={'Male'} value={'male'}/>
-                            <Picker.Item label={'Female'} value={'female'}/>
+                            <Picker.Item style={{fontSize: 14}} label={'Male'} value={'male'}/>
+                            <Picker.Item style={{fontSize: 14}} label={'Female'} value={'female'}/>
                           </CustomPicker>
                         )
                       }
 
                         <InputField
+                          textStyle={{ color: isFieldEmpty == true && address == '' ? 'red' : colors.primaryColor}}
                           inputFieldStyle={address.length > 35 && {height: Dimensions.get('window').height * 0.078}}
                           title='Address'
                           placeholder='Your Full Address'
@@ -460,7 +459,8 @@ const RegisterScreen = ({navigation}) => {
                           onChangeText={setAddress}
                         />
 
-                          <StatePicker 
+                          <StatePicker
+                            pickerTitleStyle={{ color: isFieldEmpty == true && statePicker == 0 ? 'red' : colors.primaryColor}} 
                             pickerContainerStyle={{marginTop: 10, flex: 0.49}}
                             items={cityStates}
                             selectedValue={statePicker}
@@ -470,6 +470,7 @@ const RegisterScreen = ({navigation}) => {
                           />
 
                           <CustomPicker
+                            pickerTitleStyle={{ color: isFieldEmpty == true && city == 0 ? 'red' : colors.primaryColor}}
                             pickerTitle='City'
                             label='Select City' 
                             pickerContainerStyle={{marginTop: 10, flex: 0.49}}
@@ -492,7 +493,8 @@ const RegisterScreen = ({navigation}) => {
                             }
                           </CustomPicker>
 
-                        <InputField 
+                        <InputField
+                          textStyle={{ color: isFieldEmpty == true && zipCode == '' ? 'red' : colors.primaryColor}} 
                           title='Zip Code'
                           placeholder='Zip Code'
                           maxLength={5}
@@ -502,6 +504,7 @@ const RegisterScreen = ({navigation}) => {
                         />
 
                         <PasswordField
+                          titleStyle={{ color: isFieldEmpty == true && password == '' ? 'red' : colors.primaryColor}}
                           title='Password'
                           placeholder='Set Password'
                           secureTextEntry={eye ? true : false}
@@ -513,6 +516,7 @@ const RegisterScreen = ({navigation}) => {
 
 
                         <PasswordField
+                          titleStyle={{ color: isFieldEmpty == true && confirmPassword == '' ? 'red' : colors.primaryColor}}
                           title='Confirm Password'
                           placeholder='Confirm Password'
                           secureTextEntry={confirmEye ? true : false}

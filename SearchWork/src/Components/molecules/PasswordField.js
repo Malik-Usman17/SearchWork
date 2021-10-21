@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Dimensions } from 
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import colors from '../../Constants/colors';
 
-const PasswordField = ({title, placeholder, secureTextEntry, onPress, iconName, value, onChangeText}) => {
+const PasswordField = ({title, titleStyle, placeholder, secureTextEntry, onPress, iconName, value, onChangeText}) => {
   return(
     <View style={{ marginTop: 10 }}>
 
-      <Text style={styles.title}>{title}</Text>
+      <Text style={[styles.title, titleStyle]}>{title}</Text>
 
       <View style={styles.inputFieldContainer}>
 

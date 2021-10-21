@@ -4,7 +4,6 @@ export const DateFormat = (date) => {
   var Dated = date.getDate()
   var year = date.getFullYear();
   var dateFormat = monthName+' '+Dated+' '+year
-  //var dateFormat = Dated+' '+monthName+' '+year
   return dateFormat
 }
 
