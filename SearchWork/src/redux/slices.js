@@ -24,7 +24,8 @@ const initialState = {
   jobsList : [],
   viewJob: null,
   savedJobList: [],
-  applicants: []
+  applicants: [],
+  profile: null
 }
 
 export const slices = createSlice({
@@ -61,11 +62,14 @@ export const slices = createSlice({
     },
     getApplicantsList: (state, action) => {
       state.applicants = action.payload
+    },
+    getProfile: (state, action) => {
+      state.profile = action.payload
     }
   }
 });
 
-export const { setJobPost, login, isRememberMe, saveUserCredential, getJobCategory, getJobList, getViewJob, getSaveJobList, getApplicantsList } = slices.actions;
+export const { setJobPost, login, isRememberMe, saveUserCredential, getJobCategory, getJobList, getViewJob, getSaveJobList, getApplicantsList, getProfile } = slices.actions;
 
 //Selectors
 export const jobPostedSelector = (state) => state.nav.jobPosted;
@@ -77,5 +81,6 @@ export const jobsListing = (state) => state.nav.jobsList;
 export const jobViewDetails = (state) => state.nav.viewJob;
 export const savedJobsList = (state) => state.nav.savedJobList;
 export const applicants = (state) => state.nav.applicants;
+export const applicantProfile = (state) => state.nav.profile;
 
 export default slices.reducer;

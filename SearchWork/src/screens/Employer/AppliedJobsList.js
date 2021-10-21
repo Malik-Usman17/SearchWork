@@ -15,6 +15,7 @@ import Loader from '../../Components/atoms/Loader';
 import { getSaveJobList, getViewJob, savedJobsList, getApplicantsList, applicants } from '../../redux/slices';
 import { useFocusEffect } from '@react-navigation/native';
 import NoData from '../../Components/organisms/NoData';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 
 
 const AppliedJobsList = ({navigation}) => {
@@ -22,6 +23,8 @@ const AppliedJobsList = ({navigation}) => {
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
   const [loader, setLoader] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorModal, setErrorModal] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -51,7 +54,7 @@ const AppliedJobsList = ({navigation}) => {
       <TouchableOpacity 
         activeOpacity={0.7} 
         style={styles.viewApplicantsButton}
-        onPress={() => navigation.navigate(Constants.screen.Applicants)}
+        onPress={() => navigation.navigate(Constants.screen.Applicants, {appliedUser: item.users})}
       >
         
         <View style={{height: 30, width: 30, borderRadius: 15, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.white}}>
@@ -81,7 +84,6 @@ const AppliedJobsList = ({navigation}) => {
           setLoader(true)
         }
   
-    
         try {
           var apiResult = await apiCall(
             ApiConstants.methods.GET, 
@@ -89,7 +91,8 @@ const AppliedJobsList = ({navigation}) => {
             )
     
           if (apiResult.isAxiosError == true) {
-            alert(apiResult.response.data.error.messages.map(val => val+'\n'))
+            setErrorMessage(apiResult.response.data.error.messages.map(val => val+'\n'))
+            setErrorModal(true)
             setLoader(false)
           }
           else {
@@ -112,37 +115,18 @@ const AppliedJobsList = ({navigation}) => {
     )
   }
 
-  // async function applicantsList() {
-    
-  //   setLoader(true)
-
-  //   try {
-  //     var apiResult = await apiCall(
-  //       ApiConstants.methods.GET, 
-  //       ApiConstants.endPoints.ApplicantsList,
-  //       )
-
-  //     if (apiResult.isAxiosError == true) {
-  //       alert(apiResult.response.data.error.messages.map(val => val+'\n'))
-  //       setLoader(false)
-  //     }
-  //     else {
-  //       dispatch(getApplicantsList(apiResult.data.response.data))
-  //       setLoader(false)
-  //     }
-  //   }
-  //   catch (error) {
-  //     console.log('Catch Body:', error);
-  //     setLoader(false)
-  //   }
-  // }
-
 
   return(
     applicantsList != undefined ?
     <View style={styles.container}>
 
       <StatusBar backgroundColor={colors.primaryColor} />
+
+      <ErrorModal
+        isVisible={errorModal} 
+        message={errorMessage}
+        onPress={() => setErrorModal(false)}
+      />
 
       <ImageBackground source={require('../../../assets/grayBg.jpg')} style={styles.bg}>
 

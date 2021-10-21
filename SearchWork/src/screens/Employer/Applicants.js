@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { View, Text, FlatList, ImageBackground, StyleSheet, StatusBar, Dimensions, TouchableOpacity } from "react-native";
 import colors from "../../Constants/colors";
 import AntDesign from 'react-native-vector-icons/AntDesign';
@@ -6,13 +6,62 @@ import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Divider from '../../Components/atoms/Divider';
 import Button from "../../Components/molecules/Button";
 import Constants from '../../Constants/Constants.json';
+import NoData from "../../Components/organisms/NoData";
+import { apiCall } from '../../service/ApiCall';
+import ApiConstants from '../../service/ApiConstants.json';
+import { getProfile } from "../../redux/slices";
+import { useSelector, useDispatch } from 'react-redux';
+import Loader from "../../Components/atoms/Loader";
+import ErrorModal from "../../Components/organisms/ErrorModal";
 
-const Applicants = ({navigation}) => {
+const Applicants = ({navigation, route}) => {
 
-  const applicants = [
-    {name: 'John Doe'}, {name: 'Malik Muhammad Usman'},
-    {name: 'Emma'}, {name: 'Bob MARLEY'}, {name: 'David Bob'}, {name: 'Alex John'},{name: 'Bob MARLEY'},
-  ]
+  const [loader, setLoader] = useState(false);
+  const [errorModal, setErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const dispatch = useDispatch();
+
+  const {appliedUser} = route.params;
+
+  async function applicantProfile(userId) {
+
+    setLoader(true)
+
+    let queryParams = {
+      id: userId
+    }
+
+    try {
+      var apiResult = await apiCall(
+        ApiConstants.methods.GET, 
+        ApiConstants.endPoints.ViewProfile,
+        {},
+        queryParams
+        )
+
+      if (apiResult.isAxiosError == true) {
+        setErrorMessage(apiResult.response.data.error.messages.map(val => val+'\n'))
+        setErrorModal(true)
+        setLoader(false)
+      }
+      else {
+        dispatch(getProfile(apiResult.data.response.data[0]))
+        setLoader(false)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
+  }
+
+  if(loader == true){
+    return(
+      <Loader />
+    )
+  }
+
 
   const ApplicantsList = ({item}) => {
     return(
@@ -25,7 +74,11 @@ const Applicants = ({navigation}) => {
         <TouchableOpacity 
           activeOpacity={0.6} 
           style={styles.resumeButton} 
-          onPress={() => navigation.navigate(Constants.screen.Resume)}>
+          onPress={() => {
+            applicantProfile(item.id)
+            navigation.navigate(Constants.screen.Resume)
+          }}
+        >
           <Text style={{fontWeight: 'bold', padding: 8}}>View Resume</Text>
         </TouchableOpacity>
              
@@ -39,10 +92,21 @@ const Applicants = ({navigation}) => {
     )
   }
 
+  
+
   return(
+    // {
+      appliedUser.length > 0 ?
+    
     <View style={{flex: 1}}>
 
       <StatusBar backgroundColor={colors.primaryColor}/>
+
+      <ErrorModal 
+        isVisible={errorModal}
+        message={errorMessage}
+        onPress={() => setErrorModal(false)}
+      />
 
       <ImageBackground source={require('../../../assets/grayBg.jpg')} style={styles.bg}>
 
@@ -57,8 +121,9 @@ const Applicants = ({navigation}) => {
             
             <View style={styles.flatListContainer}>
              <FlatList
-                showsVerticalScrollIndicator={false} 
-                data={applicants}
+                showsVerticalScrollIndicator={false}
+                data={appliedUser} 
+                //data={applicants}
                 keyExtractor={(key, index) => index.toString()}
                 renderItem={ApplicantsList}
                 ItemSeparatorComponent={Separator}
@@ -75,6 +140,8 @@ const Applicants = ({navigation}) => {
       </ImageBackground>
       
     </View>
+    : <NoData />
+  // }
   )
 }
 

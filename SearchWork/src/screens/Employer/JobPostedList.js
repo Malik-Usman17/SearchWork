@@ -41,11 +41,8 @@ const JobPostedList = ({ navigation }) => {
   const [errorModal, setErrorModal] = useState(false);
 
   const dispatch = useDispatch();
-  const url = `${ApiConstants.baseUrl}${ApiConstants.endPoints.ViewJob}`
-  //console.log('URL:',)
 
   const jobs = useSelector(jobsListing);
-  console.log('JOBS:',jobs)
 
   const myJobs = async () => {
     setLoader(true)
@@ -61,7 +58,6 @@ const JobPostedList = ({ navigation }) => {
       );
 
       if (apiResponse.isAxiosError == true) {
-        console.log('Axios error')
         setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
         setLoader(false);
         setErrorModal(true);
@@ -69,7 +65,6 @@ const JobPostedList = ({ navigation }) => {
       else {
         dispatch(getJobList(apiResponse.data.response.data))
         setLoader(false)
-        setErrorModal(false)
       }
     }
     catch (error) {
@@ -77,31 +72,63 @@ const JobPostedList = ({ navigation }) => {
       setLoader(false)
     }
   }
-  
 
   const viewJob = async (jobId) => {
     setLoader(true)
 
-    try {
-      var apiResult = await Axios.get(`${ApiConstants.baseUrl}${ApiConstants.endPoints.ViewJob}`, {params: {id: jobId}})
+    let queryParams = {
+      id: jobId
+    }
 
-      if (apiResult.isAxiosError == true) {
-        console.log('Axios error')
-        alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
+    try{
+      var apiResult = await apiCall(
+        ApiConstants.methods.GET,
+        ApiConstants.endPoints.ViewJob,
+        {},
+        queryParams
+      )
+
+      if(apiResult.isAxiosError == true){
+        setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        errorModal(true)
         setLoader(false)
       }
-      else {
-        console.log('Api Result:',apiResult.data.response.data)
+      else{
         dispatch(getViewJob(apiResult.data.response.data[0]))
         navigation.navigate(Constants.screen.ViewJob)
         setLoader(false)
       }
     }
-    catch (error) {
-      console.log('Catch Body:', error);
+    catch(error){
+      console.log('Catch Body:',error)
       setLoader(false)
     }
   }
+  
+
+  // const viewJob = async (jobId) => {
+  //   setLoader(true)
+
+  //   try {
+  //     var apiResult = await Axios.get(`${ApiConstants.baseUrl}${ApiConstants.endPoints.ViewJob}`, {params: {id: jobId}})
+
+  //     if (apiResult.isAxiosError == true) {
+  //       console.log('Axios error')
+  //       alert(apiResponse.response.data.error.messages.map(val => val+'\n'))
+  //       setLoader(false)
+  //     }
+  //     else {
+  //       console.log('Api Result:',apiResult.data.response.data)
+  //       dispatch(getViewJob(apiResult.data.response.data[0]))
+  //       navigation.navigate(Constants.screen.ViewJob)
+  //       setLoader(false)
+  //     }
+  //   }
+  //   catch (error) {
+  //     console.log('Catch Body:', error);
+  //     setLoader(false)
+  //   }
+  // }
 
 
 
@@ -157,12 +184,21 @@ const JobPostedList = ({ navigation }) => {
       <View style={styles.jobContainer}>
 
         <View style={styles.jobImageContainer}>
+          {
+            item.image_urls ?
+             <Image source={{uri: item.image_urls['3x']}} style={{...StyleSheet.absoluteFillObject}}/>
+            :
+            <Image resizeMode='contain' source={require('../../../assets/logo.png')} style={styles.jobImage}/>
+          }
+        </View>
+
+        {/* <View style={styles.jobImageContainer}>
           <Image
             resizeMode='contain'
             source={item.image_urls ? { uri: item.image_urls['3x'] } : require('../../../assets/logo.png')}
             style={styles.jobImage}
           />
-        </View>
+        </View> */}
 
         <View style={{ marginLeft: 8, flex: 1 }}>
 
@@ -407,6 +443,7 @@ const styles = StyleSheet.create({
     width: 100,
   },
   jobImageContainer: {
+    overflow: 'hidden',
     height: 120,
     width: 120,
     borderRadius: 15,

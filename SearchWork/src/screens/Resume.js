@@ -12,13 +12,15 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import IconText from '../Components/atoms/IconText';
 import Logo from '../Components/atoms/Logo';
 import Button from '../Components/molecules/Button';
-import {userLogin} from '../redux/slices';
+import {userLogin, applicantProfile} from '../redux/slices';
 import { useSelector } from 'react-redux';
 
 
 const Resume = () => {
 
   const user = useSelector(userLogin);
+  const profile = useSelector(applicantProfile)
+  console.log('PROFILE:',profile)
   //console.log('User Info on Resume Screen:',user)
 
   return (
@@ -37,7 +39,12 @@ const Resume = () => {
 
             <View style={{ alignItems: 'center' }}>
               <View style={{ position: 'absolute', top: -50 }}>
-                <ProfilePicture iconSize={30}/>
+                <ProfilePicture
+                  imageSource={profile?.image_urls['3x']}
+                  imageStyle={{height:80, width: 80, borderRadius: 40, borderColor: colors.white, borderWidth: 2}}
+                  disabled={true} 
+                  iconSize={30}
+                />
               </View>
             </View>
 
@@ -47,11 +54,11 @@ const Resume = () => {
               textStyle={{ color: colors.white, fontWeight: 'bold' }}
             />
           
-            <IconText text='john123@gmail.com'>
+            <IconText text={profile?.email}>
               <Ionicons name='mail' size={16} color={colors.white} />
             </IconText>
 
-            <IconText text='+9213456789'>
+            <IconText text={profile?.phone}>
               <Ionicons name='phone-portrait' size={16} color={colors.white} />
             </IconText>
           
@@ -62,7 +69,7 @@ const Resume = () => {
               textStyle={{ color: colors.white, fontWeight: 'bold' }}
             />
 
-            <IconText text='124, Blvd Street, Houston, Texas, 57601'>
+            <IconText text={`${profile?.address}, ${profile?.city}, ${profile?.state}, ${profile?.zipcode}`}>
               <Ionicons name='md-location-sharp' size={16} color={colors.white} />
             </IconText>
 
@@ -85,7 +92,7 @@ const Resume = () => {
           <View style={styles.rightColumn}>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Text style={styles.name}>John Doe</Text>
+              <Text style={styles.name}>{profile?.name}</Text>
               <Image source={require('../../assets/resumeChip.png')} resizeMode='contain'  style={{ width: 40, height: 80 }} />
             </View>
 
@@ -151,10 +158,12 @@ const Resume = () => {
             onPress={() => {
               let phoneNumber = '';
               if(Platform.OS === 'android'){
-                phoneNumber = 'tel:${+923102769940}'
+                //phoneNumber = 'tel:${+923102769940}'
+                phoneNumber = `tel:${profile?.phone}`
               }
               else{
-                phoneNumber = 'telprompt:${+923102769940}'
+                phoneNumber = `telprompt:${profile?.phone}`
+                //phoneNumber = 'telprompt:${+923102769940}'
               }
               Linking.openURL(phoneNumber)
             }}
@@ -165,7 +174,8 @@ const Resume = () => {
             iconName='email' 
             style={{...styles.button, borderTopRightRadius: 30, borderTopLeftRadius: 0, backgroundColor: 'red'}}
             titleStyle={{marginLeft: 10}}
-            onPress={() => Linking.openURL('mailto: example@gmail.com')}
+            onPress={() => Linking.openURL(`mailto: ${profile?.email}`)}
+            //onPress={() => Linking.openURL('mailto: example@gmail.com')}
           />
         </View>
       }

@@ -29,7 +29,6 @@ const ViewJob = ({navigation}) => {
   const dispatch = useDispatch();
 
   const jobDetails = useSelector(jobViewDetails);
-  console.log('JOb details:',jobDetails)
 
   return(
     <ScrollView style={{backgroundColor: colors.white}} showsVerticalScrollIndicator={false}>
