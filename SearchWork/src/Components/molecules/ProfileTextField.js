@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Dimensions, TextInput } from 'react-native';
 import Divider from '../atoms/Divider';
 
-const ProfileTextField = ({title, multiline, keyboardType, value, onChangeText, editable }) => {
+const ProfileTextField = ({title, multiline, keyboardType, value, onChangeText, editable, maxLength }) => {
   return (
     <View style={{paddingHorizontal: 10}}>
     
@@ -12,6 +12,7 @@ const ProfileTextField = ({title, multiline, keyboardType, value, onChangeText, 
       
       <TextInput
         style={styles.textField}
+        maxLength={maxLength}
         value={value}
         onChangeText={onChangeText}
         editable={editable}

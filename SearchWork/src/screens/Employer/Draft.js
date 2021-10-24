@@ -3,9 +3,9 @@ import React, { useState } from 'react';
 import { Dimensions, Image, ImageBackground, Linking, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { isEnabled, setEnabled } from 'react-native/Libraries/Performance/Systrace';
 import { useDispatch, useSelector } from 'react-redux';
 import HeaderImage from '../../Components/atoms/HeaderImage';
+import Loader from '../../Components/atoms/Loader';
 import MenuIcon from '../../Components/atoms/MenuIcon';
 import ScreenTitle from '../../Components/atoms/ScreenTitle';
 import Button from '../../Components/molecules/Button';
@@ -14,16 +14,14 @@ import InputField from '../../Components/molecules/InputField';
 import { cityStates } from '../../Components/organisms/CityStates';
 import CustomModal from '../../Components/organisms/CustomModal';
 import CustomPicker from '../../Components/organisms/CustomPicker';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import StatePicker from '../../Components/organisms/StatePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
 import { jobPostedSelector, jobsCategoryList, setJobPost } from '../../redux/slices';
-import Loader from '../../Components/atoms/Loader';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
-import NoData from '../../Components/organisms/NoData';
-import ErrorModal from '../../Components/organisms/ErrorModal';
 
 
 const Draft = ({ navigation }) => {
@@ -34,7 +32,7 @@ const Draft = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [isFieldEmpty, setIsFieldEmpty] = useState(false);
   const [loader, setLoader] = useState(false);
-  const[successModal, setSuccessModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
   const [errorModal, setErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -454,6 +452,7 @@ const Draft = ({ navigation }) => {
               onPress={() => {
                 onCancel()
                 navigation.navigate(Constants.screen.EmployerDashboard)
+                setIsFieldEmpty(false)
               }}
             />
 

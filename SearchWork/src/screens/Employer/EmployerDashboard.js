@@ -16,6 +16,7 @@ import { userLogin, getJobCategory, getJobList, jobsListing, jobsCategoryList } 
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import { useFocusEffect } from '@react-navigation/native';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 
 
 const EmployerDashboard = ({ navigation }) => {
@@ -23,6 +24,8 @@ const EmployerDashboard = ({ navigation }) => {
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
   const [loader, setLoader] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorModal, setErrorModal] = useState(false);
   
   const dispatch = useDispatch();
 
@@ -47,7 +50,8 @@ const EmployerDashboard = ({ navigation }) => {
           );
   
           if(response.isAxiosError == true){
-            console.log('Axios error') 
+            setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
+            setErrorModal(true)
             setLoader(false)
           }
           else{
@@ -60,36 +64,7 @@ const EmployerDashboard = ({ navigation }) => {
           setLoader(false)
         }
       }
-
-      // async function getJobsList(){
-      //   setLoader(true)
-  
-      //   if(jobs != undefined){
-      //     setLoader(false)
-      //   }
-  
-      //   try{
-      //     var apiResponse = await apiCall(
-      //       ApiConstants.methods.GET, 
-      //       ApiConstants.endPoints.JobsList,
-      //     );
-  
-      //     if(apiResponse.isAxiosError == true){
-      //       console.log('Axios error') 
-      //       setLoader(false)
-      //     }
-      //     else{
-      //       dispatch(getJobList(apiResponse.data.response.data))
-      //       setLoader(false)
-      //     }
-      //   }
-      //   catch(error){
-      //     console.log('Catch Body:',error);
-      //     setLoader(false)
-      //   }
-      // }
       getJobsCategory();
-     //getJobsList();
     }, [])
   )
 
@@ -104,6 +79,12 @@ const EmployerDashboard = ({ navigation }) => {
     <ScrollView style={{ backgroundColor: colors.white, flex: 1 }} showsVerticalScrollIndicator={false}>
 
       <StatusBar backgroundColor={colors.primaryColor}/>
+
+      <ErrorModal 
+        isVisible={errorModal}
+        message={errorMessage}
+        onPress={() => setErrorModal(false)}
+      />
 
       <View style={styles.headerContainer}>
 

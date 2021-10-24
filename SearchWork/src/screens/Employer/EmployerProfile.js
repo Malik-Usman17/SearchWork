@@ -11,29 +11,35 @@ import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import ProfileTextField from '../../Components/molecules/ProfileTextField';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { userLogin } from '../../redux/slices';
+import { apiCall } from '../../service/ApiCall';
+import ApiConstants from '../../service/ApiConstants.json';
+import ErrorModal from '../../Components/organisms/ErrorModal';
+import Loader from '../../Components/atoms/Loader';
+import CustomModal from '../../Components/organisms/CustomModal';
+
 
 
 const EmployerProfile = ({ navigation }) => {
 
   const user = useSelector(userLogin);
- // console.log('User Info:',user)
 
+  const [loader, setLoader] = useState(false);
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
-  const [website, setWebsite] = useState('www.searchwork.com')
-  const [emailAddress, setEmailAddress] = useState('testinguser@mail.com')
-  const [contactNo, setContactNo] = useState('03101234567')
-  const [businessName, setBusinessName] = useState('My Testing Business')
-  const [address, setAddress] = useState('mehmoodabad Gate street 2 Karachi 75460')
-  const [state, setState] = useState('Texas')
-  const [city, setCity] = useState('Houston')
-  const [zipCode, setZipCode] = useState('75601')
+  const [emailAddress, setEmailAddress] = useState(user?.email)
+  const [contactNo, setContactNo] = useState(user?.phone)
+  const [businessName, setBusinessName] = useState(user?.name)
+  const [address, setAddress] = useState(user?.address)
+  const [state, setState] = useState(user?.state)
+  const [city, setCity] = useState(user?.city)
+  const [zipCode, setZipCode] = useState(user?.zipcode.toString())
   const [editFields, setEditFields] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
 
-  console.log('Image Url:',imageUrl)
 
   function profileImage(){
     if(imageUrl == ''){
@@ -46,59 +52,103 @@ const EmployerProfile = ({ navigation }) => {
     }
   }
 
+  const pickFromGallery = () => {
+    launchImageLibrary({
+      mediaType: 'photo',
+      maxHeight: 500,
+      maxWidth: 500
+    }, (response) => {
+      if(response?.didCancel){
+        setImageUrl('')
+      }
+      else if (response?.errorMessage){
+        console.log('Error:',response?.errorMessage)
+      }
+      else{
+        const source = response?.assets[0].uri
+        setImageUrl(source)
+      }
+    })
+  }
 
-  console.log('Checking:',profileImage())
+  var bodyFormData = new FormData();
+
+   businessName != '' && bodyFormData.append('name', businessName)
+  contactNo != '' && bodyFormData.append('phone', contactNo)
+  imageUrl != '' && bodyFormData.append('image', {uri: imageUrl, name: 'profile_picture', type: 'image/*'})
+  address != '' && bodyFormData.append('address', address)
+  state != '' && bodyFormData.append('state', state)
+  city != '' && bodyFormData.append('city', city)
+
+  
+
+  async function updateProfile(){
+    setLoader(true)
+
+    try{
+      var response = await apiCall(
+        ApiConstants.methods.POST, 
+        ApiConstants.endPoints.UpdateProfile,
+        bodyFormData
+      );
+
+      if(response.isAxiosError == true){
+        setModalMessage(response.response.data.error.messages.map(val => val+'\n'))
+        //setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
+        setModalVisible(true)
+        //setErrorModal(true)
+        setLoader(false)
+      }
+      else{
+        setModalMessage('Profile has been successfully updated')
+        setModalVisible(true)
+        setLoader(false)
+      }
+    }
+    catch(error){
+      console.log('Catch Body:',error);
+      setLoader(false)
+    }
+  }
+
+  if(loader == true){
+    return(
+      <Loader />
+    )
+  }
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.white }} showsVerticalScrollIndicator={false}>
+    <ScrollView 
+      style={{backgroundColor: colors.white, flex: 1 }} 
+      showsVerticalScrollIndicator={false}
+    >
 
       <StatusBar backgroundColor={colors.primaryColor} />
 
-      <HeaderImage style={{ height: Dimensions.get('window').height * 0.29 }} />
+      <CustomModal
+        type='confirmation'
+        message={modalMessage} 
+        imageSource={modalMessage != 'Profile has been successfully updated' ? require('../../../assets/warning.png') : require('../../../assets/checked.png')}
+        isVisible={modalVisible}
+        onPressOk={() => setModalVisible(false)}
+      />
+
+      <HeaderImage style={{ height: Dimensions.get('window').height * 0.21 }} />
 
       <HeaderRowContainer>
         <MenuIcon onPress={() => navigation.openDrawer()} />
 
-        <View>
-          {/* <ProfilePicture 
-            iconSize={40} 
-            onPress={() => {
-              launchImageLibrary({
-                mediaType: 'photo',
-              }, (response) => {
-                //console.log('Response:',response)
-                if(response?.didCancel){
-                  setImageUrl('')
-                }else if (response?.errorMessage){
-                  console.log('Error:',response?.errorMessage)
-                } else {
-                  setImageUrl(response?.assets[0].uri)
-                }
-              })
-            }}
-            imageSource={imageUrl != '' ? imageUrl : undefined}
-            imageStyle={{height: 80, width: 80, borderRadius: 40, borderWidth: 2, borderColor: colors.white}}
-          /> */}
+        <View style={{alignItems: 'center'}}>
 
-          <ProfilePicture 
-            iconSize={40} 
-            onPress={() => {
-              launchImageLibrary({
-                mediaType: 'photo',
-              }, (response) => {
-                if(response?.didCancel){
-                  setImageUrl('')
-                }else if (response?.errorMessage){
-                  console.log('Error:',response?.errorMessage)
-                } else {
-                  setImageUrl(response?.assets[0].uri)
-                }
-              })
-            }}
+          <ProfilePicture
+            disabled={editFields == true ? false : true} 
+            iconSize={40}
+            onPress={() => pickFromGallery()} 
             imageSource={profileImage()}
-            imageStyle={{height: 80, width: 80, borderRadius: 40, borderWidth: 2, borderColor: colors.white}}
+            imageStyle={styles.profileImage}
           />
 
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.white }}>John Doe</Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.white }}>{user?.name}</Text>
         </View>
 
         <LanguagePicker
@@ -112,16 +162,13 @@ const EmployerProfile = ({ navigation }) => {
 
       </HeaderRowContainer>
 
-      <Text style={{alignSelf: 'center', paddingHorizontal: 9, color: colors.white, position: 'absolute', top: 120 }}>
-        Lorem ipsum dolognr sit amet, consectetur adipiscings elit. Etiam pellentesque erat vitae nibh feugiat sollicitudin.
-      </Text>
-
       <View style={styles.infoContainer}>
 
         <Heading title='BUSINESS INFORMATION' style={{marginTop: 5}}/>
 
         <ProfileTextField 
           title='BUSINESS NAME'
+          maxLength={30}
           multiline={true}
           value={businessName}
           onChangeText={setBusinessName}
@@ -142,15 +189,7 @@ const EmployerProfile = ({ navigation }) => {
           value={emailAddress}
           onChangeText={setEmailAddress}
           keyboardType='email-address'
-          editable={editFields}
-        />
-
-        <ProfileTextField 
-          title='WEBSITE'
-          multiline={true}
-          value={website}
-          onChangeText={setWebsite}
-          editable={editFields}
+          editable={false}
         />
 
         <Heading title='BUSINESS LOCATION' style={{ marginTop: 16 }} />
@@ -178,7 +217,7 @@ const EmployerProfile = ({ navigation }) => {
         /> 
 
         <ProfileTextField 
-          title='ADDRESS'
+          title='ZIP CODE'
           multiline={true}
           value={zipCode}
           onChangeText={setZipCode}
@@ -187,44 +226,37 @@ const EmployerProfile = ({ navigation }) => {
 
       </View>
 
-      <View style={{ flexDirection: 'row' }}>
+    <View style={{height: 100}}>
+      <View style={{flexDirection: 'row', marginTop: 'auto'}}>
         <Button 
           title='Edit Profile' 
           style={styles.button} 
-          onPress={() => setEditFields(!editFields)}
+          onPress={() => setEditFields(true)}
         />
 
         <Button
           title='Saved'
           style={{ ...styles.button, borderTopRightRadius: 30, borderTopLeftRadius: 0, backgroundColor: colors.primaryColor }}
+          onPress={() => {
+            updateProfile()
+            setEditFields(false)
+          }}
         />
       </View>
-      
-      {/* <View style={{borderBottomLeftRadius: 20, marginTop: 10, height: 100, marginBottom: 10, backgroundColor: 'pink', overflow:'hidden'}}>
-        <Text>hooooooolljiedhviu</Text>
-      <ImageBackground source={require('../../../assets/bgUpG.jpg')} style={{flex: 1}}>
-        <Text>Hello there</Text>
-      </ImageBackground>
-      </View> */}
-
-      {/* <Image source={require('../../../assets/bgUpG.jpg')} style={{height: 120, width: '100%', borderRadius: 20, borderWidth: 2, borderColor: 'white'}}/> */}
+      </View>
 
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('screen').height * 0.3,
-  },
   infoContainer: {
     paddingVertical: 9,
     paddingHorizontal: 9
   },
   button: {
-    flex: 0.5,
-    height: Dimensions.get('screen').height * 0.08,
+    flex: 1,
+    height: Dimensions.get('window').height * 0.093,
     borderTopLeftRadius: 30,
     borderRadius: 0
   },
@@ -237,7 +269,14 @@ const styles = StyleSheet.create({
     borderColor: colors.white,
     justifyContent: 'center',
     alignItems: 'center'
+  },
+  profileImage:{
+    height: 80, 
+    width: 80, 
+    borderRadius: 40, 
+    borderWidth: 2, 
+    borderColor: colors.white
   }
-})
+});
 
 export default EmployerProfile;

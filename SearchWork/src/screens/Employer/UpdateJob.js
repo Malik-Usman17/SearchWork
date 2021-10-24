@@ -70,7 +70,7 @@ const UpdateJob = ({ navigation, route }) => {
     setDescription(params.description)
     setJobCategory(params.category_id)
     setSubJobCategory(params.sub_category_id ? params.sub_category_id : 0)
-    setImageUrl(params.image_urls ? params.image_urls['3x'] : '')
+    //setImageUrl(params.image_urls ? params.image_urls['3x'] : '')
     setJobPostNos(params.no_of_posts ? params.no_of_posts : '0')
     setAddress(params.st_address)
     setStatePicker(params.state)
@@ -78,6 +78,7 @@ const UpdateJob = ({ navigation, route }) => {
     setZipCode(params.zipcode)
   }, [isFocused])
 
+  //console.log('PARAMS IMAGE:',params.image_urls)
 
   var bodyFormData = new FormData();
   bodyFormData.append('id', params.id)
@@ -287,12 +288,16 @@ const UpdateJob = ({ navigation, route }) => {
            <Text style={styles.uploadImageText}>Upload Image</Text>
 
            <View style={{flexDirection: 'row', marginTop: 4, justifyContent: 'space-between'}}>
-             <View style={imageUrl == '' ? styles.EmptyUploadImageContainer : styles.UploadImageContainer}>
+             <View style={(imageUrl == '' && params.image_urls == undefined) ? styles.EmptyUploadImageContainer : styles.UploadImageContainer}>
                <MaterialIcons name='cloud-upload' size={18} color={colors.gray}/>
                <Text style={imageUrl == '' ? styles.emptyUploadImageText : {color: colors.gray, opacity: 0.7}}>Upload Image</Text>
                {
-              imageUrl != '' ? <Image source={{uri: imageUrl}} style={{height: 40, width: 50, borderRadius: 5}}/>
-            : null
+              imageUrl != '' || params.image_urls != undefined ? 
+                <Image 
+                  source={(params.image_urls != undefined && imageUrl == '') ? {uri: params.image_urls['3x']} : {uri: imageUrl}} 
+                  style={{height: 40, width: 50, borderRadius: 5}}
+                />
+              : null
             }
              </View>
 

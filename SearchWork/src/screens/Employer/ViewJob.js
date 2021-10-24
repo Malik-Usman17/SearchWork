@@ -161,7 +161,6 @@ const ViewJob = ({navigation}) => {
 
 const styles = StyleSheet.create({
   bg:{
-    //flex: 1
     height: Dimensions.get('window').height + 80
   },
   JobContainer: {

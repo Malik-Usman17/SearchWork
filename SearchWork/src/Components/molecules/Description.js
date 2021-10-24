@@ -23,11 +23,11 @@ const styles = StyleSheet.create({
     alignItems: 'center', 
   },
   labelText:{
-    fontSize: 17, 
-    width: Dimensions.get('window').width * 0.38
+    fontSize: 16, 
+    width: Dimensions.get('window').width * 0.35
   },
   valueText:{
-    marginLeft: 20, 
+    marginLeft: 10, 
     fontSize: 15,  
     flex: 1 
   },
