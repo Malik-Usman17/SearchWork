@@ -19,6 +19,7 @@ import Constants from '../../Constants/Constants.json';
 import { jobViewDetails } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 
 
 const IndividualJob = ({ navigation, route }) => {
@@ -29,11 +30,12 @@ const IndividualJob = ({ navigation, route }) => {
   const [isSave, setIsSave] = useState(false);
   const [loader, setLoader] = useState(false);
   const [applyJobModal, setApplyJobModal] = useState(false);
+  const [errorModal, setErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const jobDetails = useSelector(jobViewDetails);
-  //console.log('Job Testing:',jobDetails);
 
-  const url = `https://www.google.com/maps/search/${jobDetails.st_address}, ${jobDetails.city}, ${jobDetails.state}, ${jobDetails.zipcode}`
+  const url = `${Constants.url.Map}${jobDetails.st_address}, ${jobDetails.city}, ${jobDetails.state}, ${jobDetails.zipcode}`
 
 
   async function saveJob() {
@@ -51,9 +53,10 @@ const IndividualJob = ({ navigation, route }) => {
       );
 
       if (response.isAxiosError == true) {
-        console.log('Axios error')
+        setErrorMessage(response.response.data.error.messages.map(val => val + '\n'))
         setLoader(false)
-        alert(response.response.data.error.messages.map(val => val + '\n'))
+        setErrorModal(true)
+        //alert(response.response.data.error.messages.map(val => val + '\n'))
       }
       else {
         setLoader(false)
@@ -81,9 +84,11 @@ const IndividualJob = ({ navigation, route }) => {
       );
 
       if (response.isAxiosError == true) {
-        console.log('Axios error')
+        setErrorMessage(response.response.data.error.messages.map(val => val + '\n'))
+        setErrorModal(true)
+        // console.log('Axios error')
         setLoader(false)
-        alert(response.response.data.error.messages.map(val => val + '\n'))
+        // alert(response.response.data.error.messages.map(val => val + '\n'))
       }
       else {
         setLoader(false)
@@ -118,6 +123,12 @@ const IndividualJob = ({ navigation, route }) => {
           setIsSave(false);
           setApplyJobModal(false)
         }}
+      />
+
+      <ErrorModal 
+        isVisible={errorModal}
+        message={errorMessage}
+        onPress={() => setErrorModal(false)}
       />
 
       <ImageBackground source={require('../../../assets/grayBg.jpg')} style={styles.bgContainer}>
@@ -161,14 +172,13 @@ const IndividualJob = ({ navigation, route }) => {
                 {jobDetails.employername['name']}
               </Text>
 
-              <TouchableOpacity onPress={() => {
-                saveJob()
-                setIsSave(!isSave)
+              <TouchableOpacity disabled={true} onPress={() => {
+                // saveJob()
+                // //setIsSave(!isSave)
               }}
               >
                 <FontAwesome
-                  //name='bookmark'
-                  name={isSave == true ? "bookmark" : 'bookmark-o'}
+                  name={jobDetails.is_saved == 1 ? "bookmark" : 'bookmark-o'}
                   color={colors.primaryColor}
                   size={26}
                 />
@@ -240,11 +250,13 @@ const IndividualJob = ({ navigation, route }) => {
               />
 
               <Button
-                style={styles.saveButton}
+                disabled={jobDetails.is_saved == '1' ? true : false}
+                style={{...styles.saveButton,  backgroundColor: jobDetails.is_saved == '1' ? colors.gray : colors.yellow}}
                 titleStyle={{ color: 'black' }}
                 title='Save Job'
                 iconName='bookmark'
                 iconColor='black'
+                onPress={() => saveJob()}
               />
 
             </View>

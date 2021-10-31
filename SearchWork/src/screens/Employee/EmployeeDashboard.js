@@ -12,13 +12,14 @@ import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
 import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
 import { useSelector, useDispatch } from 'react-redux';
-import {userLogin, getJobCategory, jobsCategoryList, getJobList, jobsListing} from '../../redux/slices';
+import {userLogin, getJobCategory, jobsCategoryList, getJobList, jobsListing, getLoggedInProfile} from '../../redux/slices';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Loader from '../../Components/atoms/Loader';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import { useIsFocused } from '@react-navigation/native';
 import { useFocusEffect } from '@react-navigation/native';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 
 
 const EmployeeDashboard = ({navigation}) => {
@@ -26,6 +27,8 @@ const EmployeeDashboard = ({navigation}) => {
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
   const [loader, setLoader] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorModal, setErrorModal] = useState(false);
 
   const dispatch = useDispatch();
   const isFocused = useIsFocused();
@@ -33,8 +36,6 @@ const EmployeeDashboard = ({navigation}) => {
   const user = useSelector(userLogin)
   const jobsCategory = useSelector(jobsCategoryList);
   const jobs = useSelector(jobsListing);
-  //console.log('JOB CATEGORY:',jobsCategory)
-  //console.log('Jobs Listing:',jobs)
 
 
  useFocusEffect(
@@ -53,7 +54,8 @@ const EmployeeDashboard = ({navigation}) => {
         );
 
         if(response.isAxiosError == true){
-          console.log('Axios error') 
+          setErrorMessage(response.response.data.error.messages.map(val => val + '\n'))
+          setErrorModal(true)
           setLoader(false)
         }
         else{
@@ -94,8 +96,35 @@ const EmployeeDashboard = ({navigation}) => {
         setLoader(false)
       }
     }
+
+    async function getUserProfile(){
+      //setLoader(true)
+
+      try{
+        var response = await apiCall(
+          ApiConstants.methods.GET, 
+          ApiConstants.endPoints.LoggedInUserProfile,
+        );
+
+        if(response.isAxiosError == true){
+          setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
+          setErrorModal(true)
+          setLoader(false)
+        }
+        else{
+          dispatch(getLoggedInProfile(response.data.response.data))
+          setLoader(false)
+        }
+      }
+      catch(error){
+        console.log('Catch Body:',error);
+        setLoader(false)
+      }
+    }
+
     getJobsCategory();
     getJobsList();
+    getUserProfile();
    }, [])
  )
 
@@ -110,6 +139,12 @@ const EmployeeDashboard = ({navigation}) => {
     <ScrollView style={{flex: 1}} showsVerticalScrollIndicator={false}>
 
       <StatusBar backgroundColor={colors.primaryColor}/>
+
+      <ErrorModal 
+        isVisible={errorModal}
+        message={errorMessage}
+        onPress={() => setErrorModal(false)}
+      />
 
       <ImageBackground source={require('../../../assets/grayBg.jpg')} style={styles.bgContainer}>
 

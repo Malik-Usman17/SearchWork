@@ -17,7 +17,8 @@
       "ApplicantsList": "/apply/list",
       "ViewProfile": "/applicant/viewuser",
       "EmployerJobs": "/jobs/myjobs",
-      "UpdateProfile": "/profile-update"
+      "UpdateProfile": "/profile-update",
+      "LoggedInUserProfile": "/profile-view"
   },
 
   "methods": {

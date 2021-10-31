@@ -14,7 +14,7 @@ import ProfilePicture from '../../Components/atoms/ProfilePicture';
 import IconButton from '../../Components/molecules/IconButton';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
-import { userLogin, login } from '../../redux/slices';
+import { userLogin, login, loginUserProfile } from '../../redux/slices';
 import { useDispatch } from 'react-redux';
 import { CommonActions } from '@react-navigation/native';
 
@@ -23,7 +23,7 @@ const DrawerContent = ({ navigation }) => {
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
 
-  const user = useSelector(userLogin)
+  const userProfile = useSelector(loginUserProfile)
   const dispatch = useDispatch();
 
   return (
@@ -44,7 +44,7 @@ const DrawerContent = ({ navigation }) => {
 
           <View style={{ marginRight: 5, alignItems: 'center', justifyContent: 'center' }}>
             <Text style={{ color: colors.white, fontSize: 20, fontWeight: 'bold' }}>Welcome</Text>
-            <Text style={{ color: colors.white, fontSize: 16, fontWeight: 'bold' }}>{user?.name}</Text>
+            <Text style={{ color: colors.white, fontSize: 16, fontWeight: 'bold' }}>{userProfile?.name}</Text>
           </View>
 
 
@@ -52,7 +52,7 @@ const DrawerContent = ({ navigation }) => {
             iconSize={40}
             emptyContainerStyle={styles.profilePicture}
             imageStyle={{ ...styles.profilePicture, borderWidth: 2 }}
-            imageSource={user?.image_urls != undefined && user?.image_urls['3x']}
+            imageSource={userProfile?.image_urls != undefined && userProfile?.image_urls['3x']}
             disabled={true}
           />
 

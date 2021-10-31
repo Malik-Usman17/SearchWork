@@ -10,6 +10,7 @@ import EmployeeProfile from '../screens/Employee/EmployeeProfile';
 import Resume from '../screens/Resume';
 import SavedJobs from '../screens/Employee/SavedJobs';
 import IconContainer from '../Components/molecules/IconContainer';
+import EmployeeResume from '../screens/Employee/EmployeeResume';
 
 
 const BottomTabNavigation = () => {
@@ -79,8 +80,8 @@ const BottomTabNavigation = () => {
       />
 
       <Screen
-        name={Constants.screen.Resume}
-        component={Resume}
+        name={Constants.screen.EmployeeResume}
+        component={EmployeeResume}
         options={{
           tabBarLabel: 'Resume',
           tabBarIcon: ({ focused }) => (

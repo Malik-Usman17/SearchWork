@@ -26,6 +26,9 @@ import colors from '../Constants/colors';
 import Constants from '../Constants/Constants.json';
 import { apiCall } from '../service/ApiCall';
 import ApiConstants from '../service/ApiConstants.json';
+import {saveUserCredential, userCredential} from '../redux/slices';
+import { useDispatch, useSelector } from 'react-redux';
+
 
 const RegisterScreen = ({navigation}) => {
 
@@ -55,6 +58,11 @@ const RegisterScreen = ({navigation}) => {
   const [errorModal, setErrorModal] = useState(false);
   const [imageSelection, setImageSelection] = useState(false);
   const [isFieldEmpty, setIsFieldEmpty] = useState(false);
+
+  const dispatch = useDispatch();
+
+  const credentials = useSelector(userCredential);
+  var credentialFields = { ...credentials }
 
   const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
@@ -92,6 +100,13 @@ const RegisterScreen = ({navigation}) => {
   imageUrl != '' && bodyFormData.append('image', {uri: imageUrl, name: 'profile_picture', type: 'image/*'})
 
 
+  function saveFields(){
+    credentialFields.password = password
+    credentialFields.email = email
+    dispatch(saveUserCredential(credentialFields))
+  }
+
+
   
 
   async function registerUser(){
@@ -103,11 +118,13 @@ const RegisterScreen = ({navigation}) => {
         setErrorModal(true)
         setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
         setLoader(false);
+        saveFields()
       }
       else{
         setModalVisible(!modalVisible)
         setIsFieldEmpty(false)
-        setLoader(false) 
+        setLoader(false)
+        saveFields() 
       }
     }
     catch(error){
@@ -525,6 +542,16 @@ const RegisterScreen = ({navigation}) => {
                           value={confirmPassword}
                           onChangeText={setConfirmPassword}
                         />
+
+                        {/* <Button 
+                          title='Create Account'
+                          style={{marginTop: 15}}
+                          onPress={() => {
+                            credentialFields.email = email
+                            credentialFields.password = password
+                            dispatch(saveUserCredential(credentialFields))
+                          }}
+                        /> */}
 
                         <Button 
                           title='Create Account' 

@@ -3,9 +3,9 @@ import { Dimensions, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import colors from '../../Constants/colors';
 
-const Button = ({title, iconName, style, titleStyle, onPress, iconColor}) => {
+const Button = ({title, iconName, style, titleStyle, onPress, iconColor, disabled}) => {
   return(
-      <TouchableOpacity style={[styles.button, style]} onPress={onPress}>
+      <TouchableOpacity style={[styles.button, style]} onPress={onPress} disabled={disabled}>
         {
           iconName ?
             <MaterialIcons 

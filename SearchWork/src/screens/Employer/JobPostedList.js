@@ -20,6 +20,7 @@ import Constants from '../../Constants/Constants.json';
 import { getJobList, getSaveJobList, getViewJob, jobsListing, savedJobsList } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
+import JobItemCard from '../../Components/organisms/JobItemCard';
 
 const JobPostedList = ({ navigation }) => {
 

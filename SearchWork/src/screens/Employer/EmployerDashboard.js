@@ -1,22 +1,22 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Dimensions, Image, StatusBar, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { Dimensions, Image, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import CompanyLabelCard from '../../Components/atoms/CompanyLabelCard';
 import Divider from '../../Components/atoms/Divider';
 import EmployerLogo from '../../Components/atoms/EmployerLogo';
+import Loader from '../../Components/atoms/Loader';
 import MenuIcon from '../../Components/atoms/MenuIcon';
 import ProfilePicture from '../../Components/atoms/ProfilePicture';
 import BgCard from '../../Components/molecules/BgCard';
 import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
-import Loader from '../../Components/atoms/Loader';
 import Constants from '../../Constants/Constants.json';
-import { useSelector, useDispatch } from 'react-redux';
-import { userLogin, getJobCategory, getJobList, jobsListing, jobsCategoryList } from '../../redux/slices';
+import { getJobCategory, getLoggedInProfile, jobsCategoryList, loginUserProfile } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
-import { useFocusEffect } from '@react-navigation/native';
-import ErrorModal from '../../Components/organisms/ErrorModal';
 
 
 const EmployerDashboard = ({ navigation }) => {
@@ -29,9 +29,8 @@ const EmployerDashboard = ({ navigation }) => {
   
   const dispatch = useDispatch();
 
-
-  const user = useSelector(userLogin);
   const categoryList = useSelector(jobsCategoryList);
+  const userProfile = useSelector(loginUserProfile);
 
   
   useFocusEffect(
@@ -50,8 +49,7 @@ const EmployerDashboard = ({ navigation }) => {
           );
   
           if(response.isAxiosError == true){
-            setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
-            setErrorModal(true)
+            console.log('Job Category Axios Error')
             setLoader(false)
           }
           else{
@@ -64,7 +62,38 @@ const EmployerDashboard = ({ navigation }) => {
           setLoader(false)
         }
       }
+
+      async function getUserProfile(){
+        setLoader(true)
+
+        // if(userProfile != undefined){
+        //   setLoader(false)
+        // }
+  
+        try{
+          var response = await apiCall(
+            ApiConstants.methods.GET, 
+            ApiConstants.endPoints.LoggedInUserProfile,
+          );
+  
+          if(response.isAxiosError == true){
+            setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
+            setErrorModal(true)
+            setLoader(false)
+          }
+          else{
+            dispatch(getLoggedInProfile(response.data.response.data))
+            setLoader(false)
+          }
+        }
+        catch(error){
+          console.log('Catch Body:',error);
+          setLoader(false)
+        }
+      }
+
       getJobsCategory();
+      getUserProfile();
     }, [])
   )
 
@@ -116,7 +145,7 @@ const EmployerDashboard = ({ navigation }) => {
             emptyContainerStyle={styles.profilePicture}
             imageStyle={{...styles.profilePicture, borderWidth: 2}} 
             iconSize={50}
-            imageSource={user?.image_urls != undefined && user?.image_urls['3x']}
+            imageSource={userProfile?.image_urls != undefined && userProfile?.image_urls['3x']}
             disabled={true} 
           />
         </View>
@@ -126,7 +155,7 @@ const EmployerDashboard = ({ navigation }) => {
 
         <View style={{flexDirection: 'row', flexWrap:'wrap', alignItems: 'center', justifyContent: 'center'}}>
           <Text style={{color: colors.darkGray, fontSize: 22, fontWeight: 'bold' }}>Welcome, </Text>
-          <Text style={{color: colors.primaryColor, fontSize: 22, fontWeight: 'bold', flexWrap:'wrap' }}>{user?.name}</Text>
+          <Text style={{color: colors.primaryColor, fontSize: 22, fontWeight: 'bold', flexWrap:'wrap' }}>{userProfile?.name}</Text>
         </View>
 
 

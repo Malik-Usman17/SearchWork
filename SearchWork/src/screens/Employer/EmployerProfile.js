@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dimensions, ImageBackground, Image, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
 import Heading from '../../Components/atoms/Haeding';
 import HeaderImage from '../../Components/atoms/HeaderImage';
@@ -12,39 +12,45 @@ import colors from '../../Constants/colors';
 import ProfileTextField from '../../Components/molecules/ProfileTextField';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 import { useSelector, useDispatch } from 'react-redux';
-import { userLogin } from '../../redux/slices';
+import { userLogin, loginUserProfile, getLoggedInProfile } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import ErrorModal from '../../Components/organisms/ErrorModal';
 import Loader from '../../Components/atoms/Loader';
 import CustomModal from '../../Components/organisms/CustomModal';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 
 const EmployerProfile = ({ navigation }) => {
 
-  const user = useSelector(userLogin);
+
+  const userProfile = useSelector(loginUserProfile);
+
+  const dispatch = useDispatch();
 
   const [loader, setLoader] = useState(false);
   const [lang, setLang] = useState('eng');
   const [dropDown, setDropDown] = useState(false);
-  const [emailAddress, setEmailAddress] = useState(user?.email)
-  const [contactNo, setContactNo] = useState(user?.phone)
-  const [businessName, setBusinessName] = useState(user?.name)
-  const [address, setAddress] = useState(user?.address)
-  const [state, setState] = useState(user?.state)
-  const [city, setCity] = useState(user?.city)
-  const [zipCode, setZipCode] = useState(user?.zipcode.toString())
+  const [emailAddress, setEmailAddress] = useState(userProfile?.email)
+  const [contactNo, setContactNo] = useState(userProfile?.phone)
+  const [businessName, setBusinessName] = useState(userProfile?.name)
+  const [address, setAddress] = useState(userProfile?.address)
+  const [state, setState] = useState(userProfile?.state)
+  const [city, setCity] = useState(userProfile?.city)
+  const [zipCode, setZipCode] = useState(userProfile?.zipcode.toString())
   const [editFields, setEditFields] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [errorModal, setErrorModal] = useState(false)
 
 
   function profileImage(){
     if(imageUrl == ''){
-      if(user?.image_urls != undefined){
-        return user?.image_urls['3x']
+      if(userProfile?.image_urls != undefined){
+        return userProfile?.image_urls['3x']
       }
     }
     else{
@@ -94,9 +100,7 @@ const EmployerProfile = ({ navigation }) => {
 
       if(response.isAxiosError == true){
         setModalMessage(response.response.data.error.messages.map(val => val+'\n'))
-        //setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
         setModalVisible(true)
-        //setErrorModal(true)
         setLoader(false)
       }
       else{
@@ -111,11 +115,47 @@ const EmployerProfile = ({ navigation }) => {
     }
   }
 
+  useFocusEffect(
+    useCallback(() => {
+      async function getUserProfile(){
+        setLoader(true)
+
+        if(userProfile != undefined){
+          setLoader(false)
+        }
+  
+        try{
+          var response = await apiCall(
+            ApiConstants.methods.GET, 
+            ApiConstants.endPoints.LoggedInUserProfile,
+          );
+  
+          if(response.isAxiosError == true){
+            setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
+            setErrorModal(true)
+            setLoader(false)
+          }
+          else{
+            dispatch(getLoggedInProfile(response.data.response.data))
+            setLoader(false)
+          }
+        }
+        catch(error){
+          console.log('Catch Body:',error);
+          setLoader(false)
+        }
+      }
+      getUserProfile();
+    }, [])
+  )
+
   if(loader == true){
     return(
       <Loader />
     )
   }
+
+
 
   return (
     <ScrollView 
@@ -133,6 +173,12 @@ const EmployerProfile = ({ navigation }) => {
         onPressOk={() => setModalVisible(false)}
       />
 
+      <ErrorModal 
+        isVisible={errorModal}
+        message={errorMessage}
+        onPress={() => setErrorModal(false)}
+      />
+
       <HeaderImage style={{ height: Dimensions.get('window').height * 0.21 }} />
 
       <HeaderRowContainer>
@@ -148,7 +194,7 @@ const EmployerProfile = ({ navigation }) => {
             imageStyle={styles.profileImage}
           />
 
-          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.white }}>{user?.name}</Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: colors.white }}>{userProfile?.name}</Text>
         </View>
 
         <LanguagePicker
@@ -218,7 +264,6 @@ const EmployerProfile = ({ navigation }) => {
 
         <ProfileTextField 
           title='ZIP CODE'
-          multiline={true}
           value={zipCode}
           onChangeText={setZipCode}
           editable={editFields}
