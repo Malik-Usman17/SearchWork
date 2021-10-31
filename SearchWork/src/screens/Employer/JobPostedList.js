@@ -21,6 +21,9 @@ import { getJobList, getSaveJobList, getViewJob, jobsListing, savedJobsList } fr
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import JobItemCard from '../../Components/organisms/JobItemCard';
+import commonStyles from '../../commonStyles/commonStyles';
+import SmallButton from '../../Components/atoms/SmallButton';
+
 
 const JobPostedList = ({ navigation }) => {
 
@@ -48,7 +51,6 @@ const JobPostedList = ({ navigation }) => {
   const jobs = useSelector(jobsListing);
   const activeJobs = useSelector(savedJobsList);
 
-  //console.log('Active Jobs:',activeJobs)
 
   const inActiveJobList = jobs.filter((val) => val.is_saved == '0')
   
@@ -267,14 +269,14 @@ const JobPostedList = ({ navigation }) => {
   const jobComponent = ({ item }) => {
 
     return (
-      <View style={styles.jobContainer}>
+      <View style={commonStyles.jobCardContainer}>
 
-        <View style={styles.jobImageContainer}>
+        <View style={commonStyles.jobImageContainer}>
           {
             item.image_urls ?
              <Image source={{uri: item.image_urls['3x']}} style={{...StyleSheet.absoluteFillObject}}/>
             :
-            <Image resizeMode='contain' source={require('../../../assets/logo.png')} style={styles.jobImage}/>
+            <Image resizeMode='contain' source={require('../../../assets/logo.png')} style={commonStyles.jobCardImage}/>
           }
         </View>
 
@@ -284,7 +286,7 @@ const JobPostedList = ({ navigation }) => {
           <Text
             ellipsizeMode='tail'
             numberOfLines={1}
-            style={{ color: colors.darkGray, fontSize: 16, fontWeight: 'bold', flex: 1, marginRight: 5 }}
+            style={commonStyles.jobCardTitle}
           >
             {item.job ? item.job['title'] : item.title}
           </Text>
@@ -313,7 +315,7 @@ const JobPostedList = ({ navigation }) => {
             {item.job ? item.job['description'] : item.description}
           </Text>
 
-          <View style={styles.jobIconsContainer}>
+          <View style={commonStyles.jobIconsContainer}>
             {
               mangaeJobIcons == true ?
                 <>
@@ -435,10 +437,10 @@ const JobPostedList = ({ navigation }) => {
 
           <View style={styles.headerButtonContainer}>
 
-            <Button
+            <SmallButton 
               title='All Jobs'
-              style={{...styles.headerButton, backgroundColor: allJob == true ? colors.white : colors.primaryColor}}
-              titleStyle={{ fontSize: 16, color: allJob == true ? colors.primaryColor : colors.white }}
+              style={{backgroundColor: allJob == true ? colors.white : colors.primaryColor}}
+              titleStyle={{color: allJob == true ? colors.primaryColor : colors.white}}
               onPress={() => {
                 setAllJob(true)
                 setActiveJob(false)
@@ -446,10 +448,10 @@ const JobPostedList = ({ navigation }) => {
               }}
             />
 
-            <Button
+            <SmallButton 
               title='Active Jobs'
-              style={{...styles.headerButton, backgroundColor: activeJob == true ? colors.white : colors.primaryColor}}
-              titleStyle={{ fontSize: 16, color: activeJob == true ? colors.primaryColor : colors.white }}
+              style={{backgroundColor: activeJob == true ? colors.white : colors.primaryColor}}
+              titleStyle={{color: activeJob == true ? colors.primaryColor : colors.white}}
               onPress={() => {
                 activeJobList()
                 setAllJob(false)
@@ -458,10 +460,10 @@ const JobPostedList = ({ navigation }) => {
               }}
             />
 
-            <Button
+            <SmallButton 
               title='In Active Jobs'
-              style={{...styles.headerButton, paddingHorizontal: 3, flex: 0.31, backgroundColor: inActiveJob == true ? colors.white : colors.primaryColor}}
-              titleStyle={{ fontSize: 16, color: inActiveJob == true ? colors.primaryColor : colors.white }}
+              style={{backgroundColor: inActiveJob == true ? colors.white : colors.primaryColor}}
+              titleStyle={{color: inActiveJob == true ? colors.primaryColor : colors.white}}
               onPress={() => {
                 setAllJob(false)
                 setActiveJob(false)
@@ -478,7 +480,6 @@ const JobPostedList = ({ navigation }) => {
         <FlatList
           showsVerticalScrollIndicator={false}
           data={dataList()}
-          //data={jobs}
           renderItem={jobComponent}
           keyExtractor={(key, index) => index.toString()}
           refreshControl={
@@ -512,18 +513,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryColor,
     borderRadius: 20
   },
-  jobContainer: {
-    // margin: 10,
-    // marginRight: 0,
-    marginBottom: 10,
-    // marginTop: 10,
-    padding: 8,
-    borderTopLeftRadius: 20,
-    borderBottomLeftRadius: 20,
-    marginLeft: 10,
-    backgroundColor: colors.white,
-    flexDirection: 'row'
-  },
   manageJobButton: {
     borderRadius: 20,
     marginLeft: 6,
@@ -531,29 +520,11 @@ const styles = StyleSheet.create({
     height: Dimensions.get('window').height * 0.05,
     width: 90
   },
-  jobIconsContainer: {
-    marginTop: 'auto',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-  },
   icons: {
     marginLeft: 6,
     alignItems: 'center'
   },
-  jobImage: {
-    height: 100,
-    width: 100,
-  },
-  jobImageContainer: {
-    overflow: 'hidden',
-    height: 120,
-    width: 120,
-    borderRadius: 15,
-    backgroundColor: colors.primaryColorLight,
-    alignItems: 'center',
-    justifyContent: 'center'
-  }
+
 });
 
 export default JobPostedList;
