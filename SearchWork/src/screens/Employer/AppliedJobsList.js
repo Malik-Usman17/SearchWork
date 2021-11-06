@@ -12,7 +12,7 @@ import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import { useDispatch, useSelector } from 'react-redux';
 import Loader from '../../Components/atoms/Loader';
-import { getSaveJobList, getViewJob, savedJobsList, getApplicantsList, applicants } from '../../redux/slices';
+import {getApplicantsList, applicants } from '../../redux/slices';
 import { useFocusEffect } from '@react-navigation/native';
 import NoData from '../../Components/organisms/NoData';
 import ErrorModal from '../../Components/organisms/ErrorModal';
@@ -29,8 +29,7 @@ const AppliedJobsList = ({navigation}) => {
   const dispatch = useDispatch();
 
   const applicantsList = useSelector(applicants);
-  console.log('Applicants List:',applicantsList)
-
+  
 
   const jobCard = ({item}) => {
     return(
@@ -96,7 +95,8 @@ const AppliedJobsList = ({navigation}) => {
             setLoader(false)
           }
           else {
-            dispatch(getApplicantsList(apiResult.data.response.data))
+            let applicants = apiResult.data.response.data.filter((val) => val.users.length > 0)
+            dispatch(getApplicantsList(applicants))
             setLoader(false)
           }
         }

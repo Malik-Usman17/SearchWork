@@ -26,6 +26,7 @@ const EmployerProfile = ({ navigation }) => {
 
 
   const userProfile = useSelector(loginUserProfile);
+  //console.log('User Profile:',userProfile)
 
   const dispatch = useDispatch();
 

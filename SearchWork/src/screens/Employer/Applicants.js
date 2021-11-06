@@ -1,5 +1,5 @@
 import React, {useState} from "react";
-import { View, Text, FlatList, ImageBackground, StyleSheet, StatusBar, Dimensions, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, ImageBackground, Image, StyleSheet, StatusBar, Dimensions, TouchableOpacity } from "react-native";
 import colors from "../../Constants/colors";
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import FontAwesome from "react-native-vector-icons/FontAwesome";
@@ -66,8 +66,15 @@ const Applicants = ({navigation, route}) => {
   const ApplicantsList = ({item}) => {
     return(
       <View style={styles.applicantContainer}>
-        
-        <FontAwesome name='user' size={30} color={colors.white} style={{marginLeft: 6}}/>
+
+        {
+          item.image ?
+            <Image source={{uri: item.image}} style={{height: 40, width: 40, borderRadius: 20}}/>
+          :
+          <View style={{backgroundColor: colors.lightGray, height: 30, width: 30, borderRadius: 15}}>
+            <FontAwesome name='user' size={25} color={colors.white} style={{marginLeft: 6}}/>
+          </View>
+        }
         
         <Text style={{marginLeft: 8, fontWeight: 'bold', fontSize: 18, color: colors.white, width: 160}}>{item.name}</Text>
         

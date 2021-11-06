@@ -1,31 +1,25 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, ImageBackground, Linking, Image, Dimensions, Platform } from 'react-native';
-import colors from '../Constants/colors';
-import SmallDetails from '../Components/atoms/SmallDetails';
+import { View, Text, ScrollView, StyleSheet, Linking, Image, Dimensions, Platform } from 'react-native';
+import colors from '../../Constants/colors';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Divider from '../Components/atoms/Divider';
-import CompanyLabel from '../Components/atoms/CompanyLabel';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import ProfilePicture from '../Components/atoms/ProfilePicture';
-import Heading from '../Components/atoms/Haeding';
+import Divider from '../../Components/atoms/Divider';
+import CompanyLabel from '../../Components/atoms/CompanyLabel';
+import ProfilePicture from '../../Components/atoms/ProfilePicture';
+import Heading from '../../Components/atoms/Haeding';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import IconText from '../Components/atoms/IconText';
-import Logo from '../Components/atoms/Logo';
-import Button from '../Components/molecules/Button';
-import {userLogin, applicantProfile} from '../redux/slices';
+import IconText from '../../Components/atoms/IconText';
+import Logo from '../../Components/atoms/Logo';
+import Button from '../../Components/molecules/Button';
+import {applicantProfile} from '../../redux/slices';
 import { useSelector } from 'react-redux';
 
 
 const Resume = () => {
 
-  const user = useSelector(userLogin);
   const profile = useSelector(applicantProfile)
-  console.log('PROFILE:',profile)
-  //console.log('User Info on Resume Screen:',user)
-
+  
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.lightGray }} showsVerticalScrollIndicator={false}>
-      {/* <ImageBackground source={require('../../assets/blurBg.png')} style={styles.bg}> */}
 
       <View style={styles.resumeContainer}>
 
@@ -73,29 +67,34 @@ const Resume = () => {
               <Ionicons name='md-location-sharp' size={16} color={colors.white} />
             </IconText>
 
-            <Heading
+            {
+              profile.languages != null ?
+               <>
+                 <Heading
               title='Languages'
               style={{ marginTop: 35, marginBottom: 7, alignSelf: 'flex-start', width: '100%', backgroundColor: colors.primaryColor, alignItems: 'center' }}
               textStyle={{ color: colors.white, fontWeight: 'bold' }}
             />
 
-            <IconText text='English'>
+            <IconText text={profile.languages}>
               <FontAwesome name='language' size={16} color={colors.white} />
             </IconText>
-
-            <IconText text='Spanish'>
-              <FontAwesome name='language' size={16} color={colors.white} />
-            </IconText>
-
+               </>
+            : null
+            }
+            
           </View>
 
           <View style={styles.rightColumn}>
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <Text style={styles.name}>{profile?.name}</Text>
-              <Image source={require('../../assets/resumeChip.png')} resizeMode='contain'  style={{ width: 40, height: 80 }} />
+              <Image source={require('../../../assets/resumeChip.png')} resizeMode='contain'  style={{ width: 40, height: 80 }} />
             </View>
 
+            {
+              profile.objective != null ?
+            <>
             <View style={styles.headingContainer}>
               <FontAwesome name='user' size={25} color={colors.primaryColor} />
               <Text style={styles.heading}>Objective</Text>
@@ -103,10 +102,16 @@ const Resume = () => {
             <Divider style={{ marginTop: 5 }} />
 
             <Text style={{ fontSize: 13, marginRight: 4, marginTop: 7 }}>
-              In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document or a typeface without relying on meaningful content. Lorem ipsum may be used as a placeholder before final copy is available.
+              {profile.objective}
             </Text>
-
-            <View style={styles.headingContainer}>
+            </>
+          : null 
+          }
+            
+            {
+              profile.experience != null ?
+              <>
+              <View style={styles.headingContainer}>
               <FontAwesome name='briefcase' size={25} color={colors.primaryColor} />
               <Text style={styles.heading}>Experience</Text>
             </View>
@@ -114,24 +119,11 @@ const Resume = () => {
 
             <View style={styles.descriptionContainer}>
               <View style={styles.dot} />
-              <Text style={styles.descriptionText}>Worked as a petrol Filler in Caltes Pump, London.</Text>
+              <Text style={styles.descriptionText}>{profile.experience}</Text>
             </View>
-
-            <View style={styles.descriptionContainer}>
-              <View style={styles.dot} />
-              <Text style={styles.descriptionText}>Worked as a petrol Filler in Shell Pump, Chicago.</Text>
-            </View>
-
-            {/* <View style={styles.headingContainer}>
-              <FontAwesome name='laptop' size={25} color={colors.primaryColor} />
-              <Text style={styles.heading}>Skills</Text>
-            </View>
-            <Divider style={{ marginTop: 5 }} />
-
-            <View style={styles.descriptionContainer}>
-              <View style={styles.dot} />
-              <Text style={styles.descriptionText}>MS Excel, MS Word, MS Power Point.</Text>
-            </View> */}
+            </>
+            : null
+            }
 
           </View>
 
@@ -145,10 +137,6 @@ const Resume = () => {
 
       </View>
 
-      {
-        user?.type == 'employer' &&
-      
-
         <View style={{flexDirection: 'row'}}>
           <Button 
             title='Call' 
@@ -158,12 +146,10 @@ const Resume = () => {
             onPress={() => {
               let phoneNumber = '';
               if(Platform.OS === 'android'){
-                //phoneNumber = 'tel:${+923102769940}'
                 phoneNumber = `tel:${profile?.phone}`
               }
               else{
                 phoneNumber = `telprompt:${profile?.phone}`
-                //phoneNumber = 'telprompt:${+923102769940}'
               }
               Linking.openURL(phoneNumber)
             }}
@@ -175,10 +161,9 @@ const Resume = () => {
             style={{...styles.button, borderTopRightRadius: 30, borderTopLeftRadius: 0, backgroundColor: 'red'}}
             titleStyle={{marginLeft: 10}}
             onPress={() => Linking.openURL(`mailto: ${profile?.email}`)}
-            //onPress={() => Linking.openURL('mailto: example@gmail.com')}
           />
         </View>
-      }
+
           
     </ScrollView>
   )
@@ -226,6 +211,7 @@ const styles = StyleSheet.create({
     marginLeft: 6
   },
   dot: {
+    marginTop: 8,
     height: 6,
     width: 6,
     borderRadius: 3,
@@ -259,7 +245,7 @@ const styles = StyleSheet.create({
   },
   descriptionContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    //alignItems: 'center',
     marginTop: 10
   },
   descriptionText: {

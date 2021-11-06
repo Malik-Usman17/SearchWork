@@ -7,7 +7,6 @@ import colors from '../Constants/colors';
 import Constants from '../Constants/Constants.json';
 import EmployeeDashboard from '../screens/Employee/EmployeeDashboard';
 import EmployeeProfile from '../screens/Employee/EmployeeProfile';
-import Resume from '../screens/Resume';
 import SavedJobs from '../screens/Employee/SavedJobs';
 import IconContainer from '../Components/molecules/IconContainer';
 import EmployeeResume from '../screens/Employee/EmployeeResume';
