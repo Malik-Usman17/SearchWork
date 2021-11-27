@@ -73,7 +73,20 @@ export const slices = createSlice({
   }
 });
 
-export const { setJobPost, login, isRememberMe, saveUserCredential, getJobCategory, getJobList, getViewJob, getSaveJobList, getApplicantsList, getProfile, getLoggedInProfile } = slices.actions;
+export const { 
+  setJobPost, 
+  login, 
+  isRememberMe, 
+  saveUserCredential, 
+  getJobCategory, 
+  getJobList, 
+  getViewJob, 
+  getSaveJobList, 
+  getApplicantsList, 
+  getProfile, 
+  getLoggedInProfile 
+ } = slices.actions;
+ 
 
 //Selectors
 export const jobPostedSelector = (state) => state.nav.jobPosted;

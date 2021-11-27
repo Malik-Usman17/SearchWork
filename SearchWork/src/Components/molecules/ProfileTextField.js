@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   textField:{
     marginLeft: 7, 
     flex: 1,
-    fontSize: 15
+    fontSize: 15,
   }
 })
 export default ProfileTextField;

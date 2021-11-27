@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Dimensions, Image, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useFocusEffect, useIsFocused } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { Dimensions, Image, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Swiper from 'react-native-swiper';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import { useDispatch, useSelector } from 'react-redux';
 import HeaderImage from '../../Components/atoms/HeaderImage';
+import Loader from '../../Components/atoms/Loader';
 import Logo from '../../Components/atoms/Logo';
 import MenuIcon from '../../Components/atoms/MenuIcon';
-import JobIconsView from '../../Components/molecules/JobIconsView';
+import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
+import ErrorModal from '../../Components/organisms/ErrorModal';
 import JobCard from '../../Components/organisms/JobCard';
 import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
-import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
-import { useSelector, useDispatch } from 'react-redux';
-import {userLogin, getJobCategory, jobsCategoryList, getJobList, jobsListing, getLoggedInProfile} from '../../redux/slices';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import Loader from '../../Components/atoms/Loader';
+import { getJobCategory, getJobList, getLoggedInProfile, jobsCategoryList, jobsListing, userLogin } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
-import { useIsFocused } from '@react-navigation/native';
-import { useFocusEffect } from '@react-navigation/native';
-import ErrorModal from '../../Components/organisms/ErrorModal';
 
 
 const EmployeeDashboard = ({navigation}) => {
@@ -35,7 +31,8 @@ const EmployeeDashboard = ({navigation}) => {
 
   const user = useSelector(userLogin)
   const jobsCategory = useSelector(jobsCategoryList);
-  const jobs = useSelector(jobsListing);
+  const jobsData = useSelector(jobsListing);
+  const jobs = jobsData?.data
 
 
  useFocusEffect(
@@ -54,8 +51,8 @@ const EmployeeDashboard = ({navigation}) => {
         );
 
         if(response.isAxiosError == true){
-          setErrorMessage(response.response.data.error.messages.map(val => val + '\n'))
-          setErrorModal(true)
+          console.log('Job Category:',response.response.data.error.messages.map(val => val + '\n'))
+          //setErrorModal(true)
           setLoader(false)
         }
         else{
@@ -83,11 +80,11 @@ const EmployeeDashboard = ({navigation}) => {
         );
 
         if(apiResponse.isAxiosError == true){
-          console.log('Axios error') 
+          console.log('Job Data List Axios Error') 
           setLoader(false)
         }
         else{
-          dispatch(getJobList(apiResponse.data.response.data))
+          dispatch(getJobList(apiResponse.data.response))
           setLoader(false)
         }
       }
@@ -276,7 +273,8 @@ const EmployeeDashboard = ({navigation}) => {
         
         <View style={{borderRadius:5, padding: 2, flexDirection: 'row', justifyContent: 'space-between', backgroundColor: colors.primaryColor, alignItems: 'center'}}>
           <Text style={{marginLeft: 7, fontWeight: 'bold', color: colors.white}}>Most Recent</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
+            onPress={() => navigation.navigate(Constants.screen.AllJobsScreen)} 
             //</View>onPress={() => navigation.navigate(Constants.screen.JobListing)}
           >
             <Text style={{marginRight: 7, fontWeight: 'bold', color: colors.white, textDecorationLine: 'underline'}}>See All</Text>

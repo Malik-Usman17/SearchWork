@@ -1,6 +1,7 @@
 const colors = {
   buttonColor: '#3b8ce8',
   white: '#fcfcfc',
+  black: '#000000',
   pureWhite: "#FFFFFF",
   primaryBorderColor: '#b7b7b7',
   primaryColor: '#049b04',

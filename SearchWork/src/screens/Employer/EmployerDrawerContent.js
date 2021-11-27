@@ -86,7 +86,7 @@ const EmployerDrawerContent = ({navigation}) => {
           <FontAwesome name='users' size={25} color={colors.primaryColor}/>
         </IconButton>
 
-        <IconButton title='Change Password' style={styles.iconButton}>
+        <IconButton title='Change Password' style={styles.iconButton} onPress={() => navigation.navigate(Constants.screen.ChangePassword)}>
           <Ionicons name='lock-closed' size={25} color={colors.primaryColor}/>
         </IconButton>
 

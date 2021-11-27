@@ -18,7 +18,10 @@
       "ViewProfile": "/applicant/viewuser",
       "EmployerJobs": "/jobs/myjobs",
       "UpdateProfile": "/profile-update",
-      "LoggedInUserProfile": "/profile-view"
+      "LoggedInUserProfile": "/profile-view",
+      "UpdatePassword": "/password-update",
+      "ForgotPassword": "/password-forget",
+      "JobStatus": "/jobs/status"
   },
 
   "methods": {

@@ -10,16 +10,102 @@ import InputField from '../Components/molecules/InputField';
 import LanguagePicker from '../Components/organisms/LanguagePicker';
 import colors from '../Constants/colors';
 import Constants from '../Constants/Constants.json';
+import Loader from '../Components/atoms/Loader';
+import ApiConstants from '../service/ApiConstants.json';
+import {apiCall} from '../service/ApiCall';
+import ErrorModal from '../Components/organisms/ErrorModal';
+import CustomModal from '../Components/organisms/CustomModal';
+import { type } from '../Components/organisms/CustomModal';
+
 
 const ForgotPassScreen = ({navigation}) => {
 
   const [country, setCountry] = useState('esp');
   const [dropDownOpen, setDropDownOpen] = useState(false);
+  const [loader, setLoader] = useState(false);
+  const [email, setEmail] = useState('');
+  const [errorModal, setErrorModal] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [isEmptyField, setIsEmptyField] = useState(false);
+
+  async function forgetPassword(){
+
+    let body = {
+      email: email
+    }
+
+    setLoader(true)
+
+    try{
+      var response = await apiCall(
+        ApiConstants.methods.POST, 
+        ApiConstants.endPoints.ForgotPassword,
+        body
+      );
+
+      if(response.isAxiosError == true){
+        setModalMessage(response.response.data.error.messages.map(val => val + '\n'))
+        setErrorModal(true)
+      }
+      else{
+        setModalMessage(response.data.response.messages.map(val => val + '\n'))
+        setModalVisible(true)
+      }
+    }
+    catch(error){
+      console.log('Catch Body:',error);
+    }
+    finally{
+      setLoader(false)
+    }
+  }
+
+  if(loader == true){
+    return(
+      <Loader />
+    )
+  }
+
+  function onResetPassword(){
+    if(email == ''){
+      setIsEmptyField(true)
+      setErrorModal(true)
+      setModalMessage('Please enter your registered email address.')
+    }
+    else{
+      forgetPassword()
+      setIsEmptyField(false)
+    }
+  }
+
+  function ValidateEmail(mail) 
+  {
+   if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail))
+    {
+      return (true)
+    }
+      return (false)
+  }
 
   return (
     <View style={{ flex: 1 }}>
 
       <StatusBar backgroundColor={colors.primaryColor} />
+
+      <CustomModal 
+        type={type.confirm}
+        isVisible={modalVisible}
+        imageSource={require('../../assets/checked.png')}
+        message={modalMessage}
+        onPressOk={() => setModalVisible(false)}
+      />
+
+      <ErrorModal 
+        isVisible={errorModal}
+        message={modalMessage}
+        onPress={() => setErrorModal(false)}
+      />
 
       <ImageBackground source={require('../../assets/blurBg.png')} style={styles.bgImage}>
 
@@ -55,13 +141,24 @@ const ForgotPassScreen = ({navigation}) => {
                 <Divider style={{ marginTop: 10 }} />
 
                 <InputField
+                  textStyle={{color: email == '' && isEmptyField == true ? 'red' : colors.primaryColor}}
                   style={{ marginTop: 22 }}
                   title='Email'
                   placeholder='Email Address'
+                  keyboardType='email-address'
                   iconName='mail'
+                  onEndEditing={() => {
+                    console.log('hello:',ValidateEmail(email))
+                  }}
+                  value={email}
+                  onChangeText={setEmail}
                 />
 
-                <Button title='Reset Password' style={{ marginTop: 25 }} />
+                <Button 
+                  title='Reset Password' 
+                  style={{ marginTop: 25 }}
+                  onPress={() => onResetPassword()} 
+                />
 
                 <View style={{ marginTop: 15, flexDirection: 'row', justifyContent: 'center' }}>
 

@@ -3,18 +3,13 @@ import ApiConstants from './ApiConstants.json';
 
 
 export const apiCall = async(methodType, endPoint, body, queryParams) => {
-  //console.log('Query Params:',queryParams)
+  
   var response;
 
     try{
       switch (methodType) {
         case ApiConstants.methods.GET:
-          response = await Axios.get(`${ApiConstants.baseUrl}${endPoint}`, {params: queryParams}
-          //   params:{
-          //     page: pageNo
-          //   }
-          // }
-          );
+          response = await Axios.get(`${ApiConstants.baseUrl}${endPoint}`, {params: queryParams});
           return response;
   
         case ApiConstants.methods.POST:

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, StyleSheet, Text, View, ScrollView } from 'react-native';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Entypo from 'react-native-vector-icons/Entypo';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
@@ -60,10 +60,14 @@ const DrawerContent = ({ navigation }) => {
 
       </View>
 
-      <View style={{ marginLeft: 20 }}>
+      <ScrollView style={{ marginLeft: 20, marginBottom: 15 }}>
 
         <IconButton title='Home' onPress={() => navigation.navigate(Constants.screen.EmployeeDashboard)} style={styles.IconButtonContainer}>
-          <Entypo name='home' size={30} color={colors.primaryColor} />
+          <Entypo name='home' size={30} color={colors.primaryColor} /> 
+        </IconButton>
+
+        <IconButton title='Jobs' onPress={() => navigation.navigate(Constants.screen.AllJobsScreen)} style={styles.IconButtonContainer}>
+          <Ionicons name='briefcase' size={30} color={colors.primaryColor} />
         </IconButton>
 
         <IconButton title='Saved Jobs' style={styles.IconButtonContainer} onPress={() => navigation.navigate(Constants.screen.SavedJobs)}>
@@ -74,7 +78,7 @@ const DrawerContent = ({ navigation }) => {
           <FontAwesome name='user' size={30} color={colors.primaryColor} />
         </IconButton>
 
-        <IconButton title='Change Password' style={styles.IconButtonContainer}>
+        <IconButton title='Change Password' style={styles.IconButtonContainer} onPress={() => navigation.navigate(Constants.screen.ChangePassword)}>
           <Ionicons name='lock-closed' size={30} color={colors.primaryColor} />
         </IconButton>
 
@@ -86,10 +90,11 @@ const DrawerContent = ({ navigation }) => {
             dispatch(login(null))
           }}
         >
-          <MaterialIcons name='logout' size={30} color={colors.primaryColor} />
+          <Entypo name='login' size={30} color={colors.primaryColor} />
         </IconButton>
 
-      </View>
+
+      </ScrollView>
 
       <View style={styles.bottomContainer}>
 
@@ -139,7 +144,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 40
   },
   IconButtonContainer: {
-    height: 70
+    height: 65
   },
   profilePicture: {
     borderColor: colors.white,

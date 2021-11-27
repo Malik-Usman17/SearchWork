@@ -22,19 +22,5 @@ const reduxStore = () => {
 
 export default reduxStore;
 
-// const store = configureStore({
-//   reducer: persistedReducer
-// })
-
-// export default store;
-// export const {persistor} = persistStore(store)
-
-//console.log('NAV REDUCER:',navReducer)
-
-// export const store = configureStore({
-//   reducer: {
-//     nav: navReducer,
-//   },
-// });
 
 

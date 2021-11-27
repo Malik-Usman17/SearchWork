@@ -9,7 +9,7 @@ const CompanyLabel = ({style, onPress, disabled}) => {
       activeOpacity={0.7} 
       disabled={disabled} 
       onPress={() => {
-        Linking.openURL(Constants.url.webiste).catch(err => console.error('An error occurred', err))
+        Linking.openURL(Constants.url.website).catch(err => console.error('An error occurred', err))
       }}
     >
       <Text style={[styles.text, style]}>Powered by: Hegemonic Softwares</Text>

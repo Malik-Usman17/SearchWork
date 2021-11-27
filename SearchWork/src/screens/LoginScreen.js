@@ -59,6 +59,7 @@ const LoginScreen = ({navigation}) => {
       if(apiResponse.isAxiosError == true){
         setModalVisible(!modalVisible) 
         setLoader(false)
+        setIsEmptyField(false)
       }
       else{
         dispatch(login(apiResponse.data.response.data))
@@ -169,7 +170,7 @@ const LoginScreen = ({navigation}) => {
                   <Text style={{ fontSize: 12, color: colors.gray, fontWeight: '700' }}>Part Time - Full Time</Text>
 
                   <InputField
-                    textStyle={{color: isEmptyField == true && email == '' ? 'red' : colors.primaryColor}}
+                    textStyle={{color: (isEmptyField == true && email == '' && credentials.email == '') ? 'red' : colors.primaryColor}}
                     title='Email'
                     placeholder='Email Address'
                     iconName='mail'
@@ -194,7 +195,7 @@ const LoginScreen = ({navigation}) => {
                   {validEmail == false && <Text style={{marginLeft: 7, fontWeight: 'bold', color: 'red'}}>Invalid Email Address</Text>}
                   
                   <PasswordField
-                    titleStyle={{color: isEmptyField == true && password == '' ? 'red' : colors.primaryColor}} 
+                    titleStyle={{color: (isEmptyField == true && password == '' && credentials.password == '') ? 'red' : colors.primaryColor}} 
                     title='Password'
                     placeholder='Password'
                     secureTextEntry={eye ? true : false}

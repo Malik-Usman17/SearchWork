@@ -21,7 +21,8 @@ const BottomTabNavigation = () => {
       initialRouteName={Constants.screen.EmployeeDashboard}
       tabBarOptions={{
         showLabel: false,
-        style: styles.navigatorContainer
+        style: styles.navigatorContainer,
+        keyboardHidesTabBar: true
       }}
     >
 

@@ -16,6 +16,7 @@ import Constants from '../../Constants/Constants.json';
 import { getViewJob, jobsListing } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
+import commonStyles from '../../commonStyles/commonStyles';
 
 
 const JobListing = ({navigation, route}) => {
@@ -81,14 +82,15 @@ const JobListing = ({navigation, route}) => {
 
   const jobCard = ({ item }) => {
     return (
-      <View style={styles.jobContainer}>
+      <View style={commonStyles.jobCardContainer}>
 
-        <View style={{height: 120, width: 120, borderRadius: 15, backgroundColor: colors.primaryColorLight, alignItems: 'center', justifyContent: 'center'}}>
-          <Image
-            resizeMode={'contain'} 
-            source={item.image_urls ? {uri: item.image_urls['3x']} : require('../../../assets/logo.png')}
-            style={styles.jobImage}
-          />
+        <View style={commonStyles.jobImageContainer}>
+          {
+            item.image_urls ?
+             <Image source={{uri: item.image_urls['3x']}} style={{...StyleSheet.absoluteFillObject}}/>
+            :
+            <Image resizeMode='contain' source={require('../../../assets/logoGreen.png')} style={commonStyles.jobCardImage}/>
+          }
         </View>
 
         <View style={{ marginLeft: 8, flex: 1 }}>
@@ -153,20 +155,15 @@ const JobListing = ({navigation, route}) => {
 
         </HeaderRowContainer>
 
-        {/* <SearchField style={{position: 'absolute', top: 60, marginHorizontal: 15}}/> */}
+          <View style={commonStyles.jobListingFlatListContainer}>
 
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={myJobs}
-          keyExtractor={(key, index) => index.toString()}
-          renderItem={jobCard}
-        />
-
-        {/* <Button 
-          title='See More'
-          style={styles.seeMoreButton}
-          titleStyle={{fontSize: 12}}
-        /> */}
+            <FlatList
+              showsVerticalScrollIndicator={false}
+              data={myJobs}
+              keyExtractor={(key, index) => index.toString()}
+              renderItem={jobCard}
+            />
+          </View>
 
         <CompanyLabelCard />
 
@@ -193,24 +190,10 @@ const styles = StyleSheet.create({
     height: 165,
     width: '100%'
   },
-  jobContainer: {
-    marginVertical: 4,
-    padding: 8,
-    borderTopLeftRadius: 20,
-    borderBottomLeftRadius: 20,
-    marginLeft: 10,
-    backgroundColor: colors.white,
-    flexDirection: 'row',
-    //backgroundColor: 'pink'
-  },
   jobImage: {
     height: 100,
     width: 100,
   },
-  // emptyJobImage:{
-  //   height: 100,
-  //   width: 100,
-  // },
   manageJobButton: {
     borderRadius: 20,
     marginLeft: 6,

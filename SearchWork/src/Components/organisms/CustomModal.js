@@ -1,7 +1,12 @@
+export const type = {
+  confirm: 'confirmation'
+}
+
 import React from "react";
 import { Text, TouchableOpacity, View, Image, StyleSheet } from "react-native";
 import Modal from "react-native-modal";
 import colors from '../../Constants/colors';
+
 
 
 const CustomModal = ({ isVisible, imageSource, type, message, buttonText, onPressOk, onPressYes, onPressNo}) => {
@@ -48,7 +53,7 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '600',
     bottom: 15,
     //backgroundColor: 'pink'
   },

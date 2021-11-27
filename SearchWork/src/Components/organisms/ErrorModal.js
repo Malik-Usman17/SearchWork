@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 15,
-    fontWeight: 'bold',
+    fontWeight: '600',
     bottom: 15,
   },
   icon: {

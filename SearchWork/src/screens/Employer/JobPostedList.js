@@ -17,7 +17,7 @@ import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import NoData from '../../Components/organisms/NoData';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
-import { getJobList, getSaveJobList, getViewJob, jobsListing, savedJobsList } from '../../redux/slices';
+import { getJobList, getViewJob, jobsListing } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import JobItemCard from '../../Components/organisms/JobItemCard';
@@ -48,19 +48,24 @@ const JobPostedList = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
-  const jobs = useSelector(jobsListing);
-  const activeJobs = useSelector(savedJobsList);
+  const jobsObj = useSelector(jobsListing);
+  const jobs = jobsObj?.data;
+  const pagination = jobsObj?.pagination;
+ 
+  const activeJobsData = jobs?.filter(val => val.is_block == 0)
 
 
-  const inActiveJobList = jobs.filter((val) => val.is_saved == '0')
+  const inActiveJobsData = jobs?.filter(val => val.is_block == 1)
+ 
   
 
   function dataList() {
     if(inActiveJob == true){
-      return inActiveJobList
+      return inActiveJobsData
+      //return inActiveJobList
     }
     else if(activeJob == true){
-      return activeJobs
+      return activeJobsData
     }
     else{
       return jobs
@@ -68,10 +73,14 @@ const JobPostedList = ({ navigation }) => {
   }
 
 
-  const myJobs = async () => {
+  const myJobs = async (pageNo) => {
+    let queryParams = {
+      page: pageNo
+    }
+
     setLoader(true)
 
-    if (jobs != undefined) {
+    if (jobsObj != undefined) {
       setLoader(false)
     }
 
@@ -79,6 +88,8 @@ const JobPostedList = ({ navigation }) => {
       var apiResponse = await apiCall(
         ApiConstants.methods.GET,
         ApiConstants.endPoints.EmployerJobs,
+        {},
+        queryParams
       );
 
       if (apiResponse.isAxiosError == true) {
@@ -87,12 +98,46 @@ const JobPostedList = ({ navigation }) => {
         setErrorModal(true);
       }
       else {
-        dispatch(getJobList(apiResponse.data.response.data))
+        dispatch(getJobList(apiResponse.data.response))
         setLoader(false)
       }
     }
     catch (error) {
       console.log('Catch Body:', error);
+      setLoader(false)
+    }
+  }
+
+  const changeJobStatus = async (jobId, blockValue) => {
+
+    setLoader(true)
+
+    let body = {
+      is_block: blockValue,
+      id: jobId
+    }
+
+    try {
+      var apiResponse = await apiCall(
+        ApiConstants.methods.POST,
+        ApiConstants.endPoints.JobStatus,
+        body
+      );
+
+      if (apiResponse.isAxiosError == true) {
+        setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        //setLoader(false);
+        setErrorModal(true);
+      }
+      // else {
+      //   //setLoader(false)
+      // }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(false)
+    }
+    finally{
       setLoader(false)
     }
   }
@@ -128,96 +173,6 @@ const JobPostedList = ({ navigation }) => {
       setLoader(false)
     }
   }
-
-  const makeJobActive = async (jobId) => {
-    setLoader(true)
-
-    let body = {
-      job_id: jobId
-    }
-
-    try{
-      var apiResult = await apiCall(
-        ApiConstants.methods.POST,
-        ApiConstants.endPoints.MarkSavedJob,
-        body
-      )
-
-      if(apiResult.isAxiosError == true){
-        setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
-        errorModal(true)
-        setLoader(false)
-      }
-      else{
-        setLoader(false)
-      }
-    }
-    catch(error){
-      console.log('Catch Body:',error)
-      setLoader(false)
-    }
-  }
-
-  const makeJobInactive = async (id) => {
-    setLoader(true)
-
-    let body = {
-      is_block: '1',
-      id: id
-    }
-
-    try {
-      var apiResponse = await apiCall(
-        ApiConstants.methods.POST,
-        ApiConstants.endPoints.DeleteSavedJob,
-        body
-      );
-
-      if (apiResponse.isAxiosError == true) {
-        errorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
-        setErrorModal(true)
-        setLoader(false)
-      }
-      else {
-        setLoader(false)
-      }
-    }
-    catch (error) {
-      console.log('Catch Body:', error);
-      setLoader(false)
-    }
-  }
-
-  async function activeJobList(){
-    setLoader(true)
-
-    if(activeJobs != undefined){
-      setLoader(false)
-    }
-
-    try{
-      var response = await apiCall(
-        ApiConstants.methods.GET, 
-        ApiConstants.endPoints.SavedJobsList,
-      );
-
-      if(response.isAxiosError == true){
-        setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
-        setErrorModal(true)
-        setLoader(false)
-      }
-      else{
-        dispatch(getSaveJobList(response.data.response.data))
-        setLoader(false)
-      }
-    }
-    catch(error){
-      console.log('Catch Body:',error);
-      setLoader(false)
-    }
-  }
-  
-
 
 
   const deleteJob = async (id) => {
@@ -256,7 +211,7 @@ const JobPostedList = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      myJobs();
+      myJobs(1);
     }, [])
   )
 
@@ -276,7 +231,7 @@ const JobPostedList = ({ navigation }) => {
             item.image_urls ?
              <Image source={{uri: item.image_urls['3x']}} style={{...StyleSheet.absoluteFillObject}}/>
             :
-            <Image resizeMode='contain' source={require('../../../assets/logo.png')} style={commonStyles.jobCardImage}/>
+            <Image resizeMode='contain' source={require('../../../assets/logoGreen.png')} style={commonStyles.jobCardImage}/>
           }
         </View>
 
@@ -288,22 +243,15 @@ const JobPostedList = ({ navigation }) => {
             numberOfLines={1}
             style={commonStyles.jobCardTitle}
           >
-            {item.job ? item.job['title'] : item.title}
+            {item.title}
           </Text>
-          
+
           <TouchableOpacity
-            disabled={item.is_saved == '1' ? true : false}
-            onPress={() => {
-              if((allJob == true || inActiveJob == true) && activeJob == false){
-                makeJobActive(item.id)
-              }
-              else{
-                makeJobInactive(item.id)
-              }
-            }}
+            onPress={() => changeJobStatus(item.id, item.is_block == 0 ? 1 : 0)}
           >
-            <FontAwesome 
-              name={(item.is_saved == '1' || activeJob == true) ? 'star' : 'star-o'} 
+          
+            <FontAwesome
+              name={item.is_block == 0 ? 'star' : 'star-o'} 
               size={20} 
               color={colors.darkGray}
             />
@@ -312,7 +260,7 @@ const JobPostedList = ({ navigation }) => {
           </View>
 
           <Text ellipsizeMode='tail' numberOfLines={3} style={{ fontSize: 12 }}>
-            {item.job ? item.job['description'] : item.description}
+            {item.description}
           </Text>
 
           <View style={commonStyles.jobIconsContainer}>
@@ -363,9 +311,22 @@ const JobPostedList = ({ navigation }) => {
     )
   }
 
+  const paginationComponent = ({ item }) => {
+    return(
+      <TouchableOpacity 
+        onPress={() => myJobs(item) }
+        style={{...styles.pagination, backgroundColor: pagination.current == item ? colors.primaryColor : colors.white}}>
+        <Text style={{color: pagination.current == item ? colors.white : colors.black}}>
+          {item}
+        </Text>
+      </TouchableOpacity>
+    )
+    
+  }
+
 
   return (
-    jobs == undefined || jobs.length == 0 ?
+    jobs == undefined || jobs?.length == 0 ?
     <NoData />
     :
     <View style={{ flex: 1 }}>
@@ -400,7 +361,6 @@ const JobPostedList = ({ navigation }) => {
         buttonText={'Ok'}
         onPressOk={() => {
           setDeletedConfirmModal(false)
-          navigation.navigate(Constants.screen.EmployerDashboard)
         }}
       />
 
@@ -453,7 +413,7 @@ const JobPostedList = ({ navigation }) => {
               style={{backgroundColor: activeJob == true ? colors.white : colors.primaryColor}}
               titleStyle={{color: activeJob == true ? colors.primaryColor : colors.white}}
               onPress={() => {
-                activeJobList()
+               // activeJobList()
                 setAllJob(false)
                 setActiveJob(true)
                 setInactiveJob(false)
@@ -479,6 +439,7 @@ const JobPostedList = ({ navigation }) => {
       <View style={{marginTop: 10, flex: 1}}>
         <FlatList
           showsVerticalScrollIndicator={false}
+          // data={jobs}
           data={dataList()}
           renderItem={jobComponent}
           keyExtractor={(key, index) => index.toString()}
@@ -488,6 +449,16 @@ const JobPostedList = ({ navigation }) => {
               onRefresh={myJobs}
             />
           }
+        />
+      </View>
+
+      <View style={{width: '100%', alignItems: 'center', marginVertical: 5}}>
+        <FlatList 
+          showsVerticalScrollIndicator={false}
+          data={pagination.pages}
+          keyExtractor={(key, index) => index.toString()}
+          renderItem={paginationComponent}
+          horizontal
         />
       </View>
 
@@ -524,6 +495,14 @@ const styles = StyleSheet.create({
     marginLeft: 6,
     alignItems: 'center'
   },
+  pagination:{ 
+    marginHorizontal: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 3, 
+    borderRadius: 5, 
+    borderWidth: 1,
+    borderColor: colors.primaryColorLight
+  }
 
 });
 

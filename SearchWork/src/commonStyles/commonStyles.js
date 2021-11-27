@@ -1,5 +1,4 @@
-import React from 'react';
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import colors from '../Constants/colors';
 
 export default commonStyles = StyleSheet.create({
@@ -17,7 +16,7 @@ export default commonStyles = StyleSheet.create({
     height: 120,
     width: 120,
     borderRadius: 15,
-    backgroundColor: colors.primaryColorLight,
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -38,4 +37,8 @@ export default commonStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-end',
   },
+  jobListingFlatListContainer:{
+    flex: 1,
+    marginTop: 10
+  }
 });

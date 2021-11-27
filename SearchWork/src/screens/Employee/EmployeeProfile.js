@@ -1,28 +1,27 @@
-import React, {useState, useCallback} from 'react';
-import { View, Text, ScrollView, StatusBar, TouchableOpacity, TextInput, StyleSheet, ImageBackground, Dimensions } from 'react-native';
-import colors from '../../Constants/colors';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback, useState } from 'react';
+import { Dimensions, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { useDispatch, useSelector } from 'react-redux';
 import Heading from '../../Components/atoms/Haeding';
-import Button from '../../Components/molecules/Button';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import LanguagePicker from '../../Components/organisms/LanguagePicker';
-import ProfilePicture from '../../Components/atoms/ProfilePicture';
-import ProfileTextField from '../../Components/molecules/ProfileTextField';
-import MenuIcon from '../../Components/atoms/MenuIcon';
-import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
 import HeaderImage from '../../Components/atoms/HeaderImage';
-import { useSelector, useDispatch } from 'react-redux';
-import { userLogin, loginUserProfile, getLoggedInProfile } from '../../redux/slices';
+import Loader from '../../Components/atoms/Loader';
+import MenuIcon from '../../Components/atoms/MenuIcon';
+import ProfilePicture from '../../Components/atoms/ProfilePicture';
+import Button from '../../Components/molecules/Button';
+import HeaderRowContainer from '../../Components/molecules/HeaderRowContainer';
+import ProfileTextField from '../../Components/molecules/ProfileTextField';
+import CustomModal from '../../Components/organisms/CustomModal';
+import ErrorModal from '../../Components/organisms/ErrorModal';
+import LanguagePicker from '../../Components/organisms/LanguagePicker';
+import colors from '../../Constants/colors';
+import Constants from '../../Constants/Constants.json';
+import { getLoggedInProfile, loginUserProfile, userLogin } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
-import { useFocusEffect } from '@react-navigation/native';
-import Loader from '../../Components/atoms/Loader';
-import ErrorModal from '../../Components/organisms/ErrorModal';
-import CustomModal from '../../Components/organisms/CustomModal';
-import Constants from '../../Constants/Constants.json';
-import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
 
 
-const EmployeeProfile = ({navigation}) => {
+const EmployeeProfile = ({ navigation }) => {
 
   const user = useSelector(userLogin);
   const userProfile = useSelector(loginUserProfile);
@@ -50,48 +49,46 @@ const EmployeeProfile = ({navigation}) => {
   const [modalMessage, setModalMessage] = useState('');
 
 
-    
 
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
-    //console.log('Employee Profile User:',user)
 
-    function profileImage(){
-      if(imageUrl == ''){
-        if(userProfile?.image_urls != undefined){
-          return userProfile?.image_urls['3x']
-        }
-      }
-      else{
-        return imageUrl
+  function profileImage() {
+    if (imageUrl == '') {
+      if (userProfile?.image_urls != undefined) {
+        return userProfile?.image_urls['3x']
       }
     }
-
-    const pickFromGallery = () => {
-      launchImageLibrary({
-        mediaType: 'photo',
-        maxHeight: 500,
-        maxWidth: 500
-      }, (response) => {
-        if(response?.didCancel){
-          setImageUrl('')
-        }
-        else if (response?.errorMessage){
-          console.log('Error:',response?.errorMessage)
-        }
-        else{
-          const source = response?.assets[0].uri
-          setImageUrl(source)
-        }
-      })
+    else {
+      return imageUrl
     }
-    
+  }
 
-    var bodyFormData = new FormData();
+  const pickFromGallery = () => {
+    launchImageLibrary({
+      mediaType: 'photo',
+      maxHeight: 500,
+      maxWidth: 500
+    }, (response) => {
+      if (response?.didCancel) {
+        setImageUrl('')
+      }
+      else if (response?.errorMessage) {
+        console.log('Error:', response?.errorMessage)
+      }
+      else {
+        const source = response?.assets[0].uri
+        setImageUrl(source)
+      }
+    })
+  }
+
+
+  var bodyFormData = new FormData();
 
   name != '' && bodyFormData.append('name', name)
   phone != '' && bodyFormData.append('phone', phone)
-  imageUrl != '' && bodyFormData.append('image', {uri: imageUrl, name: 'profile_picture', type: 'image/*'})
+  imageUrl != '' && bodyFormData.append('image', { uri: imageUrl, name: 'profile_picture', type: 'image/*' })
   homeAddress != '' && bodyFormData.append('address', homeAddress)
   statePick != '' && bodyFormData.append('state', statePick)
   cityPick != '' && bodyFormData.append('city', cityPick)
@@ -99,57 +96,57 @@ const EmployeeProfile = ({navigation}) => {
   jobExperience != null && bodyFormData.append('experience', jobExperience)
   objectives != null && bodyFormData.append('objective', objectives)
 
-  
 
-  async function updateProfile(){
+
+  async function updateProfile() {
     setLoader(true)
 
-    try{
+    try {
       var response = await apiCall(
-        ApiConstants.methods.POST, 
+        ApiConstants.methods.POST,
         ApiConstants.endPoints.UpdateProfile,
         bodyFormData
       );
 
-      if(response.isAxiosError == true){
-        setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
+      if (response.isAxiosError == true) {
+        setErrorMessage(response.response.data.error.messages.map(val => val + '\n'))
         setErrorModal(true)
         setLoader(false)
       }
-      else{
+      else {
         setSuccessModal(true)
         setLoader(false)
       }
     }
-    catch(error){
-      console.log('Catch Body:',error);
+    catch (error) {
+      console.log('Catch Body:', error);
       setLoader(false)
     }
   }
 
   useFocusEffect(
     useCallback(() => {
-      async function getUserProfile(){
+      async function getUserProfile() {
         // setLoader(true)
-  
-        try{
+
+        try {
           var response = await apiCall(
-            ApiConstants.methods.GET, 
+            ApiConstants.methods.GET,
             ApiConstants.endPoints.LoggedInUserProfile,
           );
-  
-          if(response.isAxiosError == true){
-            setErrorMessage(response.response.data.error.messages.map(val => val+'\n'))
+
+          if (response.isAxiosError == true) {
+            setErrorMessage(response.response.data.error.messages.map(val => val + '\n'))
             setErrorModal(true)
             setLoader(false)
           }
-          else{
+          else {
             dispatch(getLoggedInProfile(response.data.response.data))
             setLoader(false)
           }
         }
-        catch(error){
-          console.log('Catch Body:',error);
+        catch (error) {
+          console.log('Catch Body:', error);
           setLoader(false)
         }
       }
@@ -157,215 +154,214 @@ const EmployeeProfile = ({navigation}) => {
     }, [])
   )
 
-  if(loader == true){
-    return(
+  if (loader == true) {
+    return (
       <Loader />
     )
   }
 
-  return(
-    <ScrollView style={{flex: 1, backgroundColor: colors.white}} showsVerticalScrollIndicator={false}>
+  return (
+    <ScrollView style={{ flex: 1, backgroundColor: colors.white }} showsVerticalScrollIndicator={false}>
 
-      <StatusBar backgroundColor={colors.primaryColor}/>
+      <StatusBar backgroundColor={colors.primaryColor} />
 
-      <ErrorModal 
+      <ErrorModal
         isVisible={errorModal}
         message={errorMessage}
         onPress={() => setErrorModal(false)}
       />
 
-      <CustomModal 
+      <CustomModal
         type='confirmation'
         imageSource={require('../../../assets/checked.png')}
         isVisible={successModal}
-        message={'Profile has been successfully updated'}
+        message={'Profile has been successfully updated.'}
         onPressOk={() => {
           setSuccessModal(false)
           navigation.navigate(Constants.screen.EmployeeDashboard)
         }}
       />
 
-        <HeaderImage style={{height: Dimensions.get('window').height * 0.29}}/>
+      <HeaderImage style={{ height: Dimensions.get('window').height * 0.29 }} />
 
       <HeaderRowContainer>
-        <MenuIcon onPress={() => navigation.openDrawer()}/>
+        <MenuIcon onPress={() => navigation.openDrawer()} />
 
-              <View style={{alignItems: 'center', width: 190, overflow:'hidden'}}>
-                
-                <ProfilePicture
-                  disabled={editFields == true ? false : true} 
-                  iconSize={40}
-                  emptyContainerStyle={styles.profilePicture}
-                  imageStyle={{...styles.profilePicture, borderWidth: 2}}
-                  imageSource={user?.image_urls != undefined && user?.image_urls['3x']} 
-                  onPress={() => pickFromGallery()} 
-                  imageSource={profileImage()}
-                />
+        <View style={{ alignItems: 'center', width: 190, overflow: 'hidden' }}>
 
-                <Text numberOfLines={1} ellipsizeMode='clip' style={{fontSize: 18, fontWeight: 'bold', color: colors.white}}>
-                  {user?.name}
-                </Text>
+          <ProfilePicture
+            disabled={editFields == true ? false : true}
+            iconSize={40}
+            emptyContainerStyle={styles.profilePicture}
+            imageStyle={{ ...styles.profilePicture, borderWidth: 2 }}
+            imageSource={user?.image_urls != undefined && user?.image_urls['3x']}
+            onPress={() => pickFromGallery()}
+            imageSource={profileImage()}
+          />
 
-              </View>
+          <Text numberOfLines={1} ellipsizeMode='clip' style={{ fontSize: 18, fontWeight: 'bold', color: colors.white }}>
+            {user?.name}
+          </Text>
 
-              <LanguagePicker 
-                viewStyle={{width: 80}}
-                containerStyle={{flex: 1}}
-                value={lang}
-                setValue={setLang}
-                open={dropDown}
-                setOpen={setDropDown}
-              />
+        </View>
+
+        <LanguagePicker
+          viewStyle={{ width: 80 }}
+          containerStyle={{ flex: 1 }}
+          value={lang}
+          setValue={setLang}
+          open={dropDown}
+          setOpen={setDropDown}
+        />
 
       </HeaderRowContainer>
 
-              <Text style={{alignSelf: 'center', paddingHorizontal: 15, color: colors.white, position: 'absolute', top: 125}}>
-                {userProfile?.objective}
-              </Text>
+      <Text style={{ alignSelf: 'center', paddingHorizontal: 15, color: colors.white, position: 'absolute', top: 115 }}>
+        {userProfile?.objective}
+      </Text>
 
-        <View style={styles.infoContainer}>
+      <View style={styles.infoContainer}>
 
-          <Heading title='MY INFORMATION' />
+        <Heading title='MY INFORMATION' />
 
-          <ProfileTextField 
-            title='FULL NAME'
-            multiline={true}
-            maxLength={30}
-            value={name}
-            onChangeText={setName}
-            editable={editFields} 
-          />
+        <ProfileTextField
+          title='FULL NAME'
+          multiline={true}
+          maxLength={30}
+          value={name}
+          onChangeText={setName}
+          editable={editFields}
+        />
 
-          <ProfileTextField 
-            title='CONTACT NO'
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType='phone-pad'
-            editable={editFields} 
-          />
+        <ProfileTextField
+          title='CONTACT NO'
+          value={phone}
+          onChangeText={setPhone}
+          keyboardType='phone-pad'
+          editable={editFields}
+        />
 
-          <ProfileTextField 
-            title='GENDER'
-            value={gender}
-            onChangeText={setGender}
-            //value={user?.gender[0].toUpperCase() + user?.gender.slice(1)}
-            editable={editFields}  
-          />
+        <ProfileTextField
+          title='GENDER'
+          value={gender}
+          onChangeText={setGender}
+          editable={editFields}
+        />
 
-          <ProfileTextField 
-            title='DATE OF BIRTH'
-            value={dob}
-            onChangeText={setDob}
-            editable={editFields}  
-          />
+        <ProfileTextField
+          title='DATE OF BIRTH'
+          value={dob}
+          onChangeText={setDob}
+          editable={editFields}
+        />
 
-          <ProfileTextField 
-            title='EMAIL'
-            value={email}
-            onChangeText={setEmail}
-            editable={false}  
-          />
+        <ProfileTextField
+          multiline={true}
+          title='EMAIL'
+          value={email}
+          editable={false}
+        />
 
-          <ProfileTextField 
-            title='LANGUAGES'
-            multiline={true}
-            value={language}
-            onChangeText={setLanguage}
-            editable={editFields} 
-          />
+        <ProfileTextField
+          title='LANGUAGES'
+          multiline={true}
+          value={language}
+          onChangeText={setLanguage}
+          editable={editFields}
+        />
 
-          <Heading title='ADDITIONAL INFORMATION' style={{marginTop: 16}}/>
+        <Heading title='ADDITIONAL INFORMATION' style={{ marginTop: 16 }} />
 
-          <ProfileTextField 
-            title='OBJECTIVE'
-            multiline={true}
-            maxLength={250}
-            value={objectives}
-            onChangeText={setObjectives}
-            editable={editFields}  
-          />
-          <Text style={styles.charactersLengthText}>
-            {`${objectives?.length ? objectives.length : 0} / 250 Characters`}
-          </Text>
+        <ProfileTextField
+          title='OBJECTIVE'
+          multiline={true}
+          maxLength={250}
+          value={objectives}
+          onChangeText={setObjectives}
+          editable={editFields}
+        />
+        <Text style={styles.charactersLengthText}>
+          {`${objectives?.length ? objectives.length : 0} / 250 Characters`}
+        </Text>
 
 
-          <ProfileTextField 
-            title='EXPERIENCE'
-            multiline={true}
-            value={jobExperience}
-            onChangeText={setJobExperience}
-            editable={editFields}  
-          />
+        <ProfileTextField
+          title='EXPERIENCE'
+          multiline={true}
+          value={jobExperience}
+          onChangeText={setJobExperience}
+          editable={editFields}
+        />
 
-          <Heading title='LOCATION' style={{marginTop: 16}}/>
+        <Heading title='LOCATION' style={{ marginTop: 16 }} />
 
-          <ProfileTextField 
-            title='ADDRESS'
-            multiline={true}
-            value={homeAddress}
-            onChangeText={setHomeAddress}
-            editable={editFields}   
-          />
+        <ProfileTextField
+          title='ADDRESS'
+          multiline={true}
+          value={homeAddress}
+          onChangeText={setHomeAddress}
+          editable={editFields}
+        />
 
-          <ProfileTextField 
-            title='STATE'
-            value={statePick}
-            onChangeText={setStatePick}
-            editable={editFields}   
-          />
+        <ProfileTextField
+          title='STATE'
+          value={statePick}
+          onChangeText={setStatePick}
+          editable={editFields}
+        />
 
-          <ProfileTextField 
-            title='CITY'
-            value={cityPick}
-            onChangeText={setCityPick}
-            editable={editFields}   
-          />
+        <ProfileTextField
+          title='CITY'
+          value={cityPick}
+          onChangeText={setCityPick}
+          editable={editFields}
+        />
 
-          <ProfileTextField 
-            title='ZIP CODE'
-            value={zipCode}
-            onChangeText={setZipCode}
-            editable={editFields}  
-          />
+        <ProfileTextField
+          title='ZIP CODE'
+          value={zipCode}
+          onChangeText={setZipCode}
+          editable={editFields}
+        />
 
-        </View>
+      </View>
 
-        <View style={{flexDirection: 'row'}}>
-          <Button 
-            title='Edit Profile' 
-            style={styles.button}
-            onPress={() => setEditFields(true)}
-          />
+      <View style={{ flexDirection: 'row' }}>
+        <Button
+          title='Edit Profile'
+          style={styles.button}
+          onPress={() => setEditFields(true)}
+        />
 
-          <Button 
-            title='Saved' 
-            style={{...styles.button, borderTopRightRadius: 30, borderTopLeftRadius: 0, backgroundColor: colors.primaryColor}}
-            onPress={() => {
-              updateProfile()
-              setEditFields(false)
-            }}
-          />
-        </View>
-      
+        <Button
+          title='Saved'
+          style={{ ...styles.button, borderTopRightRadius: 30, borderTopLeftRadius: 0, backgroundColor: colors.primaryColor }}
+          onPress={() => {
+            updateProfile()
+            setEditFields(false)
+          }}
+        />
+      </View>
+
     </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
-  headerImage:{
+  headerImage: {
     width: Dimensions.get('window').width,
     height: Dimensions.get('screen').height * 0.34,
   },
-  infoContainer:{
+  infoContainer: {
     padding: 9
   },
-  button:{
-    flex: 0.5, 
-    height: Dimensions.get('screen').height * 0.08, 
-    borderTopLeftRadius: 30, 
+  button: {
+    flex: 0.5,
+    height: Dimensions.get('screen').height * 0.08,
+    borderTopLeftRadius: 30,
     borderRadius: 0
   },
-  userImageContainer:{
+  userImageContainer: {
     backgroundColor: colors.lightGray,
     height: 90,
     width: 90,
@@ -381,10 +377,10 @@ const styles = StyleSheet.create({
     width: 80,
     borderRadius: 40
   },
-  charactersLengthText:{
-    alignSelf: 'flex-end', 
-    fontSize: 11, 
-    color: colors.darkGray, 
+  charactersLengthText: {
+    alignSelf: 'flex-end',
+    fontSize: 11,
+    color: colors.darkGray,
     fontWeight: 'bold'
   }
 });

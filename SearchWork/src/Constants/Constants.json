@@ -27,10 +27,13 @@
         "DrawerContent": "DrawerContent",
         "JobCategory": "JobCategory",
         "ViewJob": "ViewJob",
-        "EmployeeResume": "EmployeeResume"
+        "EmployeeResume": "EmployeeResume",
+        "ChangePassword": "ChangePassword",
+        "AllJobsScreen": "AllJobsScreen"
     },
     "url":{
         "webiste": "https://hegemonicsoftwares.com",
+        "website": "https://hegemonicsoftwares.com",
         "Map": "https://www.google.com/maps/search/"
     },
     "Map": "https://www.google.com/maps/search/"

@@ -43,7 +43,7 @@ const ViewJob = ({navigation}) => {
 
         <HeaderRowContainer>
 
-          <MenuIcon />
+          <MenuIcon onPress={() => navigation.openDrawer()}/>
 
           <ScreenTitle title='Job View'/>
 

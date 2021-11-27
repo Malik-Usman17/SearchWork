@@ -1,35 +1,24 @@
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet, ImageBackground, Linking, Image, Dimensions, Platform } from 'react-native';
-import colors from '../../Constants/colors';
-import SmallDetails from '../../Components/atoms/SmallDetails';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Divider from '../../Components/atoms/Divider';
-import CompanyLabel from '../../Components/atoms/CompanyLabel';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
-import ProfilePicture from '../../Components/atoms/ProfilePicture';
-import Heading from '../../Components/atoms/Haeding';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useSelector } from 'react-redux';
+import CompanyLabel from '../../Components/atoms/CompanyLabel';
+import Divider from '../../Components/atoms/Divider';
+import Heading from '../../Components/atoms/Haeding';
 import IconText from '../../Components/atoms/IconText';
 import Logo from '../../Components/atoms/Logo';
-import Button from '../../Components/molecules/Button';
-import {userLogin, applicantProfile, loginUserProfile} from '../../redux/slices';
-import { useSelector } from 'react-redux';
+import ProfilePicture from '../../Components/atoms/ProfilePicture';
+import colors from '../../Constants/colors';
+import { loginUserProfile } from '../../redux/slices';
 
 
 const EmployeeResume = () => {
 
-  const user = useSelector(userLogin);
   const userProfile = useSelector(loginUserProfile)
-  console.log('User Profileee',userProfile)
-  
-
-  const profile = useSelector(applicantProfile)
-  // console.log('PROFILE:',profile)
-  // console.log('User Info on Resume Screen:',user)
-
+ 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.lightGray }} showsVerticalScrollIndicator={false}>
-      {/* <ImageBackground source={require('../../assets/blurBg.png')} style={styles.bg}> */}
 
       <View style={styles.resumeContainer}>
 
@@ -77,6 +66,10 @@ const EmployeeResume = () => {
               <Ionicons name='md-location-sharp' size={16} color={colors.white} />
             </IconText>
 
+            {
+              userProfile?.languages != null &&
+            
+<>
             <Heading
               title='Languages'
               style={{ marginTop: 35, marginBottom: 7, alignSelf: 'flex-start', width: '100%', backgroundColor: colors.primaryColor, alignItems: 'center' }}
@@ -87,9 +80,8 @@ const EmployeeResume = () => {
               <FontAwesome name='language' size={16} color={colors.white} />
             </IconText>
 
-            {/* <IconText text='Spanish'>
-              <FontAwesome name='language' size={16} color={colors.white} />
-            </IconText> */}
+            </>
+            }
 
           </View>
 
@@ -99,6 +91,10 @@ const EmployeeResume = () => {
               <Text style={styles.name}>{userProfile?.name}</Text>
               <Image source={require('../../../assets/resumeChip.png')} resizeMode='contain'  style={{ width: 40, height: 80}} />
             </View>
+
+            {
+              userProfile?.objective != null &&
+            <>
 
             <View style={styles.headingContainer}>
               <FontAwesome name='user' size={25} color={colors.primaryColor} />
@@ -110,6 +106,13 @@ const EmployeeResume = () => {
               {userProfile?.objective}
             </Text>
 
+            </>
+            }
+
+            {
+              userProfile?.experience != null &&
+            <>
+
             <View style={styles.headingContainer}>
               <FontAwesome name='briefcase' size={25} color={colors.primaryColor} />
               <Text style={styles.heading}>Experience</Text>
@@ -120,22 +123,8 @@ const EmployeeResume = () => {
               <View style={styles.dot} />
               <Text style={styles.descriptionText}>{userProfile?.experience}</Text>
             </View>
-
-            {/* <View style={styles.descriptionContainer}>
-              <View style={styles.dot} />
-              <Text style={styles.descriptionText}>Worked as a petrol Filler in Shell Pump, Chicago.</Text>
-            </View> */}
-
-            {/* <View style={styles.headingContainer}>
-              <FontAwesome name='laptop' size={25} color={colors.primaryColor} />
-              <Text style={styles.heading}>Skills</Text>
-            </View>
-            <Divider style={{ marginTop: 5 }} />
-
-            <View style={styles.descriptionContainer}>
-              <View style={styles.dot} />
-              <Text style={styles.descriptionText}>MS Excel, MS Word, MS Power Point.</Text>
-            </View> */}
+            </>
+}
 
           </View>
 
@@ -148,41 +137,6 @@ const EmployeeResume = () => {
         </View>
 
       </View>
-
-      {
-        user?.type == 'employer' &&
-      
-
-        <View style={{flexDirection: 'row'}}>
-          <Button 
-            title='Call' 
-            style={styles.button} 
-            iconName='add-call' 
-            titleStyle={{marginLeft: 10}}
-            onPress={() => {
-              let phoneNumber = '';
-              if(Platform.OS === 'android'){
-                //phoneNumber = 'tel:${+923102769940}'
-                phoneNumber = `tel:${profile?.phone}`
-              }
-              else{
-                phoneNumber = `telprompt:${profile?.phone}`
-                //phoneNumber = 'telprompt:${+923102769940}'
-              }
-              Linking.openURL(phoneNumber)
-            }}
-          />
-
-          <Button 
-            title='Email'
-            iconName='email' 
-            style={{...styles.button, borderTopRightRadius: 30, borderTopLeftRadius: 0, backgroundColor: 'red'}}
-            titleStyle={{marginLeft: 10}}
-            onPress={() => Linking.openURL(`mailto: ${profile?.email}`)}
-            //onPress={() => Linking.openURL('mailto: example@gmail.com')}
-          />
-        </View>
-      }
           
     </ScrollView>
   )

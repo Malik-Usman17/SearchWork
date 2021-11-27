@@ -106,6 +106,15 @@ const RegisterScreen = ({navigation}) => {
     dispatch(saveUserCredential(credentialFields))
   }
 
+  // var currentYear = new Date().getTime()
+  // var currentYear2 = new Date().getFullYear()
+  // console.log('Current year:',currentYear)
+
+  // console.log('year:',date.getTime())
+
+  // var subss = new Date(currentYear - date.getTime())
+  // console.log('Subss: ', subss)
+  // console.log('subtract year:', currentYear2 - subss.getFullYear())
 
   
 
