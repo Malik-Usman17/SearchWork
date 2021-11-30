@@ -108,6 +108,38 @@ const JobPostedList = ({ navigation }) => {
     }
   }
 
+  
+  const myJobsPagination = async (pageNo, loaderValue) => {
+    let queryParams = {
+      page: pageNo
+    }
+
+    setLoader(loaderValue)
+
+    try {
+      var apiResponse = await apiCall(
+        ApiConstants.methods.GET,
+        ApiConstants.endPoints.EmployerJobs,
+        {},
+        queryParams
+      );
+
+      if (apiResponse.isAxiosError == true) {
+        setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
+        setLoader(!loaderValue);
+        setErrorModal(true);
+      }
+      else {
+        dispatch(getJobList(apiResponse.data.response))
+        setLoader(!loaderValue)
+      }
+    }
+    catch (error) {
+      console.log('Catch Body:', error);
+      setLoader(!loaderValue)
+    }
+  }
+
   const changeJobStatus = async (jobId, blockValue) => {
 
     setLoader(true)
@@ -126,12 +158,8 @@ const JobPostedList = ({ navigation }) => {
 
       if (apiResponse.isAxiosError == true) {
         setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
-        //setLoader(false);
         setErrorModal(true);
       }
-      // else {
-      //   //setLoader(false)
-      // }
     }
     catch (error) {
       console.log('Catch Body:', error);
@@ -314,7 +342,7 @@ const JobPostedList = ({ navigation }) => {
   const paginationComponent = ({ item }) => {
     return(
       <TouchableOpacity 
-        onPress={() => myJobs(item) }
+        onPress={() => myJobsPagination(item, true) }
         style={{...styles.pagination, backgroundColor: pagination.current == item ? colors.primaryColor : colors.white}}>
         <Text style={{color: pagination.current == item ? colors.white : colors.black}}>
           {item}

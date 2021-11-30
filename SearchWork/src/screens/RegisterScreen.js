@@ -3,7 +3,6 @@ import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
 import { Dimensions, ImageBackground, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import { color } from 'react-native-reanimated';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import CompanyLabel from '../Components/atoms/CompanyLabel';
@@ -28,6 +27,11 @@ import { apiCall } from '../service/ApiCall';
 import ApiConstants from '../service/ApiConstants.json';
 import {saveUserCredential, userCredential} from '../redux/slices';
 import { useDispatch, useSelector } from 'react-redux';
+import RememberMe from '../Components/atoms/RememberMe';
+import Axios from 'axios';
+import { CommonActions } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
+
 
 
 const RegisterScreen = ({navigation}) => {
@@ -58,11 +62,16 @@ const RegisterScreen = ({navigation}) => {
   const [errorModal, setErrorModal] = useState(false);
   const [imageSelection, setImageSelection] = useState(false);
   const [isFieldEmpty, setIsFieldEmpty] = useState(false);
+  const [onClickRememberMe, setOnClickRememberMe] = useState(false);
+
+  const {t, i18n} = useTranslation();
 
   const dispatch = useDispatch();
 
   const credentials = useSelector(userCredential);
   var credentialFields = { ...credentials }
+
+  //console.log('Credentials:',credentials)
 
   const cities = cityStates.filter((value) => value.state == statePicker)
   const cityItems = cities.length > 0 ? cities[0].cities : null
@@ -100,12 +109,8 @@ const RegisterScreen = ({navigation}) => {
   imageUrl != '' && bodyFormData.append('image', {uri: imageUrl, name: 'profile_picture', type: 'image/*'})
 
 
-  function saveFields(){
-    credentialFields.password = password
-    credentialFields.email = email
-    dispatch(saveUserCredential(credentialFields))
-  }
 
+  //console.log('Saved Fields:',saveFields())
   // var currentYear = new Date().getTime()
   // var currentYear2 = new Date().getFullYear()
   // console.log('Current year:',currentYear)
@@ -127,13 +132,31 @@ const RegisterScreen = ({navigation}) => {
         setErrorModal(true)
         setErrorMessage(apiResponse.response.data.error.messages.map(val => val+'\n'))
         setLoader(false);
-        saveFields()
+        credentialFields.password = ''
+        credentialFields.email = ''
+        dispatch(saveUserCredential(credentialFields))
       }
+
       else{
-        setModalVisible(!modalVisible)
+        
+        if(onClickRememberMe == false){
+          credentialFields.password = ''
+          credentialFields.email = ''
+          dispatch(saveUserCredential(credentialFields))
+        }
+
+        Axios.defaults.headers.common['Authorization'] = `Bearer ${apiResponse.data.response.data.access_token}`;
+
+        if(apiResponse.data.response.data.type == 'employer'){
+          navigation.dispatch(CommonActions.reset({index:0, routes:[{name: Constants.screen.EmployerDrawerStack}]}));
+        }
+        else{
+          navigation.dispatch(CommonActions.reset({index:0, routes:[{name: Constants.screen.DrawerNavigation}]}));
+        }
+
+        //setModalVisible(!modalVisible)
         setIsFieldEmpty(false)
         setLoader(false)
-        saveFields() 
       }
     }
     catch(error){
@@ -296,7 +319,7 @@ const RegisterScreen = ({navigation}) => {
                         <TouchableOpacity 
                           style={{...styles.activeContainer, backgroundColor: colors.primaryColorLight, borderBottomRightRadius: 15, borderTopLeftRadius: 10}}
                           onPress={() => navigation.navigate(Constants.screen.LoginScreen)}>
-                          <Text style={styles.loginText}>Login</Text>
+                          <Text style={styles.loginText}>{t('Login')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -304,7 +327,7 @@ const RegisterScreen = ({navigation}) => {
                           onPress={() => navigation.navigate(Constants.screen.RegisterScreen)}
                         >
                           <View>
-                          <Text style={styles.loginText}>Create Account</Text>
+                          <Text style={styles.loginText}>{t('Create Account')}</Text>
                           <View style={{height:2, backgroundColor: colors.buttonColor, borderRadius: 5}}/>
                           </View>
                         </TouchableOpacity>
@@ -380,6 +403,7 @@ const RegisterScreen = ({navigation}) => {
                           textStyle={{ color: isFieldEmpty == true && fullName == '' ? 'red' : colors.primaryColor}}
                           title={register == false ? 'Full Name': 'Full Name / Business Name'}
                           placeholder={register == false ? 'Enter Your Name': 'Enter your Name / Business Name'}
+                          maxLength={30}
                           iconName='person'
                           value={fullName}
                           onChangeText={setFullName}
@@ -393,7 +417,11 @@ const RegisterScreen = ({navigation}) => {
                           autoCapitalize='none'
                           keyboardType='email-address'
                           value={email}
-                          onChangeText={setEmail}
+                          onChangeText={(val) => {
+                            setEmail(val)
+                            credentialFields.email = val
+                            dispatch(saveUserCredential(credentialFields))
+                          }}
                           onSubmitEditing={() => {
                             if(email != ''){
                               if(ValidateEmail(email) == false){
@@ -537,7 +565,11 @@ const RegisterScreen = ({navigation}) => {
                           iconName={eye ? 'eye-off' : 'eye'}
                           onPress={() => setEye(!eye)}
                           value={password}
-                          onChangeText={setPassword}
+                          onChangeText={(val) => {
+                            setPassword(val)
+                            credentialFields.password = val
+                            dispatch(saveUserCredential(credentialFields))
+                          }}
                         />
 
 
@@ -552,15 +584,11 @@ const RegisterScreen = ({navigation}) => {
                           onChangeText={setConfirmPassword}
                         />
 
-                        {/* <Button 
-                          title='Create Account'
-                          style={{marginTop: 15}}
-                          onPress={() => {
-                            credentialFields.email = email
-                            credentialFields.password = password
-                            dispatch(saveUserCredential(credentialFields))
-                          }}
-                        /> */}
+                        <RememberMe
+                          style={{marginTop: 7}} 
+                          iconName={onClickRememberMe == false ? 'crop-square' : 'check-box'}
+                          onPress={() => setOnClickRememberMe(!onClickRememberMe)}
+                        />
 
                         <Button 
                           title='Create Account' 
@@ -616,7 +644,7 @@ const RegisterScreen = ({navigation}) => {
 const styles = StyleSheet.create({
   bg: {
     width: Dimensions.get('window').width,
-    height: Dimensions.get('screen').height + 670,
+    height: Dimensions.get('screen').height + 680,
   },
   image: {
     resizeMode: 'cover',

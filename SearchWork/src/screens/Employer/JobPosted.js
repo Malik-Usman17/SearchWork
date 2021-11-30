@@ -10,7 +10,6 @@ import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import { cityStates } from '../../Components/organisms/CityStates';
 import StatePicker from '../../Components/organisms/StatePicker';
-import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from 'react-native-maps';
 import { useSelector, useDispatch } from 'react-redux';
 import { jobPostedSelector, jobsCategoryList, userLogin, setJobPost } from '../../redux/slices';
 //import { setJobPost } from '../../redux/slices';

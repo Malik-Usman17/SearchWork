@@ -14,8 +14,8 @@ const LanguagePicker = ({viewStyle, value, open, setOpen, setValue, containerSty
             icon: () => (<Image source={require('../../../assets/usa.png')} style={styles.iconImage} />)
           },
           {
-            label: 'Esp',
-            value: 'esp',
+            label: 'Mex',
+            value: 'mex',
             icon: () => (<Image source={require('../../../assets/Mexico.png')} style={styles.iconImage} />)
           },
         ]}

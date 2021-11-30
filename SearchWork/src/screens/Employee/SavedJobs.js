@@ -34,7 +34,7 @@ const SavedJobs = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const savedList = useSelector(savedJobsList);
- // console.log('Saved Job:',savedList)
+
 
   var searchSaveJob;
   if(searchJob != ''){
@@ -138,7 +138,7 @@ async function viewJob(jobId) {
   async function getSavedJobsList(){
     setLoader(true)
 
-    if(savedList.length > 0){
+    if(savedList != undefined){
       setLoader(false);
     }
 

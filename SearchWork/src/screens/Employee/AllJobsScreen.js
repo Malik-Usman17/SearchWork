@@ -20,10 +20,6 @@ const AllJobsScreen = ({navigation}) => {
   const [dropDown, setDropDown] = useState(false);
   const [lang, setLang] = useState('eng');
   const [loader, setLoader] = useState(false);
-  const [pageNo, setPageNo] = useState(1);
-  const [onClickPage, setOnClickPage] = useState(false);
-
-  console.log('On Click Page:',onClickPage);
 
   const dispatch = useDispatch();
 
@@ -75,10 +71,6 @@ const AllJobsScreen = ({navigation}) => {
       setLoader(false)
     }
 
-    if(onClickPage == true){
-      setLoader(true)
-    }
-
     try{
       var apiResponse = await apiCall(
         ApiConstants.methods.GET, 
@@ -102,10 +94,40 @@ const AllJobsScreen = ({navigation}) => {
     }
   }
 
+  async function jobsPagination(page, loaderValue){
+    setLoader(loaderValue)
+
+    let queryParams = {
+      page: page
+    }
+
+
+    try{
+      var apiResponse = await apiCall(
+        ApiConstants.methods.GET, 
+        ApiConstants.endPoints.JobsList,
+        {},
+        queryParams
+      );
+
+      if(apiResponse.isAxiosError == true){
+        console.log('Pagination Job Data Axios Error') 
+        setLoader(!loaderValue)
+      }
+      else{
+        dispatch(getJobList(apiResponse.data.response))
+        setLoader(!loaderValue)
+      }
+    }
+    catch(error){
+      console.log('Catch Body:',error);
+      setLoader(!loaderValue)
+    }
+  }
+
   useFocusEffect(
     useCallback(() => {
       jobsList(1)
-      setOnClickPage(false)
     }, [])
   )
 
@@ -168,8 +190,7 @@ const AllJobsScreen = ({navigation}) => {
     return(
       <TouchableOpacity 
         onPress={() => {
-          setOnClickPage(true)
-          jobsList(item) 
+          jobsPagination(item, true) 
         }}
         style={{...styles.pagination, backgroundColor: pagination.current == item ? colors.primaryColor : colors.white}}>
         <Text style={{color: pagination.current == item ? colors.white : colors.black}}>
@@ -206,9 +227,9 @@ const AllJobsScreen = ({navigation}) => {
 
           </View>
 
-          <SearchField 
+          {/* <SearchField 
             style={{marginTop: 40}}
-          />
+          /> */}
 
         </ImageBackground>
 
@@ -259,7 +280,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.pureWhite
   },
   headerBg:{
-    height: Dimensions.get('window').height * 0.22,
+    height: Dimensions.get('window').height * 0.15,
     padding: 9
   },
   headerBgImage:{
