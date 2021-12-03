@@ -20,12 +20,12 @@ import { isRememberMe, login, rememberMeOperation, saveUserCredential, userCrede
 import { apiCall } from '../service/ApiCall';
 import ApiConstants from '../service/ApiConstants.json';
 import Axios from 'axios';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 
 const LoginScreen = ({navigation}) => {
 
-  const {t, i18n} = useTranslation();
+  // const {t, i18n} = useTranslation();
 
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -104,9 +104,9 @@ const LoginScreen = ({navigation}) => {
     return (false)
 }
 
-useEffect(() => {
-  i18n.changeLanguage(lang)
-}, [lang])
+// useEffect(() => {
+//   i18n.changeLanguage(lang)
+// }, [lang])
 
 
   return (
@@ -142,13 +142,14 @@ useEffect(() => {
                 viewStyle={{width: 80 }}
                 containerStyle={{flex: 1}}
                 value={lang}
-                setValue={(val) => {
-                  setLang(val)
-                 // alert(val)
-                 console.log('Valueee:',val)
-                 console.log('Language:',lang)
-                  i18n.changeLanguage(lang)
-                }}
+                setValue={setLang}
+                // setValue={(val) => {
+                //   setLang(val)
+                //  // alert(val)
+                //  console.log('Valueee:',val)
+                //  console.log('Language:',lang)
+                //   i18n.changeLanguage(lang)
+                // }}
                 open={dropDown}
                 setOpen={setDropDown}
               />
@@ -164,7 +165,7 @@ useEffect(() => {
                     onPress={() => navigation.navigate(Constants.screen.LoginScreen)}
                   >
                     <View>
-                      <Text style={styles.loginText}>{t('Login')}</Text>
+                      <Text style={styles.loginText}>Login</Text>
                       <View style={{height:2, backgroundColor: colors.buttonColor, borderRadius: 5}}/>
                     </View>
     
@@ -174,7 +175,7 @@ useEffect(() => {
                     style={{...styles.activeContainer,borderTopRightRadius: 10, borderBottomLeftRadius: 15, backgroundColor: colors.primaryColorLight}}
                     onPress={() => navigation.navigate(Constants.screen.RegisterScreen)}
                   >
-                    <Text style={styles.loginText}>{t('Create Account')}</Text>
+                    <Text style={styles.loginText}>Create Account</Text>
                   </TouchableOpacity>
 
                 </View>
@@ -183,9 +184,9 @@ useEffect(() => {
                   
                   <Divider />
                   
-                  <Text style={styles.welcomeText}>{t('Welcome To Search Work')}</Text>
+                  <Text style={styles.welcomeText}>Welcome To Search Work</Text>
                   
-                  <Text style={{ fontSize: 12, color: colors.gray, fontWeight: '700' }}>{t('Part Time - Full Time')}</Text>
+                  <Text style={{ fontSize: 12, color: colors.gray, fontWeight: '700' }}>Part Time - Full Time</Text>
 
                   <InputField
                     textStyle={{color: (isEmptyField == true && email == '' && credentials.email == '') ? 'red' : colors.primaryColor}}

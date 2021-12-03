@@ -30,7 +30,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import RememberMe from '../Components/atoms/RememberMe';
 import Axios from 'axios';
 import { CommonActions } from '@react-navigation/native';
-import { useTranslation } from 'react-i18next';
+// import { useTranslation } from 'react-i18next';
 
 
 
@@ -64,7 +64,7 @@ const RegisterScreen = ({navigation}) => {
   const [isFieldEmpty, setIsFieldEmpty] = useState(false);
   const [onClickRememberMe, setOnClickRememberMe] = useState(false);
 
-  const {t, i18n} = useTranslation();
+  // const {t, i18n} = useTranslation();
 
   const dispatch = useDispatch();
 
@@ -319,7 +319,7 @@ const RegisterScreen = ({navigation}) => {
                         <TouchableOpacity 
                           style={{...styles.activeContainer, backgroundColor: colors.primaryColorLight, borderBottomRightRadius: 15, borderTopLeftRadius: 10}}
                           onPress={() => navigation.navigate(Constants.screen.LoginScreen)}>
-                          <Text style={styles.loginText}>{t('Login')}</Text>
+                          <Text style={styles.loginText}>Login</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -327,7 +327,7 @@ const RegisterScreen = ({navigation}) => {
                           onPress={() => navigation.navigate(Constants.screen.RegisterScreen)}
                         >
                           <View>
-                          <Text style={styles.loginText}>{t('Create Account')}</Text>
+                          <Text style={styles.loginText}>Create Account</Text>
                           <View style={{height:2, backgroundColor: colors.buttonColor, borderRadius: 5}}/>
                           </View>
                         </TouchableOpacity>

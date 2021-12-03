@@ -32,7 +32,9 @@ const EmployeeDashboard = ({navigation}) => {
   const user = useSelector(userLogin)
   const jobsCategory = useSelector(jobsCategoryList);
   const jobsData = useSelector(jobsListing);
+  //console.log('Jobs Data:',jobsData)
   const jobs = jobsData?.data
+  //console.log('My Jobs:',jobs)
 
 
  useFocusEffect(
@@ -323,7 +325,7 @@ const EmployeeDashboard = ({navigation}) => {
           </View>
 
         </Swiper>
-    </View>
+      </View>
 
       </ImageBackground>
     </ScrollView>
