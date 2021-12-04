@@ -39,6 +39,11 @@
       "success": "Success",
       "reject": "Reject",
       "failure": "Failure"
+  },
+
+  "apiMessage":{
+      "Network_Error": "Network error",
+      "Wrong": "Something went wrong."
   }
 }
 

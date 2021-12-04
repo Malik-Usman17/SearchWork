@@ -13,7 +13,7 @@ import JobCard from '../../Components/organisms/JobCard';
 import LanguagePicker from '../../Components/organisms/LanguagePicker';
 import colors from '../../Constants/colors';
 import Constants from '../../Constants/Constants.json';
-import { getJobCategory, getJobList, getLoggedInProfile, jobsCategoryList, jobsListing, userLogin } from '../../redux/slices';
+import { getJobCategory, getJobList, getLoggedInProfile, jobsCategoryList, jobsListing } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 
@@ -27,14 +27,18 @@ const EmployeeDashboard = ({navigation}) => {
   const [errorModal, setErrorModal] = useState(false);
 
   const dispatch = useDispatch();
-  const isFocused = useIsFocused();
 
-  const user = useSelector(userLogin)
   const jobsCategory = useSelector(jobsCategoryList);
   const jobsData = useSelector(jobsListing);
-  //console.log('Jobs Data:',jobsData)
+  
   const jobs = jobsData?.data
-  //console.log('My Jobs:',jobs)
+  const recentJobs = jobs?.slice(0, 3)
+
+  const dashboardSlideImages = [
+    {image: require('../../../assets/people.jpg')},
+    {image: require('../../../assets/slider.png')},
+    {image:require('../../../assets/bgSlide.jpg')}
+  ]
 
 
  useFocusEffect(
@@ -54,7 +58,6 @@ const EmployeeDashboard = ({navigation}) => {
 
         if(response.isAxiosError == true){
           console.log('Job Category:',response.response.data.error.messages.map(val => val + '\n'))
-          //setErrorModal(true)
           setLoader(false)
         }
         else{
@@ -63,7 +66,7 @@ const EmployeeDashboard = ({navigation}) => {
         }
       }
       catch(error){
-        console.log('Catch Body:',error);
+        alert(ApiConstants.apiMessage.Network_Error);
         setLoader(false)
       }
     }
@@ -91,7 +94,7 @@ const EmployeeDashboard = ({navigation}) => {
         }
       }
       catch(error){
-        console.log('Catch Body:',error);
+        console.log(ApiConstants.apiMessage.Network_Error);
         setLoader(false)
       }
     }
@@ -116,7 +119,7 @@ const EmployeeDashboard = ({navigation}) => {
         }
       }
       catch(error){
-        console.log('Catch Body:',error);
+        console.log(ApiConstants.apiMessage.Network_Error);
         setLoader(false)
       }
     }
@@ -167,40 +170,26 @@ const EmployeeDashboard = ({navigation}) => {
       </HeaderRowContainer>
 
       <View style={{height: 145}}>
-        
         <Swiper
           containerStyle={{flex: 1}}
           showsPagination={false}
           autoplay={true}
           autoplayTimeout={3}
         >
-          <View style={styles.slide}>
-            <Image 
-              source={require('../../../assets/people.jpg')} 
-              style={styles.slideImage}  
-            />
-          </View>
-
-          <View style={styles.slide}>
-            <Image 
-              source={require('../../../assets/slider.png')} 
-              style={styles.slideImage}   
-            />
-          </View>
-
-          <View style={styles.slide}>
-            <Image 
-              source={require('../../../assets/bgSlide.jpg')} 
-              style={styles.slideImage} 
-            />
-          </View>
-
+          {
+            dashboardSlideImages.map((val, index) => (
+              <View key={index} style={styles.slide}>
+                <Image 
+                  source={val.image}
+                  style={styles.slideImage}
+                />
+              </View>
+            ))
+          }
         </Swiper>
-
       </View>
 
       
-
         <View style={{top: -10, borderRadius: 15, backgroundColor: colors.primaryColor, padding: 5, alignItems: 'center', marginHorizontal: 60}}>
           <Text style={{fontWeight: 'bold', color: colors.white}}>Discover By Industries</Text>
         </View>
@@ -213,7 +202,7 @@ const EmployeeDashboard = ({navigation}) => {
         >
           <View style={styles.jobGridContainer}>
             {
-              jobsCategory?.slice(0, 9).map((val, index) => (
+              jobsCategory?.slice(0,9).map((val, index) => (
                 <TouchableOpacity 
                   key={index} 
                   style={styles.jobIconContainer}
@@ -284,8 +273,41 @@ const EmployeeDashboard = ({navigation}) => {
         </View>
 
       </View>
+
+      {
+        recentJobs != undefined &&
+        <View style={{height: 240, paddingVertical: 15}}>
+          <Swiper
+            containerStyle={styles.swiperContainerStyle}
+            dot={<View style={styles.dot} />}
+            activeDot ={ <View style={styles.activeDot} /> }
+            paginationStyle={{bottom: -20}}
+            loop={false}
+          >
+            {
+              recentJobs.map((val, index) => (
+                <View key={index} style={{alignItems: 'center'}}>
+                  <JobCard 
+                    jobTitle={val.title}
+                    imageSource={val.image_urls ? {uri: val.image_urls['3x']} : require('../../../assets/logo.png')} 
+                    jobDescription={val.description}
+                    duration={val.duration == 'full_time' ? 'Full-time' : 'Part-Time'}
+                    location={`${val?.state}, ${val?.city}`}
+                  />
+                </View>
+              ))
+            }
+          </Swiper>
+        </View>
+      }
+
+      {/* <View style={{height: 240, paddingVertical: 15}}>
+        {
+          <Swiper></Swiper>
+        }
+      </View> */}
     
-    <View style={{height: 240, paddingVertical: 15}}>
+    {/* <View style={{height: 240, paddingVertical: 15}}>
         <Swiper
           containerStyle={styles.swiperContainerStyle}
           dot={<View style={styles.dot} />}
@@ -325,7 +347,7 @@ const EmployeeDashboard = ({navigation}) => {
           </View>
 
         </Swiper>
-      </View>
+      </View> */}
 
       </ImageBackground>
     </ScrollView>

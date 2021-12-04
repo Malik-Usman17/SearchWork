@@ -17,6 +17,7 @@ import { getViewJob, jobsListing } from '../../redux/slices';
 import { apiCall } from '../../service/ApiCall';
 import ApiConstants from '../../service/ApiConstants.json';
 import commonStyles from '../../commonStyles/commonStyles';
+import { useFocusEffect } from '@react-navigation/native';
 
 
 const JobListing = ({navigation, route}) => {
@@ -24,6 +25,8 @@ const JobListing = ({navigation, route}) => {
   const [dropDown, setDropDown] = useState(false);
   const [lang, setLang] = useState('eng');
   const [loader, setLoader] = useState(false);
+  const [endLimit, setEndLimit] = useState(5);
+  const [searchData, setSearchData] = useState('');
 
   const dispatch = useDispatch();
   
@@ -31,16 +34,26 @@ const JobListing = ({navigation, route}) => {
   const {jobSubCategoryId, jobCategoryId} = route.params;
 
   const jobs = useSelector(jobsListing);
-
+  const jobsData = jobs?.data
 
   var myJobs;
   if(jobSubCategoryId != 0){
-     myJobs = jobs.filter((x, index) => x.category_id == jobCategoryId && x.sub_category_id == jobSubCategoryId)
+     myJobs = jobsData?.filter((x, index) => x.category_id == jobCategoryId && x.sub_category_id == jobSubCategoryId)
   }
   else{
-    myJobs = jobs.filter((x, index) => x.category_id == jobCategoryId)
+    myJobs = jobsData?.filter((x, index) => x.category_id == jobCategoryId)
   }
 
+  
+  var jobSearchData;
+  if(searchData != ''){
+    jobSearchData = myJobs?.filter((value) => (
+      value.title.toLowerCase().includes(searchData.toLowerCase())
+    ))
+  }
+  else{
+    jobSearchData = myJobs
+  }
 
   const viewJob = async (jobId) => {
     
@@ -74,11 +87,6 @@ const JobListing = ({navigation, route}) => {
     }
   }
 
-  if (loader == true) {
-    return (
-      <Loader />
-    )
-  }
 
   const jobCard = ({ item }) => {
     return (
@@ -127,6 +135,18 @@ const JobListing = ({navigation, route}) => {
     )
   }
 
+  useFocusEffect(
+    React.useCallback(()=> {
+      setEndLimit(5);
+    }, [])
+  )
+
+  if (loader == true) {
+    return (
+      <Loader />
+    )
+  }
+
 
   return (
     myJobs.length > 0 ?
@@ -136,34 +156,69 @@ const JobListing = ({navigation, route}) => {
 
       <ImageBackground source={require('../../../assets/grayBg.jpg')} style={{ flex: 1 }}>
 
-        <HeaderImage style={{ height: Dimensions.get('window').height * 0.22 }} />
+        <ImageBackground 
+          source={require('../../../assets/bgUpG.jpg')} 
+          style={{ height: Dimensions.get('window').height * 0.22, padding: 9 }}
+          imageStyle={commonStyles.headerBgImage}
+        >
 
-        <HeaderRowContainer>
-          
-          <MenuIcon onPress={() => navigation.openDrawer()}/>
-
-          <ScreenTitle title='My Jobs' />
-
-          <LanguagePicker
+          <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <MenuIcon onPress={() => navigation.openDrawer()}/>
+            
+            <ScreenTitle title='My Jobs' />
+            
+            <LanguagePicker
               viewStyle={{ width: 80 }}
               containerStyle={{ flex: 1 }}
               value={lang}
               setValue={setLang}
               open={dropDown}
               setOpen={setDropDown}
+            />
+          </View>
+
+          <SearchField 
+            style={{marginTop: 'auto', marginBottom: 12}}
+            value={searchData}
+            onChangeText={setSearchData}
           />
 
-        </HeaderRowContainer>
+        </ImageBackground>
 
-          <View style={commonStyles.jobListingFlatListContainer}>
-
+        {
+          jobSearchData != undefined &&
+      
             <FlatList
+              style={{flex: 1, marginTop: 10}}
               showsVerticalScrollIndicator={false}
-              data={myJobs}
+              data={jobSearchData.slice(0, endLimit)}
               keyExtractor={(key, index) => index.toString()}
               renderItem={jobCard}
             />
-          </View>
+        }
+
+        {
+          myJobs.slice(endLimit,).length > 0 ?
+          <TouchableOpacity style={{marginLeft: 10}} onPress={() => setEndLimit(myJobs.length)}>
+            <Text style={styles.seeAllButton}>See All</Text>
+          </TouchableOpacity>
+          : null
+        }
+
+          {/* <TouchableOpacity style={{marginLeft: 10}}>
+            <Text style={styles.seeAllButton}>See All</Text>
+          </TouchableOpacity> */}
+{/* 
+          {
+          jobSubCategory.slice(endLimit,).length > 0 ?
+  
+          <TouchableOpacity onPress={() => {
+             setEndLimit(jobSubCategory.length)
+          }}>
+            <Text style={styles.seeAllButton}>See All</Text>
+          </TouchableOpacity>
+        : null
+        } */}
 
         <CompanyLabelCard />
 
@@ -233,7 +288,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primaryColor,
     padding: 3, 
     alignSelf: 'center'
-  }
+  },
+  seeAllButton:{
+    marginTop: 6, 
+    color: colors.buttonColor, 
+    fontWeight: 'bold', 
+    fontSize: 16, 
+    textDecorationLine: 'underline'
+  },
 })
 
 export default JobListing;

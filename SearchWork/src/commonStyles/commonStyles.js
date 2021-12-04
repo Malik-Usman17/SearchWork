@@ -40,5 +40,9 @@ export default commonStyles = StyleSheet.create({
   jobListingFlatListContainer:{
     flex: 1,
     marginTop: 10
-  }
+  },
+  headerBgImage:{
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
+  },
 });
